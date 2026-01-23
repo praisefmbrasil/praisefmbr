@@ -1,7 +1,7 @@
 {
-  "name": "Praise FM USA",
-  "short_name": "Praise FM",
-  "description": "Praise FM USA – Christian Radio",
+  "name": "Praise FM Brasil",
+  "short_name": "Praise FM BR",
+  "description": "Praise FM Brasil – A rádio que toca o seu coração",
   "start_url": "/#/app",
   "scope": "/",
   "display": "standalone",
@@ -10,15 +10,15 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp",
       "sizes": "192x192",
-      "type": "image/png",
+      "type": "image/webp",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png",
+      "src": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/webp",
       "purpose": "any maskable"
     }
   ]

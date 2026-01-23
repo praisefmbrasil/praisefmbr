@@ -1,7 +1,8 @@
 {
-  "name": "NEWSITEUSA2026 - SAVE 2",
-  "description": "A world-class radio platform inspired by BBC Radio 1, featuring a 24/7 live schedule, Devotional podcasts, and high-energy music programming.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "title": "Praise FM Brasil | A rádio que toca o seu coração",
+  "description": "Programação gospel 24 horas, mensagens de fé e o melhor da música cristã nacional e internacional com locutores como Rodrigo Veras, Lucas Martins e mais.",
+  "url": "https://praisefmbr.vercel.app",
+  "image": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp",
+  "twitterHandle": "@praisefmbrasil",
+  "keywords": "rádio gospel, louvor, adoração, Praise FM Brasil, música cristã, Rodrigo Veras, Samuel Andrade"
 }
