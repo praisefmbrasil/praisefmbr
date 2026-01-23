@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Praise FM USA',
+        name: 'Praise FM BRA',
         short_name: 'Praise FM',
-        description: 'Praise FM USA Radio',
+        description: 'Praise FM BRA Radio',
         theme_color: '#ff6600',
         icons: [
           {
