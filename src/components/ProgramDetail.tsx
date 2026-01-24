@@ -177,7 +177,7 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
                   image_url: imageUrl,
                   played_at: new Date(trackTimestamp).toISOString(),
                   label: "GRAVADO AO VIVO"
-                }]).catch(e => console.debug("Sync error skip"));
+                }]).catch(() => console.debug("Sync error skip"));
 
                 return newState;
               });
