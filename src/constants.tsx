@@ -22,39 +22,39 @@ const IMAGES = {
 };
 
 const commonDaily: Program[] = [
-  { id: '1', title: 'MADRUGADA COM CRISTO', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'Louvores que acalmam a alma na sua madrugada.', image: IMAGES.SAMUEL_ANDRADE }, [cite: 1, 2]
-  { id: '2', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '06:00', endTime: '07:00', description: 'O melhor da adoração nacional e internacional.', image: IMAGES.WORSHIP }, [cite: 1, 2]
-  { id: '3', title: 'MANHÃ COM CRISTO', host: 'Lucas Martins', startTime: '07:00', endTime: '12:00', description: 'Informação, música e fé para começar o seu dia.', image: IMAGES.LUCAS_MARTINS }, [cite: 1, 2]
-  { id: '4', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '12:00', endTime: '13:00', description: 'Sua pausa para adoração ao meio-dia.', image: IMAGES.WORSHIP }, [cite: 1, 2]
-  { id: '5', title: 'TARDE GOSPEL', host: 'Rafael Costa', startTime: '13:00', endTime: '16:00', description: 'Os grandes sucessos da música cristã na sua tarde.', image: IMAGES.RAFAEL_COSTA }, [cite: 1, 2]
-  { id: '6', title: 'PRAISE FM NON STOP', host: 'Praise FM', startTime: '16:00', endTime: '17:00', description: 'Uma hora de música sem interrupções.', image: IMAGES.NON_STOP }, [cite: 1, 2]
-  { id: '7', title: 'PRAISE FM NOVA GERAÇÃO', host: 'Ana Paula', startTime: '17:00', endTime: '18:00', description: 'O som da nova geração de adoradores.', image: IMAGES.ANA_PAULA }, [cite: 1, 2]
-  { id: '8', title: 'DE CARONA COM A PRAISE FM', host: 'Bruno Almeida', startTime: '18:00', endTime: '20:00', description: 'Sua melhor companhia no trânsito e na volta para casa.', image: IMAGES.BRUNO_ALMEIDA }, [cite: 1, 2]
-  { id: '9-pop', title: 'PRAISE FM POP', host: 'Thiago Moreira', startTime: '20:00', endTime: '21:00', description: 'O melhor do pop gospel contemporâneo.', image: IMAGES.THIAGO_MOREIRA }, [cite: 2, 3]
-  { id: '10', title: 'PRAISE FM BRASIL CLÁSSICOS', host: 'Rodrigo Veras', startTime: '21:00', endTime: '22:00', description: 'Hinos e canções que marcaram época.', image: IMAGES.RODRIGO_VERAS }, [cite: 1, 2]
-  { id: '11', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '22:00', endTime: '00:00', description: 'Encerrando o dia em adoração.', image: IMAGES.WORSHIP }, [cite: 2, 3]
+  { id: '1', title: 'MADRUGADA COM CRISTO', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'Louvores que acalmam a alma na sua madrugada.', image: IMAGES.SAMUEL_ANDRADE },
+  { id: '2', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '06:00', endTime: '07:00', description: 'O melhor da adoração nacional e internacional.', image: IMAGES.WORSHIP },
+  { id: '3', title: 'MANHÃ COM CRISTO', host: 'Lucas Martins', startTime: '07:00', endTime: '12:00', description: 'Informação, música e fé para começar o seu dia.', image: IMAGES.LUCAS_MARTINS },
+  { id: '4', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '12:00', endTime: '13:00', description: 'Sua pausa para adoração ao meio-dia.', image: IMAGES.WORSHIP },
+  { id: '5', title: 'TARDE GOSPEL', host: 'Rafael Costa', startTime: '13:00', endTime: '16:00', description: 'Os grandes sucessos da música cristã na sua tarde.', image: IMAGES.RAFAEL_COSTA },
+  { id: '6', title: 'PRAISE FM NON STOP', host: 'Praise FM', startTime: '16:00', endTime: '17:00', description: 'Uma hora de música sem interrupções.', image: IMAGES.NON_STOP },
+  { id: '7', title: 'PRAISE FM NOVA GERAÇÃO', host: 'Ana Paula', startTime: '17:00', endTime: '18:00', description: 'O som da nova geração de adoradores.', image: IMAGES.ANA_PAULA },
+  { id: '8', title: 'DE CARONA COM A PRAISE FM', host: 'Bruno Almeida', startTime: '18:00', endTime: '20:00', description: 'Sua melhor companhia no trânsito e na volta para casa.', image: IMAGES.BRUNO_ALMEIDA },
+  { id: '9-pop', title: 'PRAISE FM POP', host: 'Thiago Moreira', startTime: '20:00', endTime: '21:00', description: 'O melhor do pop gospel contemporâneo.', image: IMAGES.THIAGO_MOREIRA },
+  { id: '10', title: 'PRAISE FM BRASIL CLÁSSICOS', host: 'Rodrigo Veras', startTime: '21:00', endTime: '22:00', description: 'Hinos e canções que marcaram época.', image: IMAGES.RODRIGO_VERAS },
+  { id: '11', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '22:00', endTime: '00:00', description: 'Encerrando o dia em adoração.', image: IMAGES.WORSHIP }
 ];
 
 export const SCHEDULES: Record<number, Program[]> = {
   1: commonDaily,
   2: commonDaily,
-  3: commonDaily.map(p => p.startTime === '20:00' ? { ...p, id: '9-live', title: 'PRAISE FM LIVE SHOW', host: 'Praise FM', description: 'Sessões exclusivas ao vivo.', image: IMAGES.LIVE_SHOW } : p), [cite: 2]
+  3: commonDaily.map(p => p.startTime === '20:00' ? { ...p, id: '9-live', title: 'PRAISE FM LIVE SHOW', host: 'Praise FM', description: 'Sessões exclusivas ao vivo.', image: IMAGES.LIVE_SHOW } : p),
   4: commonDaily,
   5: commonDaily,
   6: commonDaily,
   0: [ // DOMINGO
-    { id: 's1', title: 'MADRUGADA COM CRISTO', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'Louvores que acalmam a alma na sua madrugada.', image: IMAGES.SAMUEL_ANDRADE }, [cite: 1, 3]
-    { id: 's2', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '06:00', endTime: '07:00', description: 'Manhã de adoração profunda.', image: IMAGES.WORSHIP }, [cite: 1, 3]
-    { id: 's3', title: 'DOMINGO COM CRISTO', host: 'Felipe Santos', startTime: '07:00', endTime: '12:00', description: 'A celebração do dia do Senhor com você.', image: IMAGES.FELIPE_SANTOS }, [cite: 1, 3]
-    { id: 's4', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '12:00', endTime: '13:00', description: 'Pausa para meditação no domingo.', image: IMAGES.WORSHIP }, [cite: 1, 3]
-    { id: 's5', title: 'TARDE GOSPEL', host: 'Rafael Costa', startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel para o seu domingo.', image: IMAGES.RAFAEL_COSTA }, [cite: 1, 3]
-    { id: 's6', title: 'PRAISE FM NON STOP', host: 'Praise FM', startTime: '16:00', endTime: '17:00', description: 'A música que não para.', image: IMAGES.NON_STOP }, [cite: 1, 3]
-    { id: 's7', title: 'PRAISE FM NOVA GERAÇÃO', host: 'Ana Paula', startTime: '17:00', endTime: '18:00', description: 'Descobrindo talentos no dia do Senhor.', image: IMAGES.ANA_PAULA }, [cite: 1, 3]
-    { id: 's8', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '18:00', endTime: '20:00', description: 'Adoração e louvor no anoitecer.', image: IMAGES.WORSHIP }, [cite: 1, 3]
-    { id: 's9', title: 'PRAISE FM POP', host: 'Thiago Moreira', startTime: '20:00', endTime: '21:00', description: 'Sucessos atuais da música cristã.', image: IMAGES.THIAGO_MOREIRA }, [cite: 1, 3]
-    { id: 's10', title: 'PRAISE FM BRASIL CLÁSSICOS', host: 'Rodrigo Veras', startTime: '21:00', endTime: '22:00', description: 'Clássicos eternos da nossa música.', image: IMAGES.RODRIGO_VERAS }, [cite: 1, 4]
-    { id: 's11', title: 'PREGAÇÃO DA PALAVRA', host: 'Pastores', startTime: '22:00', endTime: '23:00', description: 'Uma palavra de fé para a sua semana.', image: IMAGES.PREGACAO }, [cite: 1, 3]
-    { id: 's12', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '23:00', endTime: '00:00', description: 'Terminando o domingo aos pés do Senhor.', image: IMAGES.WORSHIP } [cite: 1, 3]
+    { id: 's1', title: 'MADRUGADA COM CRISTO', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'Louvores que acalmam a alma na sua madrugada.', image: IMAGES.SAMUEL_ANDRADE },
+    { id: 's2', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '06:00', endTime: '07:00', description: 'Manhã de adoração profunda.', image: IMAGES.WORSHIP },
+    { id: 's3', title: 'DOMINGO COM CRISTO', host: 'Felipe Santos', startTime: '07:00', endTime: '12:00', description: 'A celebração do dia do Senhor com você.', image: IMAGES.FELIPE_SANTOS },
+    { id: 's4', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '12:00', endTime: '13:00', description: 'Pausa para meditação no domingo.', image: IMAGES.WORSHIP },
+    { id: 's5', title: 'TARDE GOSPEL', host: 'Rafael Costa', startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel para o seu domingo.', image: IMAGES.RAFAEL_COSTA },
+    { id: 's6', title: 'PRAISE FM NON STOP', host: 'Praise FM', startTime: '16:00', endTime: '17:00', description: 'A música que não para.', image: IMAGES.NON_STOP },
+    { id: 's7', title: 'PRAISE FM NOVA GERAÇÃO', host: 'Ana Paula', startTime: '17:00', endTime: '18:00', description: 'Descobrindo talentos no dia do Senhor.', image: IMAGES.ANA_PAULA },
+    { id: 's8', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '18:00', endTime: '20:00', description: 'Adoração e louvor no anoitecer.', image: IMAGES.WORSHIP },
+    { id: 's9', title: 'PRAISE FM POP', host: 'Thiago Moreira', startTime: '20:00', endTime: '21:00', description: 'Sucessos atuais da música cristã.', image: IMAGES.THIAGO_MOREIRA },
+    { id: 's10', title: 'PRAISE FM BRASIL CLÁSSICOS', host: 'Rodrigo Veras', startTime: '21:00', endTime: '22:00', description: 'Clássicos eternos da nossa música.', image: IMAGES.RODRIGO_VERAS },
+    { id: 's11', title: 'PREGAÇÃO DA PALAVRA', host: 'Pastores', startTime: '22:00', endTime: '23:00', description: 'Uma palavra de fé para a sua semana.', image: IMAGES.PREGACAO },
+    { id: 's12', title: 'PRAISE FM WORSHIP BRASIL', host: 'Praise FM', startTime: '23:00', endTime: '00:00', description: 'Terminando o domingo aos pés do Senhor.', image: IMAGES.WORSHIP }
   ]
 };
 
