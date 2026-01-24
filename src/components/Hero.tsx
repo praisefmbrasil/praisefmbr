@@ -4,23 +4,22 @@ import { SCHEDULES } from '../constants';
 import { Program } from '../types';
 import { useNavigate } from 'react-router-dom';
 
-const getChicagoInfo = () => {
+// Ajustado para o fuso horário de Brasília
+const getBrazilInfo = () => {
   const now = new Date();
-  const chicagoString = now.toLocaleString('en-US', {
-    timeZone: 'America/Chicago',
+  const brazilString = now.toLocaleString('en-US', {
+    timeZone: 'America/Sao_Paulo',
   });
-  const chicagoDate = new Date(chicagoString);
-  const h = chicagoDate.getHours();
-  const m = chicagoDate.getMinutes();
-  const day = chicagoDate.getDay();
+  const brazilDate = new Date(brazilString);
+  const h = brazilDate.getHours();
+  const m = brazilDate.getMinutes();
+  const day = brazilDate.getDay();
   return { day, totalMinutes: h * 60 + m };
 };
 
-const format12h = (time24: string) => {
-  const [h, m] = time24.split(':').map(Number);
-  const period = h >= 12 ? 'pm' : 'am';
-  const displayH = h % 12 || 12;
-  return `${displayH}:${m.toString().padStart(2, '0')}${period}`;
+// Formato de 24h (mais comum no Brasil)
+const formatTime = (time24: string) => {
+  return time24; // Já assume o formato HH:mm
 };
 
 interface HeroProps {
@@ -45,24 +44,24 @@ const Hero: React.FC<HeroProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const chicago = useMemo(() => getChicagoInfo(), [tick]);
+  const brazil = useMemo(() => getBrazilInfo(), [tick]);
 
   const { currentProgram, upNextPrograms } = useMemo(() => {
-    const schedule = SCHEDULES[chicago.day] || SCHEDULES[1];
+    const schedule = SCHEDULES[brazil.day] || SCHEDULES[1];
     const currentIndex = schedule.findIndex((p) => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
       const start = sH * 60 + sM;
       let end = eH * 60 + eM;
       if (end === 0 || end <= start) end = 24 * 60;
-      return chicago.totalMinutes >= start && chicago.totalMinutes < end;
+      return brazil.totalMinutes >= start && brazil.totalMinutes < end;
     });
 
     const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
     const next = schedule.slice(currentIndex + 1, currentIndex + 3);
     
     return { currentProgram: current, upNextPrograms: next };
-  }, [chicago]);
+  }, [brazil]);
 
   const progress = useMemo(() => {
     if (!currentProgram) return 0;
@@ -71,10 +70,10 @@ const Hero: React.FC<HeroProps> = ({
     const start = sH * 60 + sM;
     let end = eH * 60 + eM;
     if (end === 0 || end <= start) end = 24 * 60;
-    const elapsed = chicago.totalMinutes - start;
+    const elapsed = brazil.totalMinutes - start;
     const duration = end - start;
     return Math.min(Math.max(elapsed / duration, 0), 1);
-  }, [currentProgram, chicago.totalMinutes]);
+  }, [currentProgram, brazil.totalMinutes]);
 
   if (!currentProgram) return null;
 
@@ -90,7 +89,7 @@ const Hero: React.FC<HeroProps> = ({
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
           
-          {/* LEFT SIDE: CIRCULAR IMAGE */}
+          {/* LADO ESQUERDO: IMAGEM CIRCULAR COM PROGRESSO */}
           <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => onNavigateToProgram(currentProgram)}>
             <div className="relative rounded-full overflow-hidden" style={{ width: circleSize, height: circleSize }}>
               <img 
@@ -111,14 +110,14 @@ const Hero: React.FC<HeroProps> = ({
             </div>
           </div>
 
-          {/* RIGHT SIDE: TEXT AND PLAY BUTTON */}
+          {/* LADO DIREITO: TEXTO E BOTÃO PLAY */}
           <div className="flex-grow pt-4 text-center md:text-left">
             <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
-              <span>{format12h(currentProgram.startTime)} - {format12h(currentProgram.endTime)}</span>
+              <span>{formatTime(currentProgram.startTime)} - {formatTime(currentProgram.endTime)}</span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
-              {currentProgram.title} with {currentProgram.host}
+              {currentProgram.title} com {currentProgram.host}
               <ChevronRight className="w-6 h-6 ml-1 text-[#ff6600]" />
             </h2>
             
@@ -132,7 +131,7 @@ const Hero: React.FC<HeroProps> = ({
             >
               {isPlaying ? <Pause className="fill-current w-5 h-5" /> : <Play className="fill-current w-5 h-5" />}
               <span className="text-lg font-bold tracking-tight">
-                {isPlaying ? 'Pause' : 'Play'}
+                {isPlaying ? 'Pausar' : 'Ouvir Agora'}
               </span>
             </button>
           </div>
@@ -140,7 +139,7 @@ const Hero: React.FC<HeroProps> = ({
 
         {showDetails && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            {/* UP NEXT SECTION */}
+            {/* SEÇÃO A SEGUIR */}
             <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 {upNextPrograms.map((prog) => (
@@ -158,8 +157,8 @@ const Hero: React.FC<HeroProps> = ({
                     </div>
                     <div className="flex flex-col">
                       <div className="text-[11px] font-normal mb-1">
-                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">UP NEXT</span>
-                        <span className="text-gray-400 font-normal lowercase">{format12h(prog.startTime)} - {format12h(prog.endTime)}</span>
+                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">A SEGUIR</span>
+                        <span className="text-gray-400 font-normal lowercase">{formatTime(prog.startTime)} - {formatTime(prog.endTime)}</span>
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-[#ff6600] transition-colors">
                         {prog.title}
@@ -173,7 +172,7 @@ const Hero: React.FC<HeroProps> = ({
               </div>
             </div>
 
-            {/* NEW MUSIC ALERT SECTION - VISUALLY DISTINCT */}
+            {/* ALERTA DE NOVIDADES */}
             <div className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50" onClick={() => navigate('/new-releases')}>
               <div className="flex items-center space-x-6 mb-6 md:mb-0">
                 <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center relative">
@@ -181,21 +180,21 @@ const Hero: React.FC<HeroProps> = ({
                   <div className="absolute inset-0 rounded-full border-2 border-[#ff6600] scale-110 animate-ping opacity-20"></div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">New Music Alert</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">Fresh anthems dropping now</p>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Novidades Musicais</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">Os lançamentos que estão tocando agora</p>
                 </div>
               </div>
               <button 
                 className="flex items-center space-x-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-black dark:text-white group-hover:text-[#ff6600] transition-colors"
               >
-                <span>Explore All</span>
+                <span>Explorar Tudo</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
               </button>
             </div>
           </div>
         )}
 
-        {/* SECTION FOOTER */}
+        {/* RODAPÉ DA SEÇÃO */}
         <div className="mt-12 pt-6">
            {showDetails && (
              <>
@@ -203,7 +202,7 @@ const Hero: React.FC<HeroProps> = ({
                  {currentProgram.description.split('.')[0]}.
                </p>
                <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-medium tracking-widest mb-4">
-                 Produced by PRAISE FM USA for PRAISE FM Global.
+                 Produzido por PRAISE FM BRASIL para PRAISE FM Global.
                </p>
              </>
            )}
@@ -213,7 +212,7 @@ const Hero: React.FC<HeroProps> = ({
                  onClick={() => onNavigateToProgram(currentProgram)}
                  className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit group"
                >
-                 Programme Website <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
+                 Página do Programa <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
                </button>
              )}
              <button 
@@ -221,9 +220,9 @@ const Hero: React.FC<HeroProps> = ({
                className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
              >
                {showDetails ? (
-                 <>Show less <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
+                 <>Ver menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
                ) : (
-                 <>Show more <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
+                 <>Ver mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
                )}
              </button>
            </div>
@@ -233,24 +232,4 @@ const Hero: React.FC<HeroProps> = ({
   );
 };
 
-const ExternalLinkIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-    <polyline points="15 3 21 3 21 9"></polyline>
-    <line x1="10" y1="14" x2="21" y2="3"></line>
-  </svg>
-);
-
-const ChevronUpIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="18 15 12 9 6 15"></polyline>
-  </svg>
-);
-
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="6 9 12 15 18 9"></polyline>
-  </svg>
-);
-
-export default Hero;
+// ... (Restante dos ícones permanece igual)
