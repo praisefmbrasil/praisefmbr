@@ -1,40 +1,35 @@
 <!DOCTYPE html>
-<html lang="br">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Praise FM USA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Praise FM Brasil | Adoração e Louvor 24h</title>
     
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#ff6600" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Praise FM" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
+    
+    <meta name="description" content="A rádio de adoração que toca o seu coração. Ouça a Praise FM Brasil ao vivo 24 horas por dia." />
 
-    <!-- Tailwind via CDN (temporário) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ["Inter", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
-            },
-            colors: {
-              'praise-accent': '#ff6600',
-            }
-          },
-        },
-      }
-    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
     <style>
+      /* Previne o bounce do scroll no iOS e garante o fundo escuro/claro imediato */
+      html, body {
+        height: 100%;
+        overflow-x: hidden;
+      }
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        background-color: #ffffff; /* Evita flash branco no modo escuro */
+      }
+      @media (prefers-color-scheme: dark) {
+        body { background-color: #121212; }
       }
     </style>
   </head>
@@ -43,16 +38,5 @@
     <div id="root"></div>
 
     <script type="module" src="/src/main.tsx"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('✅ Service Worker registered:', reg.scope))
-            .catch(err => console.log('❌ Service Worker registration failed:', err));
-        });
-      }
-    </script>
   </body>
 </html>
