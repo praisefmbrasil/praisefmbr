@@ -1,22 +1,45 @@
-import React, { useState } from 'react';
-import { Play, Pause, Loader2, Volume2, Home, Music, Calendar, Tv, BookOpen, Headphones, Sun, Moon, Clock, ChevronRight } from 'lucide-react';
+import React, { useState, useContext, useRef, useEffect, createContext } from 'react';
+import { Play, Pause, Loader2, Volume2, Home, Music, Calendar, Clock, ChevronRight } from 'lucide-react';
+
+// ============ TYPES ============
+interface PlayerContextData {
+  isPlaying: boolean;
+  isBuffering: boolean;
+  volume: number;
+  togglePlay: () => void;
+  changeVolume: (value: number) => void;
+  currentTrack: { artist: string; title: string };
+}
+
+interface Program {
+  time: string;
+  title: string;
+  host: string;
+  image: string;
+  description: string;
+}
+
+interface NavbarProps {
+  activeSection: string;
+  onNavigate: (section: string) => void;
+}
 
 // ============ CONTEXT ============
-const PlayerContext = React.createContext(null);
+const PlayerContext = createContext<PlayerContextData | null>(null);
 
-function PlayerProvider({ children }) {
+function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [volume, setVolume] = useState(0.8);
-  const [currentTrack, setCurrentTrack] = useState({
+  const [currentTrack] = useState({
     artist: 'Praise FM Team',
     title: 'Praise FM Brasil - Ao Vivo'
   });
-  const audioRef = React.useRef(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv";
 
-  React.useEffect(() => {
+  useEffect(() => {
     const audio = new Audio(STREAM_URL);
     audio.preload = "none";
     audio.volume = volume;
@@ -40,7 +63,7 @@ function PlayerProvider({ children }) {
       audio.pause();
       audio.src = '';
     };
-  }, []);
+  }, [volume]);
 
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -57,7 +80,7 @@ function PlayerProvider({ children }) {
     }
   };
 
-  const changeVolume = (value) => {
+  const changeVolume = (value: number) => {
     setVolume(value);
     if (audioRef.current) audioRef.current.volume = value;
   };
@@ -69,10 +92,16 @@ function PlayerProvider({ children }) {
   );
 }
 
-const usePlayer = () => React.useContext(PlayerContext);
+const usePlayer = (): PlayerContextData => {
+  const context = useContext(PlayerContext);
+  if (!context) {
+    throw new Error('usePlayer must be used within PlayerProvider');
+  }
+  return context;
+};
 
 // ============ SCHEDULE DATA ============
-const SCHEDULE_DATA = {
+const SCHEDULE_DATA: { weekday: Program[]; sunday: Program[] } = {
   weekday: [
     { time: '00:00 - 06:00', title: 'Madrugada com Cristo', host: 'Samuel Andrade', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp', description: 'Louvores que acalmam a alma.' },
     { time: '06:00 - 07:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Adoração para começar o dia.' },
@@ -93,7 +122,7 @@ const SCHEDULE_DATA = {
 };
 
 // ============ NAVBAR ============
-function Navbar({ activeSection, onNavigate }) {
+function Navbar({ activeSection, onNavigate }: NavbarProps) {
   const menuItems = [
     { id: 'home', label: 'HOME', icon: Home },
     { id: 'schedule', label: 'SCHEDULE', icon: Calendar },
@@ -136,7 +165,7 @@ function Navbar({ activeSection, onNavigate }) {
 // ============ HERO ============
 function HeroSection() {
   const { togglePlay, isPlaying, isBuffering } = usePlayer();
-  const [currentProgram, setCurrentProgram] = useState(SCHEDULE_DATA.weekday[2]);
+  const [currentProgram] = useState<Program>(SCHEDULE_DATA.weekday[2]);
 
   return (
     <section className="min-h-screen bg-black pt-24 pb-32 px-4">
@@ -213,7 +242,7 @@ function HeroSection() {
 
 // ============ SCHEDULE ============
 function ScheduleSection() {
-  const [activeTab, setActiveTab] = useState('weekday');
+  const [activeTab, setActiveTab] = useState<'weekday' | 'sunday'>('weekday');
   const currentSchedule = SCHEDULE_DATA[activeTab];
 
   return (
@@ -315,7 +344,7 @@ function LivePlayerBar() {
 
 // ============ MAIN APP ============
 export default function App() {
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState<string>('home');
 
   return (
     <PlayerProvider>
