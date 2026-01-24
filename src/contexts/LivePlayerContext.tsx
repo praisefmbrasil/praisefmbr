@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
-import { useLiveMetadata } from '../hooks/useLiveMetadata';
+import { useLiveMetadata } from '../Hook/useLiveMetadata'; // Ajuste o nome da pasta Hook se necessário
 
 interface PlayerContextData {
   isPlaying: boolean;
@@ -24,12 +24,8 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   useEffect(() => {
     audioRef.current = new Audio(STREAM_URL);
     const audio = audioRef.current;
-
     const handleWaiting = () => setIsBuffering(true);
-    const handlePlaying = () => {
-      setIsBuffering(false);
-      setIsPlaying(true);
-    };
+    const handlePlaying = () => { setIsBuffering(false); setIsPlaying(true); };
 
     audio.addEventListener('waiting', handleWaiting);
     audio.addEventListener('playing', handlePlaying);
@@ -66,4 +62,4 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   );
 };
 
-export const usePlayer = () => useContext(LivePlayerContext);ipdate
+export const usePlayer = () => useContext(LivePlayerContext);
