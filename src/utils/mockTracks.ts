@@ -7,7 +7,6 @@ export interface MockTrack {
   artworkUrl100: string;
 }
 
-// Banco de dados local de músicas gospel brasileiras
 const BRAZILIAN_GOSPEL_TRACKS: MockTrack[] = [
   { trackId: 1, trackName: "Restituição", artistName: "Aline Barros", artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp" },
   { trackId: 2, trackName: "Ressuscita-me", artistName: "Gabriela Rocha", artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp" },
@@ -31,8 +30,8 @@ const BRAZILIAN_GOSPEL_TRACKS: MockTrack[] = [
   { trackId: 20, trackName: "Depende de Nós", artistName: "Oficina G3", artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Oficina_G3_sqjxvn.webp" }
 ];
 
-// Embaralha com semente diária (igual ao original)
 const getRotationSeed = () => Math.floor(Date.now() / (24 * 60 * 60 * 1000));
+
 const shuffleWithSeed = (array: MockTrack[], seed: number) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -42,7 +41,6 @@ const shuffleWithSeed = (array: MockTrack[], seed: number) => {
   return shuffled;
 };
 
-// Exporta 12 faixas diárias
 export const getDailyBrazilianPlaylist = (): MockTrack[] => {
   const seed = getRotationSeed();
   const shuffled = shuffleWithSeed(BRAZILIAN_GOSPEL_TRACKS, seed);
