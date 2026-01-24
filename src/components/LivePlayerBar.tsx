@@ -2,13 +2,12 @@ import { Play, Pause, Loader2, Volume2, ListMusic } from 'lucide-react';
 import { usePlayer } from '../contexts/LivePlayerContext';
 
 export function LivePlayerBar() {
-  // Pegamos as funções e estados do contexto global
   const { isPlaying, isBuffering, togglePlay, currentTrack, volume, changeVolume } = usePlayer();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-white/10 transition-colors duration-300">
       
-      {/* Barra de Progresso Laranja (Estilo BBC Sounds) */}
+      {/* Barra de Progresso Laranja */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gray-100 dark:bg-zinc-800">
         <div className="h-full bg-praise-accent w-full shadow-[0_0_8px_#ff6600]" />
       </div>
@@ -41,7 +40,7 @@ export function LivePlayerBar() {
             onClick={togglePlay}
             disabled={isBuffering}
             className="w-12 h-12 md:w-14 md:h-14 bg-praise-accent hover:scale-105 active:scale-95 transition-all rounded-full flex items-center justify-center text-white shadow-lg disabled:opacity-70"
-            aria-label={isPlaying ? "Pausar" : "Tocar"}
+            aria-label={isPlaying ? "Pausar transmissão ao vivo" : "Tocar transmissão ao vivo"}
           >
             {isBuffering ? (
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -53,7 +52,7 @@ export function LivePlayerBar() {
           </button>
         </div>
 
-        {/* Volume (Direita - visível apenas em Desktop) */}
+        {/* Volume (Direita - Desktop) */}
         <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
           <Volume2 size={20} className="text-gray-400" />
           <input
@@ -65,8 +64,8 @@ export function LivePlayerBar() {
             onChange={(e) => changeVolume(parseFloat(e.target.value))}
             className="w-24 h-1 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-praise-accent"
           />
-          <div className="text-[10px] font-bold text-gray-400 ml-2 border border-gray-400 px-1 rounded">
-            LIVE
+          <div className="text-[10px] font-bold text-gray-400 ml-2 border border-gray-400 px-1 rounded uppercase">
+            AO VIVO
           </div>
         </div>
 
