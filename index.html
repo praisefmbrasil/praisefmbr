@@ -1,250 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- SEO Meta Tags -->
-  <title>Praise FM Brasil - Rádio Gospel Online 24h | Ao Vivo</title>
-  <meta name="description" content="Ouça Praise FM Brasil ao vivo! A melhor rádio gospel online com programação 24 horas. Louvores, adoração e palavra de Deus.">
-  <meta name="keywords" content="rádio gospel, praise fm, música gospel, louvor, adoração, rádio online, transmissão ao vivo">
-  <meta name="author" content="Praise FM Brasil">
-  <meta name="robots" content="index, follow">
-  
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://praisefmbrasil.com/">
-  <meta property="og:title" content="Praise FM Brasil - Rádio Gospel Online 24h">
-  <meta property="og:description" content="Ouça a melhor rádio gospel do Brasil! Programação 24h com louvores, adoração e palavra de Deus.">
-  <meta property="og:image" content="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp">
-  
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://praisefmbrasil.com/">
-  <meta property="twitter:title" content="Praise FM Brasil - Rádio Gospel Online 24h">
-  <meta property="twitter:description" content="Ouça a melhor rádio gospel do Brasil! Programação 24h com louvores, adoração e palavra de Deus.">
-  <meta property="twitter:image" content="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp">
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
-  
-  <!-- Theme Color -->
-  <meta name="theme-color" content="#000000">
-  <meta name="msapplication-TileColor" content="#000000">
-  
-  <!-- PWA Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Praise FM Brasil">
-  
-  <!-- Preconnect para melhor performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://res.cloudinary.com">
-  <link rel="preconnect" href="https://stream.zeno.fm">
-  
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  
-  <!-- Canonical URL -->
-  <link rel="canonical" href="https://praisefmbrasil.com/">
-  
-  <!-- Structured Data / Schema.org -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "RadioStation",
-    "name": "Praise FM Brasil",
-    "description": "Rádio Gospel Online 24 horas - Louvores, Adoração e Palavra de Deus",
-    "url": "https://praisefmbrasil.com",
-    "logo": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp",
-    "broadcastFrequency": "Online",
-    "genre": "Gospel, Christian Music",
-    "inLanguage": "pt-BR",
-    "areaServed": "BR",
-    "broadcastAffiliateOf": {
-      "@type": "Organization",
-      "name": "Praise FM Global"
-    }
-  }
-  </script>
-  
-  <style>
-    /* Reset básico e fontes */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Praise FM Brasil</title>
     
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #000000;
-      color: #ffffff;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-    
-    /* Loading Screen */
-    #loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #000000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-    }
-    
-    #loading-screen.hidden {
-      opacity: 0;
-      visibility: hidden;
-    }
-    
-    .loader {
-      width: 60px;
-      height: 60px;
-      border: 4px solid rgba(255, 102, 0, 0.2);
-      border-top: 4px solid #ff6600;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .loading-text {
-      margin-top: 20px;
-      color: #ff6600;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar {
-      width: 10px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: #000000;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: #333333;
-      border-radius: 5px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: #ff6600;
-    }
-    
-    /* App Container */
-    #root {
-      min-height: 100vh;
-    }
-    
-    /* No Script Fallback */
-    .noscript-message {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
-      text-align: center;
-      background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-    }
-    
-    .noscript-message h1 {
-      font-size: 32px;
-      margin-bottom: 20px;
-      color: #ff6600;
-    }
-    
-    .noscript-message p {
-      font-size: 18px;
-      color: #999999;
-      max-width: 600px;
-      line-height: 1.6;
-    }
-  </style>
-</head>
-<body>
-  
-  <!-- Loading Screen -->
-  <div id="loading-screen">
-    <div class="loader"></div>
-    <div class="loading-text">Carregando Praise FM Brasil...</div>
-  </div>
-  
-  <!-- No Script Message -->
-  <noscript>
-    <div class="noscript-message">
-      <h1>⚠️ JavaScript Necessário</h1>
-      <p>
-        Para ouvir a Praise FM Brasil, você precisa habilitar o JavaScript no seu navegador.
-        Por favor, ative o JavaScript e recarregue a página.
-      </p>
-    </div>
-  </noscript>
-  
-  <!-- React Root -->
-  <div id="root"></div>
-  
-  <!-- Scripts -->
-  <script type="module" src="/src/main.tsx"></script>
-  
-  <!-- Remove loading screen quando o app carregar -->
-  <script>
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-          loadingScreen.classList.add('hidden');
-          setTimeout(function() {
-            loadingScreen.remove();
-          }, 500);
-        }
-      }, 500);
-    });
-    
-    // Analytics (adicione seu código do Google Analytics aqui se tiver)
-    // Exemplo:
-    // window.dataLayer = window.dataLayer || [];
-    // function gtag(){dataLayer.push(arguments);}
-    // gtag('js', new Date());
-    // gtag('config', 'G-XXXXXXXXXX');
-  </script>
-  
-  <!-- Service Worker Registration (para PWA) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').then(
-          function(registration) {
-            console.log('ServiceWorker registrado com sucesso:', registration.scope);
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#ff6600" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Praise FM" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <!-- Tailwind via CDN (temporário) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+            },
+            colors: {
+              'praise-acent': '#ff6600',
+            }
           },
-          function(err) {
-            console.log('Falha ao registrar ServiceWorker:', err);
-          }
-        );
-      });
-    }
-  </script>
-  
-</body>
+        },
+      }
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ Service Worker registered:', reg.scope))
+            .catch(err => console.log('❌ Service Worker registration failed:', err));
+        });
+      }
+    </script>
+  </body>
 </html>
