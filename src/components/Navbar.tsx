@@ -18,7 +18,7 @@ export function Navbar() {
           />
         </Link>
 
-        {/* LINKS DESKTOP (Sem Bold - font-medium) */}
+        {/* LINKS DESKTOP (Sem negrito) */}
         <div className="hidden md:flex items-center gap-8">
           <Link to="/" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-praise-accent transition-colors">
             Programação
@@ -28,13 +28,9 @@ export function Navbar() {
           </button>
         </div>
 
-        {/* BOTÃO MOBILE */}
-        <div className="md:hidden flex items-center">
-          <button 
-            onClick={() => setIsOpen(!isOpen)} 
-            className="p-2 text-gray-600 dark:text-gray-300"
-            aria-label="Abrir menu"
-          >
+        {/* BOTÃO HAMBÚRGUER MOBILE */}
+        <div className="md:hidden">
+          <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-gray-600 dark:text-gray-300">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -42,7 +38,7 @@ export function Navbar() {
 
       {/* MENU MOBILE DROP DOWN */}
       {isOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#121212] border-b border-gray-100 dark:border-white/5 p-4 flex flex-col gap-4 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#121212] border-b border-gray-100 dark:border-white/5 p-4 flex flex-col gap-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
           <Link to="/" onClick={() => setIsOpen(false)} className="text-base font-medium text-gray-600 dark:text-gray-300">
             Programação
           </Link>

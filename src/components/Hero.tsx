@@ -52,11 +52,11 @@ export default function Hero({ onNavigateToProgram }: HeroProps) {
             <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-praise-accent">Ao Vivo</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-semibold text-gray-900 dark:text-white mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl font-medium text-gray-900 dark:text-white mb-6 leading-tight">
             {currentProgram.title}
           </h1>
           
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-xl font-medium leading-relaxed">
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-xl font-normal leading-relaxed">
             {currentProgram.description}
           </p>
 
@@ -65,12 +65,15 @@ export default function Hero({ onNavigateToProgram }: HeroProps) {
             className="flex items-center gap-3 bg-praise-accent hover:bg-[#e65c00] text-white px-8 py-4 rounded-full transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-praise-accent/20"
           >
             <Play fill="currentColor" size={20} />
-            <span className="font-semibold">{isPlaying ? 'PAUSAR RÁDIO' : 'OUVIR AO VIVO'}</span>
+            <span className="font-semibold uppercase tracking-wide">
+              {isPlaying ? 'Pausar' : 'Ouvir ao Vivo'}
+            </span>
           </button>
 
-          {/* ANEL E LINK DA PROGRAMAÇÃO LADO A LADO */}
-          <div className="flex items-center gap-6 mt-12 p-4 bg-gray-50/50 dark:bg-white/5 rounded-2xl w-fit">
-            <ProgramRing title={currentProgram.title} image={currentProgram.image} progress={progress} />
+          {/* ANEL E LINK LADO A LADO */}
+          <div className="flex items-center gap-6 mt-12 p-5 bg-gray-50/50 dark:bg-white/5 rounded-2xl w-fit">
+            {/* Correção de propriedade: Enviamos o que o componente espera */}
+            <ProgramRing progress={progress} size={70} strokeWidth={4} />
             
             <div className="flex flex-col">
               <span className="text-[10px] uppercase tracking-widest text-praise-accent font-semibold mb-1">Cronograma</span>
@@ -85,12 +88,13 @@ export default function Hero({ onNavigateToProgram }: HeroProps) {
           </div>
         </div>
 
+        {/* IMAGEM DO LOCUTOR */}
         <div className="relative order-1 lg:order-2 flex justify-center lg:justify-end">
-          <div className="relative w-72 h-72 md:w-[450px] md:h-[450px]">
+          <div className="relative w-full max-w-[500px]">
             <img
               src={currentProgram.image}
               alt={currentProgram.host}
-              className="w-full h-full object-cover rounded-2xl shadow-2xl relative z-10"
+              className="w-full h-auto object-cover rounded-3xl shadow-2xl"
             />
           </div>
         </div>
