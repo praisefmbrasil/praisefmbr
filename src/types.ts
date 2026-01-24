@@ -1,9 +1,11 @@
+// src/types.ts
+
 export interface Program {
   id: string;
   title: string;
   host: string;
-  startTime: string; // Formato "HH:mm"
-  endTime: string;   // Formato "HH:mm"
+  startTime: string; // "HH:mm"
+  endTime: string;   // "HH:mm"
   description: string;
   image: string;
 }
@@ -17,7 +19,6 @@ export interface Podcast {
   author: string;
 }
 
-// Interface essencial para o Player de rádio
 export interface LiveMetadata {
   artist: string;
   title: string;
