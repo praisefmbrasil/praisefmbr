@@ -28,10 +28,10 @@ const DevotionalSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center space-x-3">
-             <div className="p-2 bg-[#ff6600] rounded-lg">
-                <Mic2 className="w-5 h-5 text-white" />
-             </div>
-             <h2 className="text-3xl font-medium uppercase tracking-tighter dark:text-white">Devocional</h2>
+            <div className="p-2 bg-[#ff6600] rounded-lg">
+              <Mic2 className="w-5 h-5 text-white" />
+            </div>
+            <h2 className="text-3xl font-medium uppercase tracking-tighter dark:text-white">Devocional</h2>
           </div>
           <button 
             onClick={() => navigate('/devotional')}
@@ -45,7 +45,11 @@ const DevotionalSection: React.FC = () => {
           {DEVOTIONAL_PODCASTS.map((podcast) => {
             const saved = isFavorite(podcast.id);
             return (
-              <div key={podcast.id} className="group cursor-pointer bg-white dark:bg-[#121212] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 dark:border-white/5">
+              <div 
+                key={podcast.id} 
+                className="group cursor-pointer bg-white dark:bg-[#121212] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 dark:border-white/5"
+                onClick={() => navigate(`/devotional/${podcast.id}`)}
+              >
                 <div className="relative aspect-square overflow-hidden">
                   <img 
                     src={podcast.image} 
@@ -66,7 +70,7 @@ const DevotionalSection: React.FC = () => {
                   <button 
                     onClick={(e) => handleListenLater(e, podcast)}
                     className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all z-10 ${saved ? 'bg-[#ff6600] text-white opacity-100' : 'bg-black/20 text-white opacity-0 group-hover:opacity-100 hover:bg-black/40'}`}
-                    title={saved ? "Salvo nos Podcasts" : "Ouvir depois"}
+                    title={saved ? "Salvo nos favoritos" : "Salvar para ouvir depois"}
                   >
                     {saved ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                   </button>
@@ -94,7 +98,16 @@ const DevotionalSection: React.FC = () => {
                           <span>Ouvir Depois</span>
                         )}
                       </button>
-                      <button className="text-[10px] font-medium uppercase tracking-widest hover:text-[#ff6600] transition-colors dark:text-gray-300">Ouvir Agora</button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Lógica para "Ouvir Agora" — pode abrir player modal ou redirecionar
+                          console.log('Ouvir agora:', podcast.title);
+                        }}
+                        className="text-[10px] font-medium uppercase tracking-widest hover:text-[#ff6600] transition-colors dark:text-gray-300"
+                      >
+                        Ouvir Agora
+                      </button>
                     </div>
                   </div>
                 </div>

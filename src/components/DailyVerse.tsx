@@ -7,14 +7,14 @@ interface VerseData {
   translation_name: string;
 }
 
-// Lista de referências (você pode manter ou traduzir os nomes dos livros se a API suportar)
+// Referências bíblicas mantidas (funcionam na API em português)
 const BIBLE_REFERENCES = [
-  "John 3:16", "Philippians 4:13", "Psalm 23:1", "Proverbs 3:5", "Isaiah 40:31",
-  "Romans 8:28", "Joshua 1:9", "Matthew 28:19", "Galatians 5:22", "Jeremiah 29:11",
-  "Psalm 46:1", "1 Corinthians 13:4", "Romans 12:2", "Matthew 5:16", "Proverbs 18:10",
-  "Psalm 119:105", "Ephesians 2:8", "Hebrews 11:1", "1 Peter 5:7", "James 1:5",
-  "2 Timothy 1:7", "Romans 15:13", "Psalm 37:4", "Matthew 11:28", "John 14:6",
-  "Isaiah 41:10", "Philippians 4:6", "Colossians 3:23", "Proverbs 16:3", "Lamentations 3:22"
+  "João 3:16", "Filipenses 4:13", "Salmos 23:1", "Provérbios 3:5", "Isaías 40:31",
+  "Romanos 8:28", "Josué 1:9", "Mateus 28:19", "Gálatas 5:22", "Jeremias 29:11",
+  "Salmos 46:1", "1 Coríntios 13:4", "Romanos 12:2", "Mateus 5:16", "Provérbios 18:10",
+  "Salmos 119:105", "Efésios 2:8", "Hebreus 11:1", "1 Pedro 5:7", "Tiago 1:5",
+  "2 Timóteo 1:7", "Romanos 15:13", "Salmos 37:4", "Mateus 11:28", "João 14:6",
+  "Isaías 41:10", "Filipenses 4:6", "Colossenses 3:23", "Provérbios 16:3", "Lamentações 3:22"
 ];
 
 const DailyVerse: React.FC = () => {
@@ -35,23 +35,28 @@ const DailyVerse: React.FC = () => {
         const refIndex = dayOfYear % BIBLE_REFERENCES.length;
         const reference = BIBLE_REFERENCES[refIndex];
         
-        // DICA: Mudei a tradução para 'almeida' (João Ferreira de Almeida) para o público brasileiro
+        // ✅ Agora usa tradução em português (Almeida)
         const response = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}?translation=almeida`);
+        if (!response.ok) throw new Error('Versículo não encontrado');
         const data = await response.json();
-        setVerse({ reference: data.reference, text: data.text.trim(), translation_name: "Almeida" });
-      } catch (error) { 
-        console.error("Erro ao buscar versículo:", error); 
+        setVerse({
+          reference: data.reference,
+          text: data.text.trim(),
+          translation_name: "Almeida Revista e Corrigida"
+        });
+      } catch (error) {
+        console.error("Erro ao buscar versículo:", error);
         setError("Não foi possível carregar o versículo do dia.");
+      } finally {
+        setLoading(false);
       }
-      finally { setLoading(false); }
     };
     fetchVerse();
   }, []);
 
   const copyToClipboard = async () => {
     if (!verse) return;
-    // Atualizado para Praise FM Brasil
-    const shareText = `"${verse.text}" - ${verse.reference} | Praise FM Brasil`;
+    const shareText = `"${verse.text}" — ${verse.reference} | Praise FM Brasil`;
     
     try {
       if (navigator.clipboard && window.isSecureContext) {
@@ -68,7 +73,7 @@ const DailyVerse: React.FC = () => {
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         } catch (err) {
-          console.error('Falha ao copiar', err);
+          console.error('Fallback copy failed', err);
         }
         document.body.removeChild(textArea);
       }
@@ -79,16 +84,15 @@ const DailyVerse: React.FC = () => {
 
   const handleShare = async () => {
     if (!verse) return;
-    
     const shareUrl = window.location.origin + window.location.pathname + window.location.hash;
     const shareData = {
-      title: 'Praise FM Brasil - Versículo Diário',
-      text: `"${verse.text}" - ${verse.reference}`,
+      title: 'Praise FM Brasil - Versículo do Dia',
+      text: `"${verse.text}" — ${verse.reference}`,
       url: shareUrl,
     };
 
     try {
-      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      if (navigator.share && navigator.canShare?.(shareData)) {
         await navigator.share(shareData);
         setShared(true);
         setTimeout(() => setShared(false), 2000);
@@ -133,7 +137,7 @@ const DailyVerse: React.FC = () => {
               VERSÍCULO DO DIA
             </span>
             <h3 className="text-white text-3xl md:text-4xl font-medium uppercase tracking-tighter leading-tight">
-              Palavra<br />Diária
+              Escritura<br />Diária
             </h3>
           </div>
           <div className="relative z-10 mt-12 flex items-center space-x-3">
