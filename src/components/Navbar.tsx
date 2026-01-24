@@ -1,5 +1,5 @@
 import React from 'react';
-import { ToggleTheme } from './common/ToggleTheme';
+import { ToggleTheme } from '../common/ToggleTheme';
 import { Radio } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
