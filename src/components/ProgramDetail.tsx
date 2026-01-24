@@ -1,328 +1,135 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Volume2, Clock, ArrowLeft, Calendar, Music, Activity, History as HistoryIcon, Loader2 } from 'lucide-react';
-import { Program } from '../types';
-import { SCHEDULES } from '../constants';
-import { supabase } from '../lib/supabase';
+import React, { useState, useEffect } from 'react';
+import { Music } from 'lucide-react';
 
-interface PlayedTrack {
+interface Track {
   artist: string;
   title: string;
-  label: string;
-  image: string;
-  isLive?: boolean;
-  timestamp: number;
+  artwork?: string;
+  playedAt?: Date;
+  isMusic?: boolean;
 }
 
-interface DailyHistory {
-  [date: string]: PlayedTrack[];
+interface RecentlyPlayedProps {
+  tracks: Track[];
 }
 
-interface ProgramDetailProps {
-  program: Program;
-  onBack: () => void;
-  onViewSchedule: () => void;
-  onListenClick: () => void;
-  isPlaying: boolean;
-}
-
-// ✅ Stream do Praise FM Brasil
-const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/olisuxy9v3vtv';
-
-// ✅ Usa fuso de São Paulo
-const getSaoPauloTotalMinutes = () => {
-  const now = new Date();
-  const saoPauloDate = new Date(now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
-  return saoPauloDate.getHours() * 60 + saoPauloDate.getMinutes();
+// ✅ Mapa de artistas gospel brasileiros → imagem no Cloudinary
+const ARTIST_ARTWORK_MAP: Record<string, string> = {
+  "Aline Barros": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp",
+  "Gabriela Rocha": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp",
+  "Fernandinho": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp",
+  "Isaias Saad": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp",
+  "Ana Paula Valadão": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Ana_Paula_Valad%C3%A3o_qkqjvz.webp",
+  "Davi Sacer": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Davi_Sacer_gxgkqh.webp",
+  "Ludmila Ferber": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Ludmila_Ferber_vy8vqj.webp",
+  "Paulo César Baruk": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Paulo_C%C3%A9sar_Baruk_wnrj1h.webp",
+  "Mariana Valadão": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Mariana_Valad%C3%A3o_yd1qwu.webp",
+  "Anderson Freire": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Anderson_Freire_jkqkxn.webp",
+  "Cassiane": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Cassiane_zcplqx.webp",
+  "Ton Carfi": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Ton_Carfi_r1xqhk.webp",
+  // Adicione mais conforme necessário
 };
 
-const getLocalDateString = () => {
-  return new Date().toISOString().split('T')[0];
-};
+// ✅ Fallback genérico (logo Praise FM)
+const FALLBACK_ARTWORK = "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp";
 
-// ✅ Não usamos mais formato 12h
-const formatTimeBR = (time24: string) => time24;
-
-const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSchedule, onListenClick, isPlaying }) => {
-  const [nowMinutes, setNowMinutes] = useState(getSaoPauloTotalMinutes());
-  const [loadingHistory, setLoadingHistory] = useState(true);
-  const eventSourceRef = useRef<EventSource | null>(null);
+const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ tracks }) => {
+  const [artworks, setArtworks] = useState<Record<string, string>>({});
   
-  const [historyGroups, setHistoryGroups] = useState<DailyHistory>(() => {
-    const storageKey = `history_v2_${program.id}`;
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return {};
-      }
-    }
-    return {};
-  });
-
-  // Carrega histórico do Supabase
-  useEffect(() => {
-    const loadSavedHistory = async () => {
-      setLoadingHistory(true);
-      try {
-        const { data, error } = await supabase
-          .from('program_history')
-          .select('*')
-          .eq('program_id', program.id)
-          .order('played_at', { ascending: false })
-          .limit(100);
-
-        if (data && data.length > 0) {
-          const grouped: DailyHistory = {};
-          data.forEach(item => {
-            const date = item.played_at.split('T')[0];
-            if (!grouped[date]) grouped[date] = [];
-            grouped[date].push({
-              artist: item.artist,
-              title: item.title,
-              label: item.label || "TOCADO ANTERIORMENTE",
-              image: item.image_url,
-              timestamp: new Date(item.played_at).getTime(),
-              isLive: false
-            });
-          });
-          setHistoryGroups(grouped);
-          localStorage.setItem(`history_v2_${program.id}`, JSON.stringify(grouped));
-        }
-      } catch (err) {
-        console.error("Erro ao carregar histórico", err);
-      } finally {
-        setLoadingHistory(false);
-      }
-    };
-
-    loadSavedHistory();
-  }, [program.id]);
+  const displayedTracks = tracks
+    .filter(track => track.isMusic !== false)
+    .slice(0, 4);
 
   useEffect(() => {
-    const timer = setInterval(() => setNowMinutes(getSaoPauloTotalMinutes()), 30000);
-    return () => clearInterval(timer);
-  }, []);
+    const resolveArtworks = () => {
+      const newArtworks: Record<string, string> = {};
+      let changed = false;
 
-  const { isCurrentlyLive, nextProgram } = useMemo(() => {
-    const [sH, sM] = program.startTime.split(':').map(Number);
-    const [eH, eM] = program.endTime.split(':').map(Number);
-    let start = sH * 60 + sM;
-    let end = eH * 60 + eM;
-    if (end <= start) end += 24 * 60;
-    
-    const live = nowMinutes >= start && nowMinutes < end;
-
-    const now = new Date();
-    const saoPauloDay = new Date(now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })).getDay(); // 0 = dom, 1 = seg, ..., 6 = sáb
-    const daySchedule = SCHEDULES[saoPauloDay] || SCHEDULES[0];
-    const currentIndex = daySchedule.findIndex(p => p.id === program.id);
-    const next = currentIndex !== -1 && currentIndex < daySchedule.length - 1 
-      ? daySchedule[currentIndex + 1] 
-      : (currentIndex === daySchedule.length - 1 ? (SCHEDULES[(saoPauloDay + 1) % 7] || daySchedule)[0] : null);
-
-    return { isCurrentlyLive: live, nextProgram: next };
-  }, [program, nowMinutes]);
-
-  useEffect(() => {
-    if (!isCurrentlyLive) return;
-
-    const connectMetadata = () => {
-      if (eventSourceRef.current) eventSourceRef.current.close();
-      try {
-        const es = new EventSource(METADATA_URL);
-        eventSourceRef.current = es;
-        
-        es.onmessage = async (event) => {
-          if (!event.data) return;
-          try {
-            const data = JSON.parse(event.data);
-            const streamTitle = data.streamTitle || "";
-            if (streamTitle.includes(' - ')) {
-              const [artistPart, ...titleParts] = streamTitle.split(' - ');
-              const artist = artistPart.trim();
-              const title = titleParts.join(' - ').trim();
-              if (!artist || !title) return;
-
-              const blocked = ['praise fm', 'comercial', 'spot', 'promo', 'identificação', 'vinheta'].some(k => 
-                title.toLowerCase().includes(k) || artist.toLowerCase().includes(k)
-              );
-              if (blocked) return;
-
-              const todayKey = getLocalDateString();
-              const trackTimestamp = Date.now();
-              // ✅ Use Cloudinary ou fallback seguro
-              const imageUrl = `https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/${encodeURIComponent(artist.replace(/\s+/g, '_'))}_placeholder.webp`;
-              
-              const newTrack: PlayedTrack = {
-                artist, title, label: "AO VIVO NA PRAISE FM",
-                image: imageUrl,
-                isLive: true, timestamp: trackTimestamp
-              };
-
-              setHistoryGroups(prev => {
-                const currentDayTracks = prev[todayKey] || [];
-                if (currentDayTracks.length > 0 && currentDayTracks[0].title === newTrack.title && currentDayTracks[0].artist === newTrack.artist) return prev;
-                
-                const updatedDay = [newTrack, ...currentDayTracks.map(t => ({ ...t, isLive: false }))].slice(0, 50);
-                const newState = { ...prev, [todayKey]: updatedDay };
-                localStorage.setItem(`history_v2_${program.id}`, JSON.stringify(newState));
-                
-                supabase.from('program_history').insert([{
-                  program_id: program.id,
-                  artist,
-                  title,
-                  image_url: imageUrl,
-                  played_at: new Date(trackTimestamp).toISOString(),
-                  label: "GRAVADO AO VIVO"
-                }]).then(({ error }) => {
-                   if (error) console.error("Erro ao salvar histórico:", error.message);
-                });
-
-                return newState;
-              });
-            }
-          } catch (err) {
-            console.error("Erro ao processar metadados", err);
+      for (const track of displayedTracks) {
+        const key = `${track.artist}-${track.title}`;
+        if (!artworks[key]) {
+          // ✅ Prioridade 1: artwork já fornecido
+          if (track.artwork) {
+            newArtworks[key] = track.artwork;
           }
-        };
-        es.onerror = () => {
-          es.close();
-          setTimeout(connectMetadata, 5000);
-        };
-      } catch (err) {
-        console.error("Falha na conexão", err);
+          // ✅ Prioridade 2: mapa local de artistas
+          else if (ARTIST_ARTWORK_MAP[track.artist]) {
+            newArtworks[key] = ARTIST_ARTWORK_MAP[track.artist];
+          }
+          // ✅ Prioridade 3: fallback genérico
+          else {
+            newArtworks[key] = FALLBACK_ARTWORK;
+          }
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        setArtworks(prev => ({ ...prev, ...newArtworks }));
       }
     };
 
-    connectMetadata();
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-    };
-  }, [isCurrentlyLive, program.id]);
-
-  const sortedDateKeys = useMemo(() => Object.keys(historyGroups).sort((a, b) => b.localeCompare(a)), [historyGroups]);
+    if (displayedTracks.length > 0) {
+      resolveArtworks();
+    }
+  }, [tracks, artworks]);
 
   return (
-    <div className="bg-[#121212] min-h-screen text-white font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
-        <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white transition-colors group mb-6">
-          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[11px] font-medium uppercase tracking-[0.2em]">Voltar para Início</span>
-        </button>
-        <h1 className="text-4xl md:text-6xl font-medium uppercase tracking-tighter text-white leading-tight mb-8">
-          {program.title}
-        </h1>
-      </div>
-
-      <div className="bg-[#1a1a1a] border-b border-white/5 sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <button className="py-4 text-[#ff6600] border-b-2 border-[#ff6600] font-medium text-[11px] uppercase tracking-widest">Início</button>
+    <section className="bg-white dark:bg-[#000] py-12 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4">
+        <h2 className="text-3xl font-regular text-gray-900 dark:text-white mb-6 tracking-tight">Músicas Recentes</h2>
+        
+        <div className="w-full">
+          <div className="grid grid-cols-12 gap-4 pb-2 border-b border-gray-200 dark:border-white/10 text-sm font-regular text-gray-900 dark:text-gray-100 mb-1">
+            <div className="col-span-8 md:col-span-6">Música</div>
+            <div className="col-span-4 md:col-span-6">Artista</div>
           </div>
-          <button onClick={onViewSchedule} className="flex items-center text-[#ff6600] space-x-2 hover:underline font-medium text-[11px] py-4 uppercase tracking-widest">
-             <Calendar className="w-4 h-4" />
-             <span>Ver Programação</span>
-          </button>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8">
-            <div className="relative aspect-video overflow-hidden mb-12 shadow-2xl group bg-[#000]">
-              <img src={program.image} alt={program.title} className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-              {isCurrentlyLive && (
-                <button onClick={onListenClick} className="absolute bottom-8 left-8 bg-[#ff6600] hover:bg-white text-black px-8 py-4 flex items-center space-x-4 transition-all">
-                  <Volume2 className={`w-8 h-8 ${isPlaying ? 'animate-pulse' : ''}`} />
-                  <span className="text-2xl font-medium uppercase tracking-tighter">{isPlaying ? 'No Ar Agora' : 'Ouvir ao vivo'}</span>
-                </button>
-              )}
-            </div>
-
-            <div className="mb-12">
-              <h2 className="bbc-section-title text-3xl font-medium mb-6 tracking-tighter uppercase dark:text-white">Sobre</h2>
-              <p className="text-lg text-gray-300 font-normal tracking-tight leading-relaxed mb-8">{program.description}</p>
-            </div>
-
-            <div className="bg-white text-black p-0 mb-12 shadow-2xl border border-gray-100 max-w-lg">
-              <div className="px-6 py-6 border-b border-gray-100 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <h3 className="text-2xl font-medium uppercase tracking-tighter">Músicas Tocadas</h3>
-                </div>
-                {isCurrentlyLive && (
-                  <div className="flex items-center space-x-2 text-[#ff6600]">
-                    <Activity className="w-4 h-4 animate-pulse" />
-                    <span className="text-[10px] font-medium uppercase tracking-widest">Ao Vivo</span>
-                  </div>
-                )}
+          <div className="flex flex-col">
+            {displayedTracks.length === 0 ? (
+              <div className="py-12 text-center text-gray-400 text-sm border-b border-gray-100 dark:border-white/5">
+                Nenhuma música recente encontrada.
               </div>
-              
-              <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto no-scrollbar">
-                {loadingHistory ? (
-                  <div className="p-20 flex flex-col items-center justify-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#ff6600] mb-4" />
-                    <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Carregando Histórico...</p>
-                  </div>
-                ) : sortedDateKeys.length > 0 ? (
-                  sortedDateKeys.map(date => (
-                    <div key={date}>
-                      <div className="bg-gray-50 px-6 py-2">
-                        <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400">
-                          {date === getLocalDateString() ? 'Hoje' : date}
-                        </span>
+            ) : (
+              displayedTracks.map((track, idx) => {
+                const key = `${track.artist}-${track.title}`;
+                const artworkUrl = artworks[key] || FALLBACK_ARTWORK;
+                
+                return (
+                  <div 
+                    key={idx} 
+                    className="grid grid-cols-12 gap-4 py-4 border-b border-gray-100 dark:border-white/5 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="col-span-8 md:col-span-6 flex items-center space-x-4">
+                      <span className="text-[13px] text-gray-500 w-5 font-normal">{idx + 1}.</span>
+                      <div className="w-10 h-10 md:w-11 md:h-11 bg-gray-200 dark:bg-gray-800 flex-shrink-0">
+                        <img 
+                          src={artworkUrl} 
+                          alt={`${track.title} - ${track.artist}`} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = FALLBACK_ARTWORK;
+                          }}
+                        />
                       </div>
-                      {historyGroups[date].map((track, i) => (
-                        <div key={i} className={`flex items-center p-5 transition-colors ${track.isLive ? 'bg-orange-50' : 'hover:bg-gray-50'}`}>
-                          <div className="w-14 h-14 flex-shrink-0 bg-gray-100 mr-5 relative">
-                            <img src={track.image} className="w-full h-full object-cover" alt="" />
-                            {track.isLive && <div className="absolute inset-0 border-2 border-[#ff6600]"></div>}
-                          </div>
-                          <div className="flex flex-col min-w-0">
-                            <h4 className="text-base font-medium uppercase tracking-tight leading-tight truncate">{track.artist}</h4>
-                            <p className="text-gray-500 text-sm font-normal truncate">{track.title}</p>
-                            <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400 mt-1">
-                              {new Date(track.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                      <span className="text-sm md:text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate pr-4">
+                        {track.title}
+                      </span>
                     </div>
-                  ))
-                ) : (
-                  <div className="p-12 text-center text-gray-400">
-                    <Music className="w-10 h-10 mx-auto mb-4 opacity-20" />
-                    <p className="text-[10px] font-medium uppercase tracking-[0.2em]">Nenhum histórico encontrado</p>
+                    <div className="col-span-4 md:col-span-6">
+                      <span className="text-sm md:text-[15px] text-gray-500 dark:text-gray-400 truncate block font-normal">
+                        {track.artist}
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-4 space-y-12">
-            <div className="bg-[#1a1a1a] p-8 border-l-4 border-[#ff6600]">
-               <h3 className="text-[10px] font-medium uppercase text-gray-500 tracking-[0.2em] mb-4">Apresentador</h3>
-               <p className="text-white font-medium text-2xl uppercase tracking-tighter">{program.host || "Praise FM Brasil"}</p>
-            </div>
-
-            <div className="bg-[#1a1a1a] p-8">
-               <h3 className="text-[10px] font-medium uppercase text-gray-500 tracking-[0.2em] mb-4">Próximo</h3>
-               {nextProgram ? (
-                 <div className="flex flex-col">
-                    <p className="text-white font-medium text-xl uppercase tracking-tight">{nextProgram.title}</p>
-                    <p className="text-[#ff6600] font-medium text-sm uppercase tracking-widest mt-1">{formatTimeBR(nextProgram.startTime)}</p>
-                 </div>
-               ) : <p className="text-gray-600 uppercase text-xs">Fim da programação</p>}
-            </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
-export default ProgramDetail;
+export default RecentlyPlayed;
