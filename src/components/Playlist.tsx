@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+// Corrigido: Importação correta da biblioteca lucide-react
 import { Play, Music, Heart, Info, ExternalLink, Pause, Loader2, X, Calendar } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-// LISTA DE ARTISTAS GOSPEL BRASILEIROS (MASTER LIST)
+// LISTA DE ARTISTAS GOSPEL BRASILEIROS
 const MASTER_ARTISTS = [
   "Fernandinho", "Aline Barros", "Anderson Freire", "Gabriela Rocha", 
   "Preto no Branco", "Isadora Pompeo", "Morada", "Kemuel", 
@@ -12,7 +13,6 @@ const MASTER_ARTISTS = [
   "Nivea Soares", "Paulo Neto", "Julia Vitória", "Sarah Beatriz", "Gabriel Guedes"
 ];
 
-// DADOS DO ARQUIVO (TRADUZIDOS E ATUALIZADOS)
 const ARCHIVE_DATA = [
   { date: "24 Out", artists: ["Fernandinho", "Gabriela Rocha", "Morada"] },
   { date: "23 Out", artists: ["Aline Barros", "Anderson Freire", "Isadora Pompeo"] },
@@ -112,22 +112,14 @@ const Playlist: React.FC = () => {
         const results: Track[] = [];
         for (const artist of currentArtists) { 
           const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&media=music&entity=song&limit=1&country=br`);
-          
           if (res.ok) {
-            const text = await res.text();
-            if (text && text.trim().length > 0) {
-              try {
-                const json = JSON.parse(text);
-                if (json.results && json.results.length > 0) results.push(json.results[0]);
-              } catch (parseErr) {
-                console.debug("Erro ao processar artista:", artist);
-              }
-            }
+            const data = await res.json();
+            if (data.results && data.results.length > 0) results.push(data.results[0]);
           }
         }
         setTracks(results);
       } catch (e) {
-        console.debug("Erro ao carregar playlist - Rede instável");
+        console.error("Erro ao carregar playlist");
       } finally {
         setLoading(false);
       }
@@ -137,7 +129,6 @@ const Playlist: React.FC = () => {
 
   const togglePreview = (track: Track) => {
     if (!track.previewUrl || !audioRef.current) return;
-    
     if (activePreview === track.trackId) {
       audioRef.current.pause();
       setActivePreview(null);
@@ -148,157 +139,42 @@ const Playlist: React.FC = () => {
     }
   };
 
-  const aList = tracks.slice(0, 4);
-  const bList = tracks.slice(4, 8);
-  const cList = tracks.slice(8, 12);
-
   return (
     <div className="bg-[#f2f2f2] dark:bg-[#000] min-h-screen transition-colors duration-300">
       <audio ref={audioRef} onEnded={() => setActivePreview(null)} />
       
-      {/* MODAL DE ARQUIVO */}
-      {showArchive && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#111] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-6 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-[#ff6600] text-white">
-              <div className="flex items-center space-x-3">
-                <Calendar className="w-5 h-5" />
-                <h2 className="text-xl font-black uppercase tracking-tighter">Seleções Anteriores</h2>
-              </div>
-              <button onClick={() => setShowArchive(false)} className="p-2 hover:bg-black/20 rounded-full transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="flex-grow overflow-y-auto p-6 space-y-4">
-              {ARCHIVE_DATA.map((item, idx) => (
-                <div key={idx} className="p-5 border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 hover:border-[#ff6600] transition-colors group cursor-default">
-                  <span className="text-[10px] font-black text-[#ff6600] uppercase tracking-[0.2em] mb-2 block">{item.date}</span>
-                  <h3 className="text-lg font-black dark:text-white uppercase tracking-tight mb-3">Destaques do Dia</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {item.artists.map((artist, aIdx) => (
-                      <span key={aIdx} className="bg-white dark:bg-black px-3 py-1 text-xs font-regular border border-gray-200 dark:border-white/10 dark:text-gray-300">
-                        {artist}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-6 border-t border-gray-100 dark:border-white/10 text-center">
-              <p className="text-xs text-gray-400 uppercase font-regular tracking-widest">Exibindo as últimas 4 edições diárias</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* HEADER DA PLAYLIST */}
-      <div className="bg-white dark:bg-[#111] border-b border-gray-200 dark:border-white/5 py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
+      {/* HEADER */}
+      <div className="bg-white dark:bg-[#111] border-b border-gray-200 dark:border-white/5 py-12 md:py-20 px-4">
+        <div className="max-w-7xl mx-auto">
           <div className="flex items-center space-x-2 text-[#ff6600] mb-4">
             <Music className="w-4 h-4" />
             <span className="text-[10px] font-medium uppercase tracking-[0.4em]">Seleção Oficial Praise FM Brasil</span>
           </div>
           <h1 className="text-5xl md:text-8xl font-medium uppercase tracking-tighter mb-6 dark:text-white leading-none">Playlist</h1>
           <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl font-normal leading-tight uppercase">
-            Curadoria diária. O som definitivo da <span className="text-black dark:text-white font-medium">Praise FM Brasil</span>, com os maiores sucessos da adoração nacional.
+            Curadoria diária. O som definitivo da <span className="text-black dark:text-white font-medium">Praise FM Brasil</span>.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-16">
-        
         {loading ? (
           <div className="flex flex-col items-center justify-center py-40">
             <Loader2 className="w-12 h-12 text-[#ff6600] animate-spin mb-4" />
-            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gray-400">Atualizando Playlist Diária...</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gray-400">Atualizando...</p>
           </div>
         ) : (
-          <>
-            {/* LISTA A */}
-            {aList.length > 0 && (
-              <section className="mb-24">
-                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black dark:border-white pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white">Lista A</h2>
-                  <span className="text-[#ff6600] text-sm font-medium uppercase tracking-widest">Alta Rotação</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {aList.map(track => (
-                    <PlaylistCard 
-                      key={track.trackId} 
-                      track={track} 
-                      isPlaying={activePreview === track.trackId}
-                      onTogglePlay={() => togglePreview(track)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* LISTA B */}
-            {bList.length > 0 && (
-              <section className="mb-24">
-                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/20 dark:border-white/20 pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-60">Lista B</h2>
-                  <span className="text-gray-400 text-sm font-medium uppercase tracking-widest">Em Ascensão</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {bList.map(track => (
-                    <PlaylistCard 
-                      key={track.trackId} 
-                      track={track}
-                      isPlaying={activePreview === track.trackId}
-                      onTogglePlay={() => togglePreview(track)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* LISTA C */}
-            {cList.length > 0 && (
-              <section className="mb-24">
-                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/10 dark:border-white/10 pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-40">Lista C</h2>
-                  <span className="text-gray-300 text-sm font-medium uppercase tracking-widest">Novidades</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {cList.map(track => (
-                    <PlaylistCard 
-                      key={track.trackId} 
-                      track={track}
-                      isPlaying={activePreview === track.trackId}
-                      onTogglePlay={() => togglePreview(track)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-          </>
-        )}
-
-        {/* INFO FOOTER */}
-        <div className="bg-white dark:bg-[#111] p-12 mt-20 border border-gray-200 dark:border-white/5">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="flex items-center space-x-8">
-              <div className="w-16 h-16 bg-[#ff6600] rounded-full flex items-center justify-center text-white flex-shrink-0">
-                <Info className="w-8 h-8" />
-              </div>
-              <div>
-                <h4 className="text-2xl font-medium uppercase tracking-tighter dark:text-white">Rotação Diária</h4>
-                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-lg mt-2 uppercase font-normal tracking-tight leading-relaxed">
-                  A <span className="text-[#ff6600] font-medium">Playlist Praise FM Brasil</span> é atualizada a cada 24 horas. Selecionamos as músicas mais impactantes do Brasil para inspirar sua jornada de fé diariamente.
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setShowArchive(true)}
-              className="bg-black dark:bg-white text-white dark:text-black px-10 py-5 text-[10px] font-medium uppercase tracking-[0.3em] flex items-center space-x-3 hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all shadow-lg active:scale-95"
-            >
-              <span>Ver Listas Anteriores</span>
-              <ExternalLink className="w-4 h-4" />
-            </button>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {tracks.map(track => (
+              <PlaylistCard 
+                key={track.trackId} 
+                track={track} 
+                isPlaying={activePreview === track.trackId}
+                onTogglePlay={() => togglePreview(track)}
+              />
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
