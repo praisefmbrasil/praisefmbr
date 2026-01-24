@@ -3,7 +3,7 @@ import { Program } from './types';
 // Programação Segunda a Sábado
 const WEEKDAY_SCHEDULE: Program[] = [
   {
-    id: 1,
+    id: "1",
     title: "Madrugada com Cristo",
     host: "Samuel Andrade",
     description: "Comece seu dia na presença de Deus com louvores e reflexões.",
@@ -12,7 +12,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp"
   },
   {
-    id: 2,
+    id: "2",
     title: "Praise FM Worship Brasil",
     host: "Praise FM Brasil",
     description: "Uma hora de adoração pura.",
@@ -21,7 +21,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp"
   },
   {
-    id: 3,
+    id: "3",
     title: "Manhã com Cristo",
     host: "Lucas Martins",
     description: "Energia e inspiração para sua manhã.",
@@ -30,7 +30,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp"
   },
   {
-    id: 4,
+    id: "4",
     title: "Praise FM Worship Brasil",
     host: "Praise FM Brasil",
     description: "Uma hora de adoração pura.",
@@ -39,7 +39,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp"
   },
   {
-    id: 5,
+    id: "5",
     title: "Tarde Gospel",
     host: "Rafael Costa",
     description: "O melhor da música gospel para sua tarde.",
@@ -48,7 +48,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp"
   },
   {
-    id: 6,
+    id: "6",
     title: "Praise FM Non Stop",
     host: "Praise FM Brasil",
     description: "Músicas sem parar.",
@@ -57,7 +57,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp"
   },
   {
-    id: 7,
+    id: "7",
     title: "Praise FM Nova Geração",
     host: "Ana Paula",
     description: "Descubra a próxima geração de talentos gospel.",
@@ -66,7 +66,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp"
   },
   {
-    id: 8,
+    id: "8",
     title: "De Carona com a Praise FM",
     host: "Bruno Almeida",
     description: "Sua companhia perfeita no caminho de volta.",
@@ -75,7 +75,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp"
   },
   {
-    id: 9,
+    id: "9",
     title: "Praise FM Live Show",
     host: "Praise FM Brasil",
     description: "Show ao vivo com os melhores hits.",
@@ -84,7 +84,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_Fm_Live_Show_blfy7o.webp"
   },
   {
-    id: 10,
+    id: "10",
     title: "Praise FM Brasil Clássicos",
     host: "Rodrigo Veras",
     description: "Os clássicos que marcaram gerações.",
@@ -93,7 +93,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp"
   },
   {
-    id: 11,
+    id: "11",
     title: "Praise FM Worship Brasil",
     host: "Praise FM Brasil",
     description: "Uma hora de adoração pura.",
@@ -106,7 +106,7 @@ const WEEKDAY_SCHEDULE: Program[] = [
 // Programação Domingo
 const SUNDAY_SCHEDULE: Program[] = [
   {
-    id: 1,
+    id: "1",
     title: "Madrugada com Cristo",
     host: "Samuel Andrade",
     description: "Comece seu dia na presença de Deus com louvores e reflexões.",
@@ -115,7 +115,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp"
   },
   {
-    id: 2,
+    id: "2",
     title: "Praise FM Worship Brasil",
     host: "Praise FM Brasil",
     description: "Uma hora de adoração pura.",
@@ -124,7 +124,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp"
   },
   {
-    id: 3,
+    id: "3",
     title: "Domingo com Cristo",
     host: "Felipe Santos",
     description: "Um domingo especial na presença do Senhor.",
@@ -133,7 +133,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp"
   },
   {
-    id: 4,
+    id: "4",
     title: "Praise FM Worship Brasil",
     host: "Praise FM Brasil",
     description: "Uma hora de adoração pura.",
@@ -142,7 +142,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp"
   },
   {
-    id: 5,
+    id: "5",
     title: "Tarde Gospel",
     host: "Rafael Costa",
     description: "O melhor da música gospel para sua tarde.",
@@ -151,7 +151,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp"
   },
   {
-    id: 6,
+    id: "6",
     title: "Praise FM Non Stop",
     host: "Praise FM Brasil",
     description: "Músicas sem parar.",
@@ -160,7 +160,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp"
   },
   {
-    id: 7,
+    id: "7",
     title: "Praise FM Nova Geração",
     host: "Ana Paula",
     description: "Descubra a próxima geração de talentos gospel.",
@@ -169,7 +169,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp"
   },
   {
-    id: 8,
+    id: "8",
     title: "Praise FM Worship Brasil",
     host: "Praise FM Brasil",
     description: "Uma hora de adoração pura.",
@@ -178,7 +178,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp"
   },
   {
-    id: 9,
+    id: "9",
     title: "Praise FM POP",
     host: "Thiago Moreira",
     description: "Os maiores sucessos pop gospel.",
@@ -187,7 +187,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp"
   },
   {
-    id: 10,
+    id: "10",
     title: "Praise FM Brasil Clássicos",
     host: "Rodrigo Veras",
     description: "Os clássicos que marcaram gerações.",
@@ -196,7 +196,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp"
   },
   {
-    id: 11,
+    id: "11",
     title: "Pregação da Palavra",
     host: "Praise FM Brasil",
     description: "Mensagens que transformam vidas.",
@@ -205,7 +205,7 @@ const SUNDAY_SCHEDULE: Program[] = [
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp"
   },
   {
-    id: 12,
+    id: "12",
     title: "Praise FM Worship Brasil",
     host: "Praise FM Brasil",
     description: "Uma hora de adoração pura.",
