@@ -28,23 +28,25 @@ import AppHomePage from './pages/AppHomePage';
 import { SCHEDULES } from './constants';
 import { Program } from './types';
 
+// Configurações de Streaming
 const STREAM_URL = 'https://stream.zeno.fm/hvwifp8ezc6tv';
 const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/hvwifp8ezc6tv';
 
+// Palavras-chave para filtrar metadados que não são música (comerciais, vinhetas, etc)
 const BLOCKED_METADATA_KEYWORDS = [
-  'praise fm', 'praisefm', 'commercial', 'spot', 'promo', 'ident', 'sweeper',
-  'intro', 'outro', 'announcement', 'morning show', 'midday grace',
-  'midnight grace', 'carpool', 'future artists', 'worship', 'non stop',
-  'classics', 'pop hits', 'live show', 'station id', 'ramp', 'advertising',
-  'jingle', 'bumper', 'teaser', 'coming up'
+  'praise fm', 'praisefm', 'comercial', 'spot', 'promo', 'ident', 'sweeper',
+  'vinheta', 'abertura', 'encerramento', 'anúncio', 'morning show', 'midday grace',
+  'midnight grace', 'carpool', 'future artists', 'adoracao', 'louvor', 'non stop',
+  'classics', 'pop hits', 'ao vivo', 'station id', 'publicidade', 'teaser'
 ];
 
-const getChicagoDayAndTotalMinutes = () => {
+// Ajuste para Fuso Horário de Brasília (BRT)
+const getBrazilDayAndTotalMinutes = () => {
   const now = new Date();
-  const chicagoDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
-  const h = chicagoDate.getHours();
-  const m = chicagoDate.getMinutes();
-  return { day: chicagoDate.getDay(), total: h * 60 + m };
+  const brazilDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const h = brazilDate.getHours();
+  const m = brazilDate.getMinutes();
+  return { day: brazilDate.getDay(), total: h * 60 + m };
 };
 
 interface LiveMetadata {
@@ -81,7 +83,8 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { day, total } = getChicagoDayAndTotalMinutes();
+  // Usando fuso horário de Brasília
+  const { day, total } = getBrazilDayAndTotalMinutes();
   
   const { currentProgram, queue } = useMemo(() => {
     const schedule = SCHEDULES[day] || SCHEDULES[1];
@@ -105,16 +108,13 @@ const AppContent: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (selectedProgram) {
-      setSelectedProgram(null);
-    }
+    if (selectedProgram) setSelectedProgram(null);
   }, [location.pathname]);
 
+  // Lógica de Metadados (SSE)
   useEffect(() => {
     const connectMetadata = () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
+      if (eventSourceRef.current) eventSourceRef.current.close();
       
       try {
         const es = new EventSource(METADATA_URL);
@@ -147,9 +147,7 @@ const AppContent: React.FC = () => {
                 if (isNewTrack) {
                   if (newMetadata.isMusic) {
                     setTrackHistory(h => {
-                      if (h.length > 0 && h[0].title === newMetadata.title && h[0].artist === newMetadata.artist) {
-                        return h;
-                      }
+                      if (h.length > 0 && h[0].title === newMetadata.title && h[0].artist === newMetadata.artist) return h;
                       return [newMetadata, ...h].slice(0, 10);
                     });
                   }
@@ -171,10 +169,7 @@ const AppContent: React.FC = () => {
     
     connectMetadata();
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
+      if (eventSourceRef.current) eventSourceRef.current.close();
       if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
     };
   }, []);
@@ -185,11 +180,7 @@ const AppContent: React.FC = () => {
       audioRef.current.pause();
     } else {
       audioRef.current.load();
-      audioRef.current.play().catch(e => {
-        if (e.name !== 'AbortError' && !e.message?.includes('interrupted')) {
-          console.error("Playback failed", e);
-        }
-      });
+      audioRef.current.play().catch(e => console.error("Falha no playback", e));
     }
     setIsPlaying(!isPlaying);
   };
@@ -198,8 +189,7 @@ const AppContent: React.FC = () => {
     audioRef.current = new Audio(STREAM_URL);
     audioRef.current.crossOrigin = "anonymous";
     const savedVol = localStorage.getItem('praise-volume');
-    const initialVol = savedVol ? parseFloat(savedVol) : 0.8;
-    audioRef.current.volume = initialVol;
+    audioRef.current.volume = savedVol ? parseFloat(savedVol) : 0.8;
 
     return () => {
       if (audioRef.current) {
@@ -216,8 +206,6 @@ const AppContent: React.FC = () => {
   };
 
   const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
-
-  // Verifica se está na rota do app (sem navbar/footer)
   const isAppRoute = location.pathname === '/app';
 
   return (
