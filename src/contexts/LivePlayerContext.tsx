@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
-import { useLiveMetadata } from '../Hook/useLiveMetadata'; // Ajuste o nome da pasta Hook se necessário
+import { useLiveMetadata } from '../Hook/useLiveMetadata';
 
 interface PlayerContextData {
   isPlaying: boolean;
@@ -22,41 +22,76 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv";
 
   useEffect(() => {
-    audioRef.current = new Audio(STREAM_URL);
-    const audio = audioRef.current;
+    // Criar o elemento de áudio UMA VEZ
+    const audio = new Audio(STREAM_URL);
+    audio.preload = "none";
+    audio.volume = volume;
+    audioRef.current = audio;
+
+    // Event listeners
     const handleWaiting = () => setIsBuffering(true);
-    const handlePlaying = () => { setIsBuffering(false); setIsPlaying(true); };
+    const handlePlaying = () => {
+      setIsBuffering(false);
+      setIsPlaying(true);
+    };
+    const handlePause = () => setIsPlaying(false);
+    const handleError = (e: Event) => {
+      console.error('Erro no áudio:', e);
+      setIsBuffering(false);
+      setIsPlaying(false);
+    };
 
     audio.addEventListener('waiting', handleWaiting);
     audio.addEventListener('playing', handlePlaying);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('error', handleError);
 
+    // Cleanup
     return () => {
       audio.removeEventListener('waiting', handleWaiting);
       audio.removeEventListener('playing', handlePlaying);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('error', handleError);
       audio.pause();
+      audio.src = '';
     };
   }, []);
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
+
+    try {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        setIsBuffering(true);
+        await audioRef.current.play();
+      }
+    } catch (error) {
+      console.error('Erro ao reproduzir:', error);
+      setIsBuffering(false);
       setIsPlaying(false);
-    } else {
-      setIsBuffering(true);
-      audioRef.current.src = STREAM_URL;
-      audioRef.current.load();
-      audioRef.current.play().catch(console.error);
     }
   };
 
   const changeVolume = (value: number) => {
     setVolume(value);
-    if (audioRef.current) audioRef.current.volume = value;
+    if (audioRef.current) {
+      audioRef.current.volume = value;
+    }
   };
 
   return (
-    <LivePlayerContext.Provider value={{ isPlaying, isBuffering, volume, togglePlay, changeVolume, currentTrack }}>
+    <LivePlayerContext.Provider 
+      value={{ 
+        isPlaying, 
+        isBuffering, 
+        volume, 
+        togglePlay, 
+        changeVolume, 
+        currentTrack 
+      }}
+    >
       {children}
     </LivePlayerContext.Provider>
   );
