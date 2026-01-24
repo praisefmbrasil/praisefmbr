@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Home, Music, Radio, Menu, Calendar, Sun, Moon, X, User as UserIcon, Library, Settings, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -31,22 +30,26 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
     }
   }, [user]);
 
+  // Itens de navegação traduzidos
   const navItems = [
-    { id: 'home', label: 'Home', icon: Home, path: '/' },
-    { id: 'music', label: 'Music', icon: Music, path: '/music' },
-    { id: 'schedule', label: 'Schedule', icon: Calendar, path: '/schedule' },
-    { id: 'events', label: 'Events', icon: Ticket, path: '/events' },
-    { id: 'devotional', label: 'Devotional', icon: Radio, path: '/devotional' },
+    { id: 'home', label: 'Início', icon: Home, path: '/' },
+    { id: 'music', label: 'Música', icon: Music, path: '/music' },
+    { id: 'schedule', label: 'Programação', icon: Calendar, path: '/schedule' },
+    { id: 'events', label: 'Eventos', icon: Ticket, path: '/events' },
+    { id: 'devotional', label: 'Devocional', icon: Radio, path: '/devotional' },
   ];
 
   return (
-    <header className="bg-white dark:bg-[#0b0b0b] text-black dark:text-white">
+    <header className="bg-white dark:bg-[#0b0b0b] text-black dark:text-white border-b border-gray-100 dark:border-white/5">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
       <div className="flex items-center h-full space-x-12">
         <div className="flex items-center cursor-pointer h-full" onClick={() => navigate('/')}>
-          <img src="https://res.cloudinary.com/dtecypmsh/image/upload/v1766869698/SVGUSA_lduiui.webp"
-            alt="Praise FM USA Logo"
-            className={`h-7 w-auto object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''}`} />
+          <img 
+            // Logo atualizada para Praise FM Brasil
+            src="https://res.cloudinary.com/dtecypmsh/image/upload/v1766869698/SVGBRASIL_lduiui.webp"
+            alt="Praise FM Brasil Logo"
+            className={`h-7 w-auto object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''}`} 
+          />
         </div>
 
         <nav className="hidden md:flex items-center space-x-8 h-full">
@@ -71,18 +74,17 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
             className={`flex items-center space-x-2 text-[15px] font-medium transition-all h-full border-b-2 px-1 uppercase tracking-tighter ${activeTab === 'my-sounds' ? 'text-black dark:text-white border-[#ff6600]' : 'text-gray-500 border-transparent hover:text-black dark:hover:text-white'}`}
           >
             <Library className="w-4 h-4" strokeWidth={1.5} />
-            <span>My Sounds</span>
+            <span>Meus Sons</span>
           </button>
         </nav>
       </div>
 
       <div className="flex items-center">
-        {/* Botão de tema movido mais para a esquerda com margem maior à direita */}
         <button
           onClick={onToggleTheme}
           className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-400 mr-8 md:mr-12"
         >
-          {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-praise-accent" />}
+          {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-[#ff6600]" />}
         </button>
 
         <div className="flex items-center space-x-4">
@@ -94,12 +96,12 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
               >
                 <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 flex items-center justify-center border border-transparent group-hover:border-[#ff6600] transition-all">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="User" className="w-full h-full object-cover" />
+                    <img src={avatarUrl} alt="Usuário" className="w-full h-full object-cover" />
                   ) : (
                     <UserIcon className="w-4 h-4 text-gray-500" />
                   )}
                 </div>
-                <span className="text-[10px] font-medium uppercase tracking-widest text-gray-500 group-hover:text-black dark:group-hover:text-white">Profile</span>
+                <span className="text-[10px] font-medium uppercase tracking-widest text-gray-500 group-hover:text-black dark:group-hover:text-white">Perfil</span>
               </button>
             </div>
           ) : (
@@ -107,7 +109,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
               onClick={() => navigate('/login')}
               className="hidden md:block text-[10px] font-medium uppercase tracking-widest text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
             >
-              Sign In
+              Entrar
             </button>
           )}
 
@@ -139,15 +141,23 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
               className="flex items-center space-x-4 p-4 rounded-xl text-lg font-medium text-gray-600 dark:text-gray-400 uppercase tracking-tighter"
             >
               <Library className="w-5 h-5" />
-              <span>My Sounds</span>
+              <span>Meus Sons</span>
             </button>
-            {user && (
+            {user ? (
               <button 
                 onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
                 className="flex items-center space-x-4 p-4 rounded-xl text-lg font-medium text-[#ff6600] uppercase tracking-tighter border-t border-gray-100 dark:border-white/5 mt-4 pt-8"
               >
                 <Settings className="w-5 h-5" />
-                <span>Account Settings</span>
+                <span>Configurações</span>
+              </button>
+            ) : (
+              <button 
+                onClick={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
+                className="flex items-center space-x-4 p-4 rounded-xl text-lg font-medium text-[#ff6600] uppercase tracking-tighter border-t border-gray-100 dark:border-white/5 mt-4 pt-8"
+              >
+                <UserIcon className="w-5 h-5" />
+                <span>Entrar / Cadastrar</span>
               </button>
             )}
           </nav>
