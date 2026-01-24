@@ -1,19 +1,23 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+
+// CONTEXTOS
 import { AuthProvider } from './contexts/AuthContext';
 import { LivePlayerProvider } from './contexts/LivePlayerContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+// Removido o ThemeProvider temporariamente para evitar erro de "Module not found"
 
 // COMPONENTES
-import Navbar from './components/Navbar';
+// Usando importações nomeadas { } para garantir compatibilidade com seus arquivos
+import { Navbar } from './components/Navbar';
 import Hero from './components/Hero';
 import Playlist from './components/Playlist';
-import Podcasts from './components/Podcasts';
 import Footer from './components/Footer';
-import Login from './pages/Login';
-import Favorites from './pages/Favorites';
 
-// CORREÇÃO DA TELA BRANCA: Importação nomeada conforme o seu arquivo
+// PÁGINAS (Comentadas até que os arquivos sejam criados na pasta /pages)
+// import Login from './pages/Login';
+// import Favorites from './pages/Favorites';
+
+// CORREÇÃO DA TELA BRANCA: Importação nomeada conforme o erro do console
 import { LivePlayerBar } from './components/LivePlayerBar'; 
 
 function AppContent() {
@@ -23,16 +27,15 @@ function AppContent() {
       <Routes>
         <Route path="/" element={
           <main>
-            <Hero />
+            {/* onNavigateToProgram adicionado para resolver o erro de propriedade obrigatória */}
+            <Hero onNavigateToProgram={() => {}} />
             <Playlist />
-            <Podcasts />
           </main>
         } />
-        <Route path="/login" element={<Login />} />
-        <Route path="/favorites" element={<Favorites />} />
+        {/* Adicione as rotas de Login e Favoritos aqui quando os arquivos estiverem prontos */}
       </Routes>
       <Footer />
-      {/* O Player Bar fica fixo no rodapé em todas as páginas */}
+      {/* O Player Bar fixo no rodapé */}
       <LivePlayerBar />
     </div>
   );
@@ -40,14 +43,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <LivePlayerProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </LivePlayerProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <LivePlayerProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </LivePlayerProvider>
+    </AuthProvider>
   );
 }
