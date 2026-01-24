@@ -1,22 +1,23 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Play, Music, Heart, Info, ExternalLink, Pause, Loader2, X, Calendar } from 'lucide-react';
+import { Play, Music, Heart, Info, ExternalLink, Pause, Loader2, X, Calendar } from 'lucide-center';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
+// LISTA DE ARTISTAS GOSPEL BRASILEIROS (MASTER LIST)
 const MASTER_ARTISTS = [
-  "Brandon Lake", "Elevation Worship", "Chris Tomlin", "Tauren Wells", 
-  "Lauren Daigle", "Forrest Frank", "Phil Wickham", "Anne Wilson", 
-  "Matthew West", "Cory Asbury", "Casting Crowns", "MercyMe", 
-  "Maverick City Music", "CeCe Winans", "Tasha Cobbs Leonard",
-  "TobyMac", "Jeremy Camp", "Hillsong Worship", "Kari Jobe", "Crowder"
+  "Fernandinho", "Aline Barros", "Anderson Freire", "Gabriela Rocha", 
+  "Preto no Branco", "Isadora Pompeo", "Morada", "Kemuel", 
+  "Bruna Karla", "Cassiane", "Thalles Roberto", "Casa Worship", 
+  "Diante do Trono", "Fernanda Brum", "Leonardo Gonçalves",
+  "Nivea Soares", "Paulo Neto", "Julia Vitória", "Sarah Beatriz", "Gabriel Guedes"
 ];
 
+// DADOS DO ARQUIVO (TRADUZIDOS E ATUALIZADOS)
 const ARCHIVE_DATA = [
-  { date: "Oct 24", artists: ["Brandon Lake", "Phil Wickham", "CeCe Winans"] },
-  { date: "Oct 23", artists: ["Elevation Worship", "Tauren Wells", "Lauren Daigle"] },
-  { date: "Oct 22", artists: ["Chris Tomlin", "Forrest Frank", "Tasha Cobbs"] },
-  { date: "Oct 21", artists: ["Maverick City", "TobyMac", "Anne Wilson"] }
+  { date: "24 Out", artists: ["Fernandinho", "Gabriela Rocha", "Morada"] },
+  { date: "23 Out", artists: ["Aline Barros", "Anderson Freire", "Isadora Pompeo"] },
+  { date: "22 Out", artists: ["Preto no Branco", "Casa Worship", "Kemuel"] },
+  { date: "21 Out", artists: ["Bruna Karla", "Cassiane", "Thalles Roberto"] }
 ];
 
 type Track = {
@@ -28,7 +29,6 @@ type Track = {
 };
 
 const getRotationSeed = () => {
-  // Changed from 3 days to 1 day for daily rotation
   const oneDayInMs = 24 * 60 * 60 * 1000;
   return Math.floor(Date.now() / oneDayInMs);
 };
@@ -111,7 +111,7 @@ const Playlist: React.FC = () => {
       try {
         const results: Track[] = [];
         for (const artist of currentArtists) { 
-          const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&media=music&entity=song&limit=1`);
+          const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&media=music&entity=song&limit=1&country=br`);
           
           if (res.ok) {
             const text = await res.text();
@@ -120,14 +120,14 @@ const Playlist: React.FC = () => {
                 const json = JSON.parse(text);
                 if (json.results && json.results.length > 0) results.push(json.results[0]);
               } catch (parseErr) {
-                console.debug("Playlist iTunes parse error for:", artist);
+                console.debug("Erro ao processar artista:", artist);
               }
             }
           }
         }
         setTracks(results);
       } catch (e) {
-        console.debug("Erro ao carregar playlist Praise FM - Rede instável");
+        console.debug("Erro ao carregar playlist - Rede instável");
       } finally {
         setLoading(false);
       }
@@ -156,13 +156,14 @@ const Playlist: React.FC = () => {
     <div className="bg-[#f2f2f2] dark:bg-[#000] min-h-screen transition-colors duration-300">
       <audio ref={audioRef} onEnded={() => setActivePreview(null)} />
       
+      {/* MODAL DE ARQUIVO */}
       {showArchive && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="bg-white dark:bg-[#111] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
             <div className="p-6 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-[#ff6600] text-white">
               <div className="flex items-center space-x-3">
                 <Calendar className="w-5 h-5" />
-                <h2 className="text-xl font-black uppercase tracking-tighter">Archive Selection</h2>
+                <h2 className="text-xl font-black uppercase tracking-tighter">Seleções Anteriores</h2>
               </div>
               <button onClick={() => setShowArchive(false)} className="p-2 hover:bg-black/20 rounded-full transition-colors">
                 <X className="w-6 h-6" />
@@ -172,7 +173,7 @@ const Playlist: React.FC = () => {
               {ARCHIVE_DATA.map((item, idx) => (
                 <div key={idx} className="p-5 border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 hover:border-[#ff6600] transition-colors group cursor-default">
                   <span className="text-[10px] font-black text-[#ff6600] uppercase tracking-[0.2em] mb-2 block">{item.date}</span>
-                  <h3 className="text-lg font-black dark:text-white uppercase tracking-tight mb-3">The A-List Artists</h3>
+                  <h3 className="text-lg font-black dark:text-white uppercase tracking-tight mb-3">Destaques do Dia</h3>
                   <div className="flex flex-wrap gap-2">
                     {item.artists.map((artist, aIdx) => (
                       <span key={aIdx} className="bg-white dark:bg-black px-3 py-1 text-xs font-regular border border-gray-200 dark:border-white/10 dark:text-gray-300">
@@ -184,21 +185,22 @@ const Playlist: React.FC = () => {
               ))}
             </div>
             <div className="p-6 border-t border-gray-100 dark:border-white/10 text-center">
-              <p className="text-xs text-gray-400 uppercase font-regular tracking-widest">Showing last 4 daily editions</p>
+              <p className="text-xs text-gray-400 uppercase font-regular tracking-widest">Exibindo as últimas 4 edições diárias</p>
             </div>
           </div>
         </div>
       )}
 
+      {/* HEADER DA PLAYLIST */}
       <div className="bg-white dark:bg-[#111] border-b border-gray-200 dark:border-white/5 py-12 md:py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center space-x-2 text-[#ff6600] mb-4">
             <Music className="w-4 h-4" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.4em]">Official Praise FM USA Selection</span>
+            <span className="text-[10px] font-medium uppercase tracking-[0.4em]">Seleção Oficial Praise FM Brasil</span>
           </div>
           <h1 className="text-5xl md:text-8xl font-medium uppercase tracking-tighter mb-6 dark:text-white leading-none">Playlist</h1>
           <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl font-normal leading-tight uppercase">
-            Curated daily. The definitive sound of <span className="text-black dark:text-white font-medium">Praise FM USA</span>, featuring the world's most impactful worship hits.
+            Curadoria diária. O som definitivo da <span className="text-black dark:text-white font-medium">Praise FM Brasil</span>, com os maiores sucessos da adoração nacional.
           </p>
         </div>
       </div>
@@ -208,15 +210,16 @@ const Playlist: React.FC = () => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-40">
             <Loader2 className="w-12 h-12 text-[#ff6600] animate-spin mb-4" />
-            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gray-400">Refreshing Daily Playlist...</p>
+            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gray-400">Atualizando Playlist Diária...</p>
           </div>
         ) : (
           <>
+            {/* LISTA A */}
             {aList.length > 0 && (
               <section className="mb-24">
                 <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black dark:border-white pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white">A List</h2>
-                  <span className="text-[#ff6600] text-sm font-medium uppercase tracking-widest">Power Rotation</span>
+                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white">Lista A</h2>
+                  <span className="text-[#ff6600] text-sm font-medium uppercase tracking-widest">Alta Rotação</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                   {aList.map(track => (
@@ -231,11 +234,12 @@ const Playlist: React.FC = () => {
               </section>
             )}
 
+            {/* LISTA B */}
             {bList.length > 0 && (
               <section className="mb-24">
                 <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/20 dark:border-white/20 pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-60">B List</h2>
-                  <span className="text-gray-400 text-sm font-medium uppercase tracking-widest">On The Rise</span>
+                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-60">Lista B</h2>
+                  <span className="text-gray-400 text-sm font-medium uppercase tracking-widest">Em Ascensão</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                   {bList.map(track => (
@@ -250,11 +254,12 @@ const Playlist: React.FC = () => {
               </section>
             )}
 
+            {/* LISTA C */}
             {cList.length > 0 && (
               <section className="mb-24">
                 <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/10 dark:border-white/10 pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-40">C List</h2>
-                  <span className="text-gray-300 text-sm font-medium uppercase tracking-widest">New & Next</span>
+                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-40">Lista C</h2>
+                  <span className="text-gray-300 text-sm font-medium uppercase tracking-widest">Novidades</span>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                   {cList.map(track => (
@@ -271,6 +276,7 @@ const Playlist: React.FC = () => {
           </>
         )}
 
+        {/* INFO FOOTER */}
         <div className="bg-white dark:bg-[#111] p-12 mt-20 border border-gray-200 dark:border-white/5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             <div className="flex items-center space-x-8">
@@ -278,9 +284,9 @@ const Playlist: React.FC = () => {
                 <Info className="w-8 h-8" />
               </div>
               <div>
-                <h4 className="text-2xl font-medium uppercase tracking-tighter dark:text-white">Daily Rotation</h4>
+                <h4 className="text-2xl font-medium uppercase tracking-tighter dark:text-white">Rotação Diária</h4>
                 <p className="text-gray-500 dark:text-gray-400 text-sm max-w-lg mt-2 uppercase font-normal tracking-tight leading-relaxed">
-                  The <span className="text-[#ff6600] font-medium">Praise FM USA Playlist</span> is updated every 24 hours. We select the most impactful songs from around the world to inspire your faith journey daily.
+                  A <span className="text-[#ff6600] font-medium">Playlist Praise FM Brasil</span> é atualizada a cada 24 horas. Selecionamos as músicas mais impactantes do Brasil para inspirar sua jornada de fé diariamente.
                 </p>
               </div>
             </div>
@@ -288,7 +294,7 @@ const Playlist: React.FC = () => {
               onClick={() => setShowArchive(true)}
               className="bg-black dark:bg-white text-white dark:text-black px-10 py-5 text-[10px] font-medium uppercase tracking-[0.3em] flex items-center space-x-3 hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all shadow-lg active:scale-95"
             >
-              <span>View Past Daily Lists</span>
+              <span>Ver Listas Anteriores</span>
               <ExternalLink className="w-4 h-4" />
             </button>
           </div>
