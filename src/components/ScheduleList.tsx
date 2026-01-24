@@ -1,229 +1,134 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Play, ArrowLeft, MapPin, Calendar as CalendarIcon } from 'lucide-react';
-import { SCHEDULES } from '../constants';
-import { Program } from '../types';
+import React, { useState } from 'react';
+import { Calendar, Clock } from 'lucide-react';
 
-interface ScheduleListProps {
-  onNavigateToProgram: (program: Program) => void;
-  onBack?: () => void;
-}
-
-// AJUSTE PARA FUSO HORÁRIO DE BRASÍLIA
-const getBrasiliaDate = (baseDate: Date = new Date()) => {
-  return new Date(baseDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+const SCHEDULE = {
+  weekday: {
+    day: 'Segunda a Sábado',
+    programs: [
+      { time: '00:00 - 06:00', title: 'Madrugada com Cristo', host: 'Samuel Andrade', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp' },
+      { time: '06:00 - 07:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp' },
+      { time: '07:00 - 12:00', title: 'Manhã com Cristo', host: 'Lucas Martins', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp' },
+      { time: '12:00 - 13:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp' },
+      { time: '13:00 - 16:00', title: 'Tarde Gospel', host: 'Rafael Costa', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp' },
+      { time: '16:00 - 17:00', title: 'Praise FM Non Stop', host: 'Praise FM', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp' },
+      { time: '17:00 - 18:00', title: 'Praise FM Nova Geração', host: 'Ana Paula', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp' },
+      { time: '18:00 - 20:00', title: 'De Carona com a Praise FM', host: 'Bruno Almeida', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp' },
+      { time: '20:00 - 21:00', title: 'Praise FM Live Show', host: 'Praise FM Team (Quarta)', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_Fm_Live_Show_blfy7o.webp' },
+      { time: '21:00 - 22:00', title: 'Praise FM Brasil Clássicos', host: 'Rodrigo Veras', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp' },
+      { time: '22:00 - 00:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp' },
+    ]
+  },
+  sunday: {
+    day: 'Domingo',
+    programs: [
+      { time: '00:00 - 06:00', title: 'Madrugada com Cristo', host: 'Samuel Andrade', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp' },
+      { time: '06:00 - 07:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp' },
+      { time: '07:00 - 12:00', title: 'Domingo com Cristo', host: 'Felipe Santos', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp' },
+      { time: '12:00 - 13:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp' },
+      { time: '13:00 - 16:00', title: 'Tarde Gospel', host: 'Rafael Costa', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp' },
+      { time: '16:00 - 17:00', title: 'Praise FM Non Stop', host: 'Praise FM', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp' },
+      { time: '17:00 - 18:00', title: 'Praise FM Nova Geração', host: 'Ana Paula', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp' },
+      { time: '18:00 - 20:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp' },
+      { time: '20:00 - 21:00', title: 'Praise FM Pop', host: 'Thiago Moreira', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp' },
+      { time: '21:00 - 22:00', title: 'Praise FM Brasil Clássicos', host: 'Rodrigo Veras', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp' },
+      { time: '22:00 - 23:00', title: 'Pregação da Palavra', host: 'Ministério', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp' },
+      { time: '23:00 - 00:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp' },
+    ]
+  }
 };
 
-// Formatação Brasileira de Horas (24h)
-const formatTimeBR = (time24: string) => {
-  return `${time24}h`;
-};
-
-const ProgramProgressRing: React.FC<{ program: Program; isActive: boolean; nowMinutes: number }> = ({ program, isActive, nowMinutes }) => {
-  const progress = useMemo(() => {
-    if (!isActive) return 0;
-    const [sH, sM] = program.startTime.split(':').map(Number);
-    const [eH, eM] = program.endTime.split(':').map(Number);
-    const start = sH * 60 + sM;
-    let end = eH * 60 + eM;
-    if (end === 0 || end <= start) end = 24 * 60;
-    const elapsed = nowMinutes - start;
-    const duration = end - start;
-    return Math.min(Math.max(elapsed / duration, 0), 1);
-  }, [program, isActive, nowMinutes]);
-
-  const size = 120;
-  const strokeWidth = 3;
+export function Schedule() {
+  const [activeTab, setActiveTab] = useState<'weekday' | 'sunday'>('weekday');
+  const currentSchedule = SCHEDULE[activeTab];
 
   return (
-    <div className="relative flex-shrink-0 flex items-center justify-center bg-[#f2f2f2] dark:bg-[#1a1a1a] p-3 group-hover:scale-105 transition-transform duration-500">
-      <div className="relative rounded-full overflow-hidden" style={{ width: size - 24, height: size - 24 }}>
-        <img 
-          src={program.image} 
-          alt="" 
-          className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
-        />
-        <svg 
-          width={size - 24} 
-          height={size - 24} 
-          className="absolute inset-0 -rotate-90 pointer-events-none"
-        >
-          <circle 
-            cx={(size - 24) / 2} cy={(size - 24) / 2} r={(size - 24) / 2 - strokeWidth / 2} 
-            stroke="#dbdbdb" strokeWidth={strokeWidth} 
-            fill="transparent" 
-            className="dark:stroke-white/10"
-          />
-          {isActive && (
-            <circle 
-              cx={(size - 24) / 2} cy={(size - 24) / 2} r={(size - 24) / 2 - strokeWidth / 2} 
-              stroke="#ff6600" strokeWidth={strokeWidth} 
-              fill="transparent" 
-              strokeDasharray={2 * Math.PI * ((size - 24) / 2 - strokeWidth / 2)}
-              strokeDashoffset={2 * Math.PI * ((size - 24) / 2 - strokeWidth / 2) - progress * 2 * Math.PI * ((size - 24) / 2 - strokeWidth / 2)}
-              strokeLinecap="butt"
-              className="transition-all duration-1000"
-            />
-          )}
-        </svg>
-      </div>
-    </div>
-  );
-};
-
-const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) => {
-  const [now, setNow] = useState(getBrasiliaDate());
-  const listContainerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    const timer = setInterval(() => setNow(getBrasiliaDate()), 30000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const currentSchedule = useMemo(() => {
-    const dayIndex = now.getDay();
-    return SCHEDULES[dayIndex] || SCHEDULES[1];
-  }, [now]);
-
-  const sections = useMemo(() => {
-    const groups: Record<string, Program[]> = {
-      'MADRUGADA': [], 'MANHÃ': [], 'TARDE': [], 'NOITE': []
-    };
-    currentSchedule.forEach(prog => {
-      const h = parseInt(prog.startTime.split(':')[0]);
-      if (h >= 0 && h < 6) groups['MADRUGADA'].push(prog);
-      else if (h >= 6 && h < 12) groups['MANHÃ'].push(prog);
-      else if (h >= 12 && h < 18) groups['TARDE'].push(prog);
-      else groups['NOITE'].push(prog);
-    });
-    return groups;
-  }, [currentSchedule]);
-
-  const isLiveNow = (startStr: string, endStr: string) => {
-    const [sH, sM] = startStr.split(':').map(Number);
-    const [eH, eM] = endStr.split(':').map(Number);
-    const start = sH * 60 + sM;
-    let end = eH * 60 + eM;
-    if (end === 0 || end <= start) end = 24 * 60;
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-    return nowMinutes >= start && nowMinutes < end;
-  };
-
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
-  useEffect(() => {
-    const scrollInterval = setTimeout(() => {
-      const liveElement = document.querySelector('[data-live="true"]');
-      if (liveElement) {
-        liveElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 300);
-    return () => clearTimeout(scrollInterval);
-  }, []);
-
-  return (
-    <section ref={listContainerRef} className="bg-white dark:bg-[#121212] min-h-screen font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        {onBack && (
-          <button onClick={onBack} className="flex items-center text-gray-400 hover:text-[#ff6600] transition-colors mb-6 text-xs font-normal uppercase tracking-widest">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Voltar ao Início
-          </button>
-        )}
+    <section className="min-h-screen bg-black pt-24 pb-32 px-4">
+      <div className="max-w-6xl mx-auto">
         
-        <div className="flex flex-col md:flex-row md:items-baseline md:space-x-4 mb-12 border-b-4 border-black dark:border-white pb-6">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none">Programação</h1>
-          <p className="text-gray-400 font-normal uppercase tracking-wide text-sm mt-4 md:mt-0">
-            Hoje • {now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Calendar className="text-praise-accent" size={32} />
+            <h1 className="text-4xl md:text-5xl font-bold text-white">
+              Programação
+            </h1>
+          </div>
+          <p className="text-gray-400 text-lg">
+            Confira nossa grade completa de programas
           </p>
         </div>
 
-        <div className="sticky top-16 z-[40] bg-white/95 dark:bg-[#121212]/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5 py-4 mb-16 -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex items-center space-x-6 text-[11px] font-semibold uppercase tracking-wide overflow-x-auto no-scrollbar">
-            <span className="text-gray-400 flex-shrink-0">IR PARA:</span>
-            <div className="flex items-center space-x-6 whitespace-nowrap">
-              {(Object.keys(sections) as string[]).map((title) => (
-                items[title as keyof typeof sections]?.length > 0 && (
-                <React.Fragment key={title}>
-                   <a 
-                    href={`#${title}`} 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      document.getElementById(title)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="text-[#ff6600] hover:text-black dark:hover:text-white transition-colors"
-                  >
-                    {title}
-                  </a>
-                  {title !== 'NOITE' && <span className="text-gray-200 dark:text-gray-800">|</span>}
-                </React.Fragment>
-                )
-              ))}
-            </div>
-          </div>
+        {/* Tabs */}
+        <div className="flex justify-center gap-4 mb-12">
+          <button
+            onClick={() => setActiveTab('weekday')}
+            className={`px-8 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'weekday'
+                ? 'bg-praise-accent text-white'
+                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            Segunda a Sábado
+          </button>
+          <button
+            onClick={() => setActiveTab('sunday')}
+            className={`px-8 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === 'sunday'
+                ? 'bg-praise-accent text-white'
+                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            Domingo
+          </button>
         </div>
 
-        {(Object.entries(sections) as [string, Program[]][]).map(([title, items]) => (
-          items.length > 0 && (
-            <div key={title} id={title} className="mb-20 scroll-mt-32">
-              <h3 className="text-xl font-semibold dark:text-white mb-8 uppercase tracking-tight border-l-4 border-[#ff6600] pl-4">
-                {title}
-              </h3>
-              
-              <div className="space-y-8">
-                {items.map((prog) => {
-                  const active = isLiveNow(prog.startTime, prog.endTime);
-                  return (
-                    <div 
-                      key={prog.id}
-                      data-live={active}
-                      onClick={() => onNavigateToProgram(prog)}
-                      className={`relative flex flex-col md:flex-row items-start p-6 transition-all cursor-pointer group rounded-sm ${active ? 'bg-gray-50 dark:bg-white/5 border-l-8 border-[#ff6600] shadow-lg' : 'border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5'}`}
-                    >
-                      <div className="w-32 flex-shrink-0 flex flex-col mb-6 md:mb-0 pt-1">
-                        <span className={`text-2xl font-bold tracking-tight ${active ? 'text-[#ff6600]' : 'text-gray-300 dark:text-gray-700 group-hover:text-black dark:group-hover:text-white'}`}>
-                          {formatTimeBR(prog.startTime)}
-                        </span>
-                        {active && (
-                          <div className="mt-3 inline-flex items-center justify-center bg-[#ff6600] text-white text-[10px] font-bold px-3 py-1 uppercase tracking-wider w-24">
-                            NO AR
-                          </div>
-                        )}
-                      </div>
+        {/* Schedule Grid */}
+        <div className="grid gap-4">
+          {currentSchedule.programs.map((program, index) => (
+            <div
+              key={index}
+              className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-4 md:p-6 transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-4 md:gap-6">
+                
+                {/* Imagem */}
+                <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden flex-shrink-0 border-2 border-white/20 group-hover:border-praise-accent transition-colors">
+                  <img
+                    src={program.image}
+                    alt={program.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
 
-                      <div className="md:mx-8">
-                        <ProgramProgressRing 
-                          program={prog} 
-                          isActive={active} 
-                          nowMinutes={nowMinutes} 
-                        />
-                      </div>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="text-praise-accent flex-shrink-0" size={16} />
+                    <span className="text-gray-400 text-sm font-medium">
+                      {program.time}
+                    </span>
+                  </div>
+                  <h3 className="text-white font-bold text-lg md:text-xl mb-1 group-hover:text-praise-accent transition-colors">
+                    {program.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    com {program.host}
+                  </p>
+                </div>
 
-                      <div className="flex-grow min-w-0 pt-1">
-                        <h4 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-[#ff6600] leading-tight tracking-tight mb-2 transition-all duration-300">
-                          {prog.title}
-                        </h4>
-                        <p className="text-gray-500 dark:text-gray-400 font-normal text-base mb-4 tracking-tight">
-                          com {prog.host}
-                        </p>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 leading-relaxed font-normal max-w-2xl">
-                          {prog.description}
-                        </p>
-                        {active && (
-                          <div className="mt-6 flex items-center space-x-3">
-                             <div className="h-1 w-10 bg-[#ff6600] animate-pulse"></div>
-                             <span className="text-[10px] font-semibold text-[#ff6600] uppercase tracking-wider">Ouvindo agora ao vivo</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {/* Arrow */}
+                <div className="hidden md:block">
+                  <svg className="w-6 h-6 text-gray-600 group-hover:text-praise-accent group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+
               </div>
             </div>
-          )
-        ))}
+          ))}
+        </div>
+
       </div>
     </section>
   );
-};
-
-export default ScheduleList;
+}
