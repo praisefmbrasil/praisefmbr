@@ -70,7 +70,7 @@ export default function Hero({ onNavigateToProgram }: HeroProps) {
 
           {/* ANEL E LINK DA PROGRAMAÇÃO LADO A LADO */}
           <div className="flex items-center gap-6 mt-12 p-4 bg-gray-50/50 dark:bg-white/5 rounded-2xl w-fit">
-            <ProgramRing program={currentProgram} progress={progress} size={80} />
+            <ProgramRing title={currentProgram.title} image={currentProgram.image} progress={progress} />
             
             <div className="flex flex-col">
               <span className="text-[10px] uppercase tracking-widest text-praise-accent font-semibold mb-1">Cronograma</span>
