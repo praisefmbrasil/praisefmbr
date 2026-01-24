@@ -2,11 +2,22 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
 
+// ✅ Tipagem forte para favoritos
+export interface FavoriteItem {
+  id: string;
+  user_id: string;
+  item_id: string;
+  item_type: string;
+  title: string;
+  subtitle: string;
+  image: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  favorites: any[];
+  favorites: FavoriteItem[];
   toggleFavorite: (item: any) => Promise<void>;
   isFavorite: (id: string) => boolean;
   signOut: () => Promise<void>;
@@ -19,10 +30,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [favorites, setFavorites] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
   useEffect(() => {
-    // 1. Pega a sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -30,20 +40,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // 2. Escuta mudanças na autenticação (Login/Logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
+      setUser(session?.user ?? null);
       
-      if (currentUser) {
-        fetchFavorites(currentUser.id);
+      if (session?.user) {
+        fetchFavorites(session.user.id);
       } else {
         setFavorites([]);
       }
       
       if (event === 'SIGNED_OUT') {
-        window.location.hash = '#/login'; // Redireciona ao deslogar
+        setUser(null);
+        setSession(null);
+        setFavorites([]);
       }
       setLoading(false);
     });
@@ -56,18 +66,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase
         .from('favorites')
         .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false }); // Favoritos mais recentes primeiro
+        .eq('user_id', userId);
       
       if (error) {
         if (error.code === 'PGRST103') {
-          console.warn("Supabase: Tabela 'favorites' não encontrada.");
+          console.warn("Supabase: 'favorites' table not found. Please run the migration SQL.");
+        } else {
+          console.error("Error fetching favorites:", error.message);
         }
         return;
       }
       setFavorites(data || []);
     } catch (e: any) {
-      console.error("Erro inesperado ao buscar favoritos:", e.message);
+      console.error("Unexpected error fetching favorites:", e.message || String(e));
     }
   };
 
@@ -76,33 +87,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleFavorite = async (item: any) => {
-    if (!user) {
-      alert("Por favor, faça login para favoritar.");
-      return;
-    }
+    if (!user) return;
 
     const itemIdString = String(item.id || item.item_id);
     const existing = favorites.find(f => String(f.item_id) === itemIdString);
     
     try {
       if (existing) {
-        // Remover dos favoritos
         const { error } = await supabase
           .from('favorites')
           .delete()
           .eq('id', existing.id);
           
-        if (!error) {
+        if (error) {
+          if (error.code === 'PGRST103') alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
+          console.error("Error removing favorite:", error.message);
+        } else {
           setFavorites(prev => prev.filter(f => f.id !== existing.id));
         }
       } else {
-        // Adicionar aos favoritos
         const newItem = {
           user_id: user.id,
           item_id: itemIdString,
           item_type: item.type || 'track',
           title: item.title,
-          subtitle: item.host || item.author || item.subtitle || 'Praise FM',
+          subtitle: item.host || item.author || item.subtitle || '',
           image: item.image,
         };
         
@@ -112,25 +121,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .select();
           
         if (error) {
-          if (error.code === 'PGRST103') alert("Configuração Necessária: A tabela 'favorites' precisa ser criada no Supabase.");
+          if (error.code === 'PGRST103') alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
+          console.error("Error adding favorite:", error.message);
         } else if (data && data.length > 0) {
-          setFavorites(prev => [data[0], ...prev]); // Adiciona no topo da lista
+          setFavorites(prev => [...prev, data[0]]);
         }
       }
     } catch (err: any) {
-      console.error("Falha ao alternar favorito:", err.message);
+      console.error("Toggle favorite failed:", err.message);
     }
   };
 
   const isFavorite = (id: string) => {
-    return favorites.some(f => String(f.item_id) === String(id));
+    const searchId = String(id);
+    return favorites.some(f => String(f.item_id) === searchId);
   };
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
     } catch (e: any) {
-      console.error("Erro ao sair:", e.message);
+      console.error("Sign out error:", e.message);
     } finally {
       setUser(null);
       setSession(null);
@@ -158,7 +169,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
