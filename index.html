@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="Praise FM" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
 
-    <!-- Tailwind via CDN (temporário) -->
+    <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -24,7 +24,7 @@
               sans: ["Inter", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
             },
             colors: {
-              'praise-acent': '#ff6600',
+              'praise-accent': '#ff6600',
             }
           },
         },
@@ -41,10 +41,8 @@
 
   <body>
     <div id="root"></div>
-
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
