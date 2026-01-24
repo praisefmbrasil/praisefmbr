@@ -17,3 +17,4 @@
 # PWA - Arquivos gerados pelo plugin
 public/sw.js
 public/workbox-*.js
+node_modules
