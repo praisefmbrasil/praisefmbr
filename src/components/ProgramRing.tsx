@@ -18,7 +18,9 @@ export function ProgramRing({
   return (
     <div className="flex flex-col items-center min-w-[120px]">
       <div className="relative w-28 h-28">
-        <svg className="absolute inset-0 rotate-[-90deg]">
+        {/* SVG do Anel de Progresso */}
+        <svg className="absolute inset-0 rotate-[-90deg] w-full h-full">
+          {/* Fundo do anel (trilho) */}
           <circle
             cx="56"
             cy="56"
@@ -27,6 +29,7 @@ export function ProgramRing({
             strokeWidth="6"
             fill="none"
           />
+          {/* Progresso do anel (Praise Orange) */}
           <circle
             cx="56"
             cy="56"
@@ -37,23 +40,29 @@ export function ProgramRing({
             strokeDasharray={circumference}
             strokeDashoffset={offset}
             strokeLinecap="round"
+            className="transition-all duration-1000 ease-in-out"
           />
         </svg>
 
-        <img
-          src={image}
-          alt={title}
-          className="absolute inset-2 rounded-full object-cover"
-        />
+        {/* Foto do Locutor/Programa */}
+        <div className="absolute inset-2 overflow-hidden rounded-full">
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover"
+          />
+        </div>
 
+        {/* Badge de Status Ao Vivo */}
         {isLive && (
-          <span className="absolute bottom-1 right-1 bg-black text-white text-xs px-2 py-0.5 rounded">
-            LIVE
-          </span>
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#ff6600] text-black text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border-2 border-black animate-pulse whitespace-nowrap">
+            AO VIVO
+          </div>
         )}
       </div>
 
-      <span className="mt-2 text-sm text-center text-white">
+      {/* Nome do Programa */}
+      <span className="mt-3 text-[10px] font-bold text-center text-white uppercase tracking-widest leading-tight px-1">
         {title}
       </span>
     </div>
