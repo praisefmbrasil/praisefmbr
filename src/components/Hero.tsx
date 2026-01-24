@@ -1,163 +1,272 @@
-import React, { useEffect, useState } from 'react';
-import { Play, Pause, Loader2 } from 'lucide-react';
-import { usePlayer } from '../contexts/LivePlayerContext';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Play, Pause, ChevronRight, Zap, ArrowRight } from 'lucide-react';
+import { SCHEDULES } from '../constants';
+import { Program } from '../types';
+import { useNavigate } from 'react-router-dom';
 
-// Programação completa baseada no documento
-const SCHEDULE = {
-  weekday: [
-    { id: 1, title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp', description: 'Louvores que acalmam a alma na sua madrugada.' },
-    { id: 2, title: 'Praise FM Worship Brasil', host: 'Praise FM Team', startTime: '06:00', endTime: '07:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Músicas de adoração para começar o dia.' },
-    { id: 3, title: 'Manhã com Cristo', host: 'Lucas Martins', startTime: '07:00', endTime: '12:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp', description: 'Começando o dia com muita energia e louvor.' },
-    { id: 4, title: 'Praise FM Worship Brasil', host: 'Praise FM Team', startTime: '12:00', endTime: '13:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Momento de adoração ao meio-dia.' },
-    { id: 5, title: 'Tarde Gospel', host: 'Rafael Costa', startTime: '13:00', endTime: '16:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp', description: 'As melhores músicas gospel da tarde.' },
-    { id: 6, title: 'Praise FM Non Stop', host: 'Praise FM', startTime: '16:00', endTime: '17:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp', description: 'Músicas sem parar!' },
-    { id: 7, title: 'Praise FM Nova Geração', host: 'Ana Paula', startTime: '17:00', endTime: '18:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp', description: 'Para a nova geração de adoradores.' },
-    { id: 8, title: 'De Carona com a Praise FM', host: 'Bruno Almeida', startTime: '18:00', endTime: '20:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp', description: 'Acompanhe seu trajeto com muita música.' },
-    { id: 9, title: 'Praise FM Live Show', host: 'Praise FM Team', startTime: '20:00', endTime: '21:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_Fm_Live_Show_blfy7o.webp', description: 'Show ao vivo toda quarta-feira!' },
-    { id: 10, title: 'Praise FM Brasil Clássicos', host: 'Rodrigo Veras', startTime: '21:00', endTime: '22:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp', description: 'Os clássicos do gospel brasileiro.' },
-    { id: 11, title: 'Praise FM Worship Brasil', host: 'Praise FM Team', startTime: '22:00', endTime: '00:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Encerrando o dia em adoração.' },
-  ],
-  sunday: [
-    { id: 1, title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp', description: 'Louvores que acalmam a alma na sua madrugada.' },
-    { id: 2, title: 'Praise FM Worship Brasil', host: 'Praise FM Team', startTime: '06:00', endTime: '07:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Músicas de adoração para começar o dia.' },
-    { id: 3, title: 'Domingo com Cristo', host: 'Felipe Santos', startTime: '07:00', endTime: '12:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp', description: 'Domingo especial com muito louvor.' },
-    { id: 4, title: 'Praise FM Worship Brasil', host: 'Praise FM Team', startTime: '12:00', endTime: '13:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Momento de adoração ao meio-dia.' },
-    { id: 5, title: 'Tarde Gospel', host: 'Rafael Costa', startTime: '13:00', endTime: '16:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp', description: 'As melhores músicas gospel da tarde.' },
-    { id: 6, title: 'Praise FM Non Stop', host: 'Praise FM', startTime: '16:00', endTime: '17:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp', description: 'Músicas sem parar!' },
-    { id: 7, title: 'Praise FM Nova Geração', host: 'Ana Paula', startTime: '17:00', endTime: '18:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp', description: 'Para a nova geração de adoradores.' },
-    { id: 8, title: 'Praise FM Worship Brasil', host: 'Praise FM Team', startTime: '18:00', endTime: '20:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Adoração dominical.' },
-    { id: 9, title: 'Praise FM Pop', host: 'Thiago Moreira', startTime: '20:00', endTime: '21:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp', description: 'O melhor do pop gospel.' },
-    { id: 10, title: 'Praise FM Brasil Clássicos', host: 'Rodrigo Veras', startTime: '21:00', endTime: '22:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp', description: 'Os clássicos do gospel brasileiro.' },
-    { id: 11, title: 'Pregação da Palavra', host: 'Ministério', startTime: '22:00', endTime: '23:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp', description: 'Palavra de Deus para edificação.' },
-    { id: 12, title: 'Praise FM Worship Brasil', host: 'Praise FM Team', startTime: '23:00', endTime: '00:00', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Encerrando o domingo em adoração.' },
-  ]
+// 🔴 ALTERADO: agora usa fuso de São Paulo
+const getSaoPauloInfo = () => {
+  const now = new Date();
+  const saoPauloString = now.toLocaleString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+  });
+  const saoPauloDate = new Date(saoPauloString);
+  const h = saoPauloDate.getHours();
+  const m = saoPauloDate.getMinutes();
+  const day = saoPauloDate.getDay(); // 0 = domingo, 1 = segunda, ..., 6 = sábado
+  return { day, totalMinutes: h * 60 + m };
 };
 
-export function HeroUSAStyle() {
-  const { togglePlay, isPlaying, isBuffering } = usePlayer();
-  const [currentProgram, setCurrentProgram] = useState(SCHEDULE.weekday[0]);
+// 🔴 REMOVIDO: formato 12h não é usado no Brasil
+// Mantemos apenas 24h ou texto natural
+
+interface HeroProps {
+  onListenClick: () => void;
+  isPlaying: boolean;
+  liveMetadata?: { artist: string; title: string; artwork?: string } | null;
+  onNavigateToProgram: (program: Program) => void;
+}
+
+const Hero: React.FC<HeroProps> = ({
+  onListenClick,
+  isPlaying,
+  liveMetadata,
+  onNavigateToProgram,
+}) => {
+  const [tick, setTick] = useState(0);
+  const [showDetails, setShowDetails] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const updateCurrentProgram = () => {
-      const now = new Date();
-      const day = now.getDay();
-      const time = now.getHours() * 60 + now.getMinutes();
-      
-      const todaySchedule = day === 0 ? SCHEDULE.sunday : SCHEDULE.weekday;
-      
-      const current = todaySchedule.find(p => {
-        const [startH, startM] = p.startTime.split(':').map(Number);
-        const [endH, endM] = p.endTime.split(':').map(Number);
-        const start = startH * 60 + startM;
-        const end = (endH === 0 ? 24 : endH) * 60 + endM;
-        return time >= start && time < end;
-      });
-      
-      if (current) setCurrentProgram(current);
-    };
-    
-    updateCurrentProgram();
-    const interval = setInterval(updateCurrentProgram, 60000);
+    const interval = setInterval(() => setTick((t) => t + 1), 30000);
     return () => clearInterval(interval);
   }, []);
 
+  // 🔴 USANDO SÃO PAULO
+  const saoPaulo = useMemo(() => getSaoPauloInfo(), [tick]);
+
+  const { currentProgram, upNextPrograms } = useMemo(() => {
+    // Ajuste: no Brasil, DOMINGO = 0, SEGUNDA = 1, ..., SÁBADO = 6
+    // Se sua grade usa SEGUNDA = 0, ajuste aqui:
+    const dayIndex = saoPaulo.day; // 0 (dom) a 6 (sáb)
+    const schedule = SCHEDULES[dayIndex] || SCHEDULES[0]; // fallback para domingo
+    
+    const currentIndex = schedule.findIndex((p) => {
+      const [sH, sM] = p.startTime.split(':').map(Number);
+      const [eH, eM] = p.endTime.split(':').map(Number);
+      let start = sH * 60 + sM;
+      let end = eH * 60 + eM;
+      if (end <= start) end += 24 * 60; // programa cruza meia-noite
+      
+      let nowMinutes = saoPaulo.totalMinutes;
+      if (start > end && nowMinutes < start) nowMinutes += 24 * 60;
+      
+      return nowMinutes >= start && nowMinutes < end;
+    });
+
+    const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
+    const next = schedule.slice(currentIndex + 1, currentIndex + 3);
+    
+    return { currentProgram: current, upNextPrograms: next };
+  }, [saoPaulo]);
+
+  const progress = useMemo(() => {
+    if (!currentProgram) return 0;
+    const [sH, sM] = currentProgram.startTime.split(':').map(Number);
+    const [eH, eM] = currentProgram.endTime.split(':').map(Number);
+    let start = sH * 60 + sM;
+    let end = eH * 60 + eM;
+    if (end <= start) end += 24 * 60;
+    
+    let nowMinutes = saoPaulo.totalMinutes;
+    if (start > end && nowMinutes < start) nowMinutes += 24 * 60;
+    
+    const elapsed = nowMinutes - start;
+    const duration = end - start;
+    return Math.min(Math.max(elapsed / duration, 0), 1);
+  }, [currentProgram, saoPaulo.totalMinutes]);
+
+  if (!currentProgram) return null;
+
+  const circleSize = 192;    
+  const strokeWidth = 4;
+  const center = circleSize / 2;
+  const radius = center - strokeWidth / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - progress * circumference;
+
+  // Função para formatar horário BR (ex: "07:00")
+  const formatTimeBR = (time24: string) => {
+    return time24; // já está no formato 24h
+  };
+
   return (
-    <section className="min-h-screen bg-black pt-24 pb-32 px-4">
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Horário do Programa */}
-        <div className="text-center mb-8">
-          <p className="text-gray-400 text-sm tracking-widest">
-            {currentProgram.startTime} - {currentProgram.endTime}
-          </p>
-        </div>
-
-        {/* Imagem Circular do Programa */}
-        <div className="flex justify-center mb-10">
-          <div className="relative">
-            <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-white/10 shadow-2xl">
-              <img
-                src={currentProgram.image}
-                alt={currentProgram.title}
-                className="w-full h-full object-cover"
+    <section className="bg-white dark:bg-[#000000] py-10 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
+          
+          {/* LEFT SIDE: CIRCULAR IMAGE */}
+          <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => onNavigateToProgram(currentProgram)}>
+            <div className="relative rounded-full overflow-hidden" style={{ width: circleSize, height: circleSize }}>
+              <img 
+                src={currentProgram.image} 
+                alt={currentProgram.title} 
+                className="w-full h-full object-cover" 
               />
-            </div>
-            
-            {/* Badge "AO VIVO" */}
-            {isPlaying && (
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-praise-accent text-white px-4 py-1 rounded-full text-xs font-bold tracking-wider flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                AO VIVO
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Título do Programa */}
-        <div className="text-center mb-6">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 leading-tight">
-            {currentProgram.title}
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl">
-            {currentProgram.description}
-          </p>
-        </div>
-
-        {/* Botão Play/Pause Grande */}
-        <div className="flex justify-center mb-16">
-          <button
-            onClick={togglePlay}
-            disabled={isBuffering}
-            className="bg-praise-accent hover:bg-[#e65c00] text-white px-12 py-4 rounded-lg text-lg font-bold tracking-wider transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3 disabled:opacity-70 shadow-2xl"
-          >
-            {isBuffering ? (
-              <>
-                <Loader2 className="w-6 h-6 animate-spin" />
-                Carregando...
-              </>
-            ) : isPlaying ? (
-              <>
-                <Pause size={24} fill="currentColor" />
-                Pause
-              </>
-            ) : (
-              <>
-                <Play size={24} fill="currentColor" />
-                Play
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Banner "NEW MUSIC ALERT" */}
-        <div className="bg-gradient-to-r from-praise-accent/20 to-transparent border border-praise-accent/30 rounded-2xl p-6 md:p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-praise-accent rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-white font-bold text-lg md:text-xl mb-1">
-                  NOVOS LANÇAMENTOS
-                </h3>
-                <p className="text-gray-400 text-sm">
-                  Músicas de adoração disponíveis agora
-                </p>
-              </div>
-            </div>
-            
-            <button className="hidden md:flex items-center gap-2 text-white hover:text-praise-accent transition-colors text-sm font-semibold tracking-wider">
-              EXPLORAR TUDO
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg 
+                width={circleSize} height={circleSize} 
+                className="absolute inset-0 -rotate-90 pointer-events-none"
+              >
+                <circle cx={center} cy={center} r={radius} stroke="#dbdbdb" strokeWidth={strokeWidth} fill="transparent" className="dark:stroke-white/10" />
+                <circle cx={center} cy={center} r={radius} stroke="#ff6600" strokeWidth={strokeWidth} fill="transparent" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="butt" />
               </svg>
+            </div>
+            <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white dark:border-black shadow-lg">
+              <span className="text-white text-2xl font-bold">1</span>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE: TEXT AND PLAY BUTTON */}
+          <div className="flex-grow pt-4 text-center md:text-left">
+            <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
+              <span>{formatTimeBR(currentProgram.startTime)} - {formatTimeBR(currentProgram.endTime)}</span>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
+              {currentProgram.title} com {currentProgram.host}
+              <ChevronRight className="w-6 h-6 ml-1 text-[#ff6600]" />
+            </h2>
+            
+            <p className="text-lg text-gray-600 dark:text-gray-400 font-normal mb-6">
+              {currentProgram.description}
+            </p>
+
+            <button 
+              onClick={onListenClick}
+              className="bg-[#ff6600] text-white px-10 py-3.5 flex items-center justify-center space-x-3 hover:bg-[#e65c00] transition-all active:scale-95 mx-auto md:mx-0 rounded-sm shadow-md"
+            >
+              {isPlaying ? <Pause className="fill-current w-5 h-5" /> : <Play className="fill-current w-5 h-5" />}
+              <span className="text-lg font-bold tracking-tight">
+                {isPlaying ? 'Pausar' : 'Ouvir Agora'}
+              </span>
             </button>
           </div>
         </div>
 
+        {showDetails && (
+          <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+            {/* UP NEXT SECTION */}
+            <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {upNextPrograms.map((prog) => (
+                  <div 
+                    key={prog.id} 
+                    className="flex items-start space-x-5 group cursor-pointer"
+                    onClick={() => onNavigateToProgram(prog)}
+                  >
+                    <div className="w-24 h-24 flex-shrink-0 bg-gray-100 overflow-hidden">
+                      <img 
+                        src={prog.image} 
+                        alt={prog.title} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="text-[11px] font-normal mb-1">
+                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">PRÓXIMOS</span>
+                        <span className="text-gray-400 font-normal">{formatTimeBR(prog.startTime)} - {formatTimeBR(prog.endTime)}</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-[#ff6600] transition-colors">
+                        {prog.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-snug">
+                        {prog.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* NEW MUSIC ALERT SECTION */}
+            <div className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50" onClick={() => navigate('/new-releases')}>
+              <div className="flex items-center space-x-6 mb-6 md:mb-0">
+                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center relative">
+                  <Zap className="w-6 h-6 text-[#ff6600] fill-current animate-pulse" />
+                  <div className="absolute inset-0 rounded-full border-2 border-[#ff6600] scale-110 animate-ping opacity-20"></div>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Novos Lançamentos</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">Os melhores louvores chegando agora</p>
+                </div>
+              </div>
+              <button 
+                className="flex items-center space-x-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-black dark:text-white group-hover:text-[#ff6600] transition-colors"
+              >
+                <span>Explorar</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* SECTION FOOTER */}
+        <div className="mt-12 pt-6">
+           {showDetails && (
+             <>
+               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">
+                 {currentProgram.description.split('.')[0]}.
+               </p>
+               <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-medium tracking-widest mb-4">
+                 Produzido por PRAISE FM BRASIL.
+               </p>
+             </>
+           )}
+           <div className="flex flex-col space-y-3">
+             {showDetails && (
+               <button 
+                 onClick={() => onNavigateToProgram(currentProgram)}
+                 className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit group"
+               >
+                 Site do Programa <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
+               </button>
+             )}
+             <button 
+               onClick={() => setShowDetails(!showDetails)}
+               className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
+             >
+               {showDetails ? (
+                 <>Mostrar menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
+               ) : (
+                 <>Mostrar mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
+               )}
+             </button>
+           </div>
+        </div>
       </div>
     </section>
   );
-}
+};
+
+// Ícones personalizados (mantidos)
+const ExternalLinkIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+    <polyline points="15 3 21 3 21 9"></polyline>
+    <line x1="10" y1="14" x2="21" y2="3"></line>
+  </svg>
+);
+
+const ChevronUpIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+);
+
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+);
+
+export default Hero;
