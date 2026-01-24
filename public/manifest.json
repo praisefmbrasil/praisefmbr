@@ -1,14 +1,13 @@
 {
   "name": "Praise FM Brasil",
-  "short_name": "Praise FM BR",
-  "description": "Rádio Gospel Ao Vivo - Praise FM Brasil",
+  "short_name": "Praise FM",
+  "description": "Praise FM Brasil – Rádio Cristã 24h",
   "start_url": "/#/app",
   "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#ff6600",
   "orientation": "portrait",
-  "lang": "pt-BR",
   "icons": [
     {
       "src": "/icon-192.png",
