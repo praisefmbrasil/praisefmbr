@@ -4,20 +4,15 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 // CONTEXTOS
 import { AuthProvider } from './contexts/AuthContext';
 import { LivePlayerProvider } from './contexts/LivePlayerContext';
-// Removido o ThemeProvider temporariamente para evitar erro de "Module not found"
+// O ThemeProvider foi removido para evitar o erro de "Module not found" visto no terminal
 
 // COMPONENTES
-// Usando importações nomeadas { } para garantir compatibilidade com seus arquivos
 import { Navbar } from './components/Navbar';
 import Hero from './components/Hero';
 import Playlist from './components/Playlist';
 import Footer from './components/Footer';
 
-// PÁGINAS (Comentadas até que os arquivos sejam criados na pasta /pages)
-// import Login from './pages/Login';
-// import Favorites from './pages/Favorites';
-
-// CORREÇÃO DA TELA BRANCA: Importação nomeada conforme o erro do console
+// CORREÇÃO DA TELA BRANCA: Importação nomeada correta
 import { LivePlayerBar } from './components/LivePlayerBar'; 
 
 function AppContent() {
@@ -27,15 +22,14 @@ function AppContent() {
       <Routes>
         <Route path="/" element={
           <main>
-            {/* onNavigateToProgram adicionado para resolver o erro de propriedade obrigatória */}
+            {/* onNavigateToProgram adicionado para satisfazer o TypeScript */}
             <Hero onNavigateToProgram={() => {}} />
             <Playlist />
           </main>
         } />
-        {/* Adicione as rotas de Login e Favoritos aqui quando os arquivos estiverem prontos */}
+        {/* Adicione as rotas de Login/Favorites aqui apenas quando criar os arquivos em /pages */}
       </Routes>
       <Footer />
-      {/* O Player Bar fixo no rodapé */}
       <LivePlayerBar />
     </div>
   );
