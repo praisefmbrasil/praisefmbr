@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MapPin, Calendar, ExternalLink, Ticket } from 'lucide-react';
 
@@ -17,12 +16,16 @@ interface EventProps {
 
 const EventCard: React.FC<EventProps> = ({ event }) => {
   const date = new Date(event.datetime);
-  const formattedDate = date.toLocaleDateString('en-US', {
-    month: 'short',
+  
+  // Alterado para o padrão brasileiro (pt-BR)
+  const formattedDate = date.toLocaleDateString('pt-BR', {
     day: 'numeric',
+    month: 'short',
     year: 'numeric'
   });
-  const formattedTime = date.toLocaleTimeString('en-US', {
+  
+  // Alterado para formato 24h
+  const formattedTime = date.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit'
   });
@@ -40,9 +43,9 @@ const EventCard: React.FC<EventProps> = ({ event }) => {
           </h4>
           <p className="text-[11px] text-gray-500 uppercase tracking-widest flex items-center font-medium">
             <MapPin className="w-3.5 h-3.5 mr-1 text-[#ff6600]" /> 
-            {event.venue.city}, {event.venue.region} {event.venue.country !== 'United States' ? event.venue.country : ''}
+            {event.venue.city}, {event.venue.region} {event.venue.country !== 'Brazil' ? event.venue.country : ''}
           </p>
-          <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em]">Doors: {formattedTime}</p>
+          <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em]">Início: {formattedTime}</p>
         </div>
       </div>
       <a 
@@ -52,7 +55,7 @@ const EventCard: React.FC<EventProps> = ({ event }) => {
         className="mt-6 sm:mt-0 flex items-center justify-center space-x-3 bg-black dark:bg-white text-white dark:text-black px-6 py-3 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all shadow-lg active:scale-95"
       >
         <Ticket className="w-4 h-4" />
-        <span>Tickets</span>
+        <span>Ingressos</span>
         <ExternalLink className="w-3 h-3 ml-1" />
       </a>
     </div>
