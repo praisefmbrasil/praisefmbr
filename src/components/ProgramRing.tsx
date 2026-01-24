@@ -1,70 +1,51 @@
-type ProgramRingProps = {
-  title: string
-  image: string
-  progress: number // 0 a 100
-  isLive?: boolean
+import React from 'react';
+
+interface ProgramRingProps {
+  progress: number;
+  size?: number;
+  strokeWidth?: number;
 }
 
-export function ProgramRing({
-  title,
-  image,
-  progress,
-  isLive
-}: ProgramRingProps) {
-  const radius = 46
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference - (progress / 100) * circumference
+export function ProgramRing({ progress, size = 80, strokeWidth = 4 }: ProgramRingProps) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center min-w-[120px]">
-      <div className="relative w-28 h-28">
-        {/* SVG do Anel de Progresso */}
-        <svg className="absolute inset-0 rotate-[-90deg] w-full h-full">
-          {/* Fundo do anel (trilho) */}
-          <circle
-            cx="56"
-            cy="56"
-            r={radius}
-            stroke="#2a2a2a"
-            strokeWidth="6"
-            fill="none"
-          />
-          {/* Progresso do anel (Praise Orange) */}
-          <circle
-            cx="56"
-            cy="56"
-            r={radius}
-            stroke="#ff6600"
-            strokeWidth="6"
-            fill="none"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            strokeLinecap="round"
-            className="transition-all duration-1000 ease-in-out"
-          />
-        </svg>
-
-        {/* Foto do Locutor/Programa */}
-        <div className="absolute inset-2 overflow-hidden rounded-full">
-          <img
-            src={image}
-            alt={title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Badge de Status Ao Vivo */}
-        {isLive && (
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#ff6600] text-black text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border-2 border-black animate-pulse whitespace-nowrap">
-            AO VIVO
-          </div>
-        )}
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="rotate-[-90deg]">
+        {/* Círculo de Fundo */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          className="text-gray-100 dark:text-white/10"
+        />
+        {/* Círculo de Progresso Laranja */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#ff6600"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          fill="transparent"
+          className="transition-all duration-500 ease-in-out"
+        />
+      </svg>
+      {/* Imagem do Locutor no Centro */}
+      <div className="absolute inset-1 rounded-full overflow-hidden border-2 border-white dark:border-[#0f0f0f]">
+        <img 
+          src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp" 
+          alt="Locutor"
+          className="w-full h-full object-cover"
+        />
       </div>
-
-      {/* Nome do Programa */}
-      <span className="mt-3 text-[10px] font-bold text-center text-white uppercase tracking-widest leading-tight px-1">
-        {title}
-      </span>
     </div>
-  )
+  );
 }
