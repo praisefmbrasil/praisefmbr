@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
@@ -23,6 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [favorites, setFavorites] = useState<any[]>([]);
 
   useEffect(() => {
+    // 1. Pega a sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -30,20 +30,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
+    // 2. Escuta mudanças na autenticação (Login/Logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       
-      if (session?.user) {
-        fetchFavorites(session.user.id);
+      if (currentUser) {
+        fetchFavorites(currentUser.id);
       } else {
         setFavorites([]);
       }
       
       if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setSession(null);
-        setFavorites([]);
+        window.location.hash = '#/login'; // Redireciona ao deslogar
       }
       setLoading(false);
     });
@@ -56,19 +56,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase
         .from('favorites')
         .select('*')
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false }); // Favoritos mais recentes primeiro
       
       if (error) {
         if (error.code === 'PGRST103') {
-          console.warn("Supabase: 'favorites' table not found. Please run the migration SQL.");
-        } else {
-          console.error("Error fetching favorites:", error.message);
+          console.warn("Supabase: Tabela 'favorites' não encontrada.");
         }
         return;
       }
       setFavorites(data || []);
     } catch (e: any) {
-      console.error("Unexpected error fetching favorites:", e.message || String(e));
+      console.error("Erro inesperado ao buscar favoritos:", e.message);
     }
   };
 
@@ -77,31 +76,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleFavorite = async (item: any) => {
-    if (!user) return;
+    if (!user) {
+      alert("Por favor, faça login para favoritar.");
+      return;
+    }
 
     const itemIdString = String(item.id || item.item_id);
     const existing = favorites.find(f => String(f.item_id) === itemIdString);
     
     try {
       if (existing) {
+        // Remover dos favoritos
         const { error } = await supabase
           .from('favorites')
           .delete()
           .eq('id', existing.id);
           
-        if (error) {
-          if (error.code === 'PGRST103') alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
-          console.error("Error removing favorite:", error.message);
-        } else {
+        if (!error) {
           setFavorites(prev => prev.filter(f => f.id !== existing.id));
         }
       } else {
+        // Adicionar aos favoritos
         const newItem = {
           user_id: user.id,
           item_id: itemIdString,
           item_type: item.type || 'track',
           title: item.title,
-          subtitle: item.host || item.author || item.subtitle || '',
+          subtitle: item.host || item.author || item.subtitle || 'Praise FM',
           image: item.image,
         };
         
@@ -111,27 +112,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .select();
           
         if (error) {
-          if (error.code === 'PGRST103') alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
-          console.error("Error adding favorite:", error.message);
+          if (error.code === 'PGRST103') alert("Configuração Necessária: A tabela 'favorites' precisa ser criada no Supabase.");
         } else if (data && data.length > 0) {
-          setFavorites(prev => [...prev, data[0]]);
+          setFavorites(prev => [data[0], ...prev]); // Adiciona no topo da lista
         }
       }
     } catch (err: any) {
-      console.error("Toggle favorite failed:", err.message);
+      console.error("Falha ao alternar favorito:", err.message);
     }
   };
 
   const isFavorite = (id: string) => {
-    const searchId = String(id);
-    return favorites.some(f => String(f.item_id) === searchId);
+    return favorites.some(f => String(f.item_id) === String(id));
   };
 
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
     } catch (e: any) {
-      console.error("Sign out error:", e.message);
+      console.error("Erro ao sair:", e.message);
     } finally {
       setUser(null);
       setSession(null);
@@ -159,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };
