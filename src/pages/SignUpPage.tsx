@@ -1,6 +1,4 @@
-
 import React, { useState } from 'react';
-// Ensure useNavigate and Link are imported from 'react-router-dom'
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Loader2, ArrowRight } from 'lucide-react';
@@ -16,7 +14,7 @@ const SignUpPage: React.FC = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("As senhas não coincidem");
       return;
     }
     setLoading(true);
@@ -27,7 +25,7 @@ const SignUpPage: React.FC = () => {
       setError(error.message);
       setLoading(false);
     } else {
-      navigate('/login?message=Account created! Please sign in.');
+      navigate('/login?message=Conta criada! Por favor, faça login para acessar.');
     }
   };
 
@@ -37,50 +35,50 @@ const SignUpPage: React.FC = () => {
         <div className="text-center mb-8">
           <img 
             src="https://res.cloudinary.com/dtecypmsh/image/upload/v1766869698/SVGUSA_lduiui.webp" 
-            alt="Praise FM USA" 
+            alt="Praise FM Brasil" 
             className="h-10 mx-auto mb-6 dark:invert"
           />
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">Join Us</h1>
-          <p className="text-gray-500 dark:text-gray-400 font-regular text-sm mt-2">Start your worship journey today</p>
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">Faça Parte</h1>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm mt-2 uppercase tracking-tight">Comece sua jornada de adoração hoje</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-regular rounded-xl border border-red-100 dark:border-red-900/50">
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl border border-red-100 dark:border-red-900/50">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSignUp} className="space-y-5">
           <div>
-            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Email address</label>
+            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Endereço de E-mail</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-4 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl focus:ring-2 focus:ring-[#ff6600] outline-none dark:text-white font-regular"
-              placeholder="name@example.com"
+              className="w-full px-5 py-4 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl focus:ring-2 focus:ring-[#ff6600] outline-none dark:text-white font-bold"
+              placeholder="exemplo@email.com"
               required
             />
           </div>
           <div>
-            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Password</label>
+            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Senha</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl focus:ring-2 focus:ring-[#ff6600] outline-none dark:text-white font-regular"
-              placeholder="Min 6 characters"
+              className="w-full px-5 py-4 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl focus:ring-2 focus:ring-[#ff6600] outline-none dark:text-white font-bold"
+              placeholder="Mínimo de 6 caracteres"
               required
             />
           </div>
           <div>
-            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Confirm password</label>
+            <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Confirmar Senha</label>
             <input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-5 py-4 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl focus:ring-2 focus:ring-[#ff6600] outline-none dark:text-white font-regular"
-              placeholder="Repeat password"
+              className="w-full px-5 py-4 bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl focus:ring-2 focus:ring-[#ff6600] outline-none dark:text-white font-bold"
+              placeholder="Repita sua senha"
               required
             />
           </div>
@@ -91,7 +89,7 @@ const SignUpPage: React.FC = () => {
           >
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
               <>
-                <span className="text-lg uppercase tracking-tight">Create Account</span>
+                <span className="text-lg uppercase tracking-tight">Criar Conta</span>
                 <ArrowRight className="w-5 h-5" />
               </>
             )}
@@ -99,9 +97,9 @@ const SignUpPage: React.FC = () => {
         </form>
 
         <div className="mt-8 pt-8 border-t border-gray-100 dark:border-white/5 text-center">
-          <p className="text-gray-500 dark:text-gray-400 font-regular text-sm">
-            Already have an account?{' '}
-            <Link to="/login" className="text-[#ff6600] hover:underline">Sign In</Link>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm uppercase tracking-tight">
+            Já tem uma conta?{' '}
+            <Link to="/login" className="text-[#ff6600] hover:underline">Entrar</Link>
           </p>
         </div>
       </div>
