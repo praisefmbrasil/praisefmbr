@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Mic2, ChevronRight, Play, Clock, Check } from 'lucide-react';
 import { DEVOTIONAL_PODCASTS } from '../constants';
@@ -32,13 +31,13 @@ const DevotionalSection: React.FC = () => {
              <div className="p-2 bg-[#ff6600] rounded-lg">
                 <Mic2 className="w-5 h-5 text-white" />
              </div>
-             <h2 className="text-3xl font-medium uppercase tracking-tighter dark:text-white">Devotional</h2>
+             <h2 className="text-3xl font-medium uppercase tracking-tighter dark:text-white">Devocional</h2>
           </div>
           <button 
             onClick={() => navigate('/devotional')}
             className="flex items-center text-black dark:text-white font-medium uppercase tracking-widest text-[10px] hover:underline"
           >
-            View all <ChevronRight className="w-4 h-4 ml-1 text-[#ff6600]" />
+            Ver todos <ChevronRight className="w-4 h-4 ml-1 text-[#ff6600]" />
           </button>
         </div>
 
@@ -63,11 +62,11 @@ const DevotionalSection: React.FC = () => {
                       {podcast.category}
                     </span>
                   </div>
-                  {/* Listen Later Floating Button */}
+                  {/* Botão de Ouvir Mais Tarde */}
                   <button 
                     onClick={(e) => handleListenLater(e, podcast)}
                     className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all z-10 ${saved ? 'bg-[#ff6600] text-white opacity-100' : 'bg-black/20 text-white opacity-0 group-hover:opacity-100 hover:bg-black/40'}`}
-                    title={saved ? "Saved to Podcasts" : "Listen Later"}
+                    title={saved ? "Salvo nos Podcasts" : "Ouvir depois"}
                   >
                     {saved ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                   </button>
@@ -77,7 +76,7 @@ const DevotionalSection: React.FC = () => {
                     {podcast.title}
                   </h3>
                   <p className="text-gray-500 text-xs font-normal uppercase mb-4 tracking-tight">
-                    With {podcast.author}
+                    Com {podcast.author}
                   </p>
                   <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">
                     <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{podcast.duration}</span>
@@ -89,13 +88,13 @@ const DevotionalSection: React.FC = () => {
                         {saved ? (
                           <>
                             <Check className="w-3 h-3" />
-                            <span>Saved</span>
+                            <span>Salvo</span>
                           </>
                         ) : (
-                          <span>Listen Later</span>
+                          <span>Ouvir Depois</span>
                         )}
                       </button>
-                      <button className="text-[10px] font-medium uppercase tracking-widest hover:text-[#ff6600] transition-colors dark:text-gray-300">Listen Now</button>
+                      <button className="text-[10px] font-medium uppercase tracking-widest hover:text-[#ff6600] transition-colors dark:text-gray-300">Ouvir Agora</button>
                     </div>
                   </div>
                 </div>
