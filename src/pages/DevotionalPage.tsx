@@ -9,10 +9,11 @@ const DevotionalPage: React.FC = () => {
       {/* Header com Overlay */}
       <div className="bg-black text-white py-24 md:py-32 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-30">
+          {/* ✅ Imagem de fundo com identidade brasileira */}
           <img 
-            src="https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&q=80" 
+            src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp" 
             className="w-full h-full object-cover" 
-            alt="Fundo Devocional" 
+            alt="Fundo Devocional - Praise FM Brasil" 
           />
           {/* Gradiente para garantir leitura do texto */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black" />
@@ -24,7 +25,7 @@ const DevotionalPage: React.FC = () => {
             Devocional
           </h1>
           <p className="text-sm md:text-lg text-gray-400 font-medium max-w-2xl mx-auto uppercase tracking-[0.2em]">
-            Fé em Reflexão. Seu Pão Diário Digital.
+            Meditação Diária. Alimento Espiritual para sua Jornada.
           </p>
         </div>
       </div>
@@ -32,15 +33,12 @@ const DevotionalPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 -mt-10 relative z-20">
         <DailyVerse />
         
-        {/* Espaço extra para o conteúdo do Versículo Diário respirar */}
         <div className="mt-12 text-center">
           <p className="text-[10px] text-gray-400 dark:text-gray-600 uppercase tracking-widest">
             Novas meditações todos os dias às 00:00h
           </p>
         </div>
       </div>
-
-      {/* Seção de Podcasts/Áudio removida conforme solicitado */}
     </div>
   );
 };
