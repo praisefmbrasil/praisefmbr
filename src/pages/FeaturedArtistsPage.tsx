@@ -11,34 +11,49 @@ interface Artist {
   hits: string[];
 }
 
+// ✅ Artistas gospel brasileiros
 const FEATURED_ARTISTS: Artist[] = [
   { 
-    id: 'art_br_1', 
-    name: 'Fernandinho', 
-    genre: 'Worship / Rock Cristão', 
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp', 
-    hits: ['Faz Chover', 'Galileu', 'Uma Nova História'] 
-  },
-  { 
-    id: 'art_br_2', 
-    name: 'Gabriela Rocha', 
-    genre: 'Worship / Adoração', 
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp', 
-    hits: ['Lugar Secreto', 'Diz', 'Me Atraiu'] 
-  },
-  { 
-    id: 'art_br_3', 
-    name: 'Isaias Saad', 
-    genre: 'Worship Moderno', 
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp', 
-    hits: ['Oousado Amor', 'Enche-me', 'Bondade de Deus'] 
-  },
-  { 
-    id: 'art_br_4', 
+    id: 'art_1', 
     name: 'Aline Barros', 
-    genre: 'Gospel / Pop Cristão', 
+    genre: 'Adoração', 
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp', 
-    hits: ['Ressuscita-me', 'Sonda-me, Usa-me', 'Vitória no Deserto'] 
+    hits: ['Restituição', 'Tua Graça Me Basta', 'Faz Chover'] 
+  },
+  { 
+    id: 'art_2', 
+    name: 'Gabriela Rocha', 
+    genre: 'Worship', 
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp', 
+    hits: ['Ressuscita-me', 'Reina o Senhor', 'Eis que Sou'] 
+  },
+  { 
+    id: 'art_3', 
+    name: 'Fernandinho', 
+    genre: 'Pop Gospel', 
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp', 
+    hits: ['Me Ama', 'Teu Nome é Amor', 'Ousado Amor'] 
+  },
+  { 
+    id: 'art_4', 
+    name: 'Isaias Saad', 
+    genre: 'Adoração Profética', 
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp', 
+    hits: ['Deus de Promessas', 'Tu És Fiel', 'Santo Espírito'] 
+  },
+  { 
+    id: 'art_5', 
+    name: 'Ana Paula Valadão', 
+    genre: 'Adoração', 
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Ana_Paula_Valad%C3%A3o_qkqjvz.webp', 
+    hits: ['Tua Graça Me Basta', 'Coragem', 'Espírito Santo'] 
+  },
+  { 
+    id: 'art_6', 
+    name: 'Davi Sacer', 
+    genre: 'Worship', 
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Davi_Sacer_gxgkqh.webp', 
+    hits: ['Nada Além de Ti', 'Faz Chover', 'Tu És Fiel'] 
   }
 ];
 
@@ -72,7 +87,7 @@ const FeaturedArtistsPage: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300 font-sans">
-      {/* Header Editorial */}
+      {/* Editorial Header */}
       <div className="bg-black text-white py-16 md:py-24 border-b border-white/10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#ff6600]/10 to-transparent pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
@@ -80,51 +95,51 @@ const FeaturedArtistsPage: React.FC = () => {
             <Star className="w-5 h-5 fill-current" />
             <span className="text-[10px] font-medium uppercase tracking-[0.4em]">O Pulso da Praise FM Brasil</span>
           </div>
-          <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-[0.85] mb-8">Artistas<br />Em Destaque</h1>
+          <h1 className="text-5xl md:text-8xl font-medium uppercase tracking-tighter leading-[0.85] mb-8">Artistas<br />Em Destaque</h1>
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl font-normal uppercase tracking-tight leading-tight">
-            Os sons que definem uma geração de fé. Sessões exclusivas e mergulhos profundos nos artistas por trás dos maiores hinos de adoração do país.
+            Os sons que definem uma geração de fé. Sessões exclusivas e mergulhos profundos nos artistas por trás dos maiores louvores do cenário gospel nacional.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-2xl dark:text-white uppercase font-black tracking-tight border-l-4 border-[#ff6600] pl-4">Em Alta na Rádio</h2>
+        <h2 className="bbc-section-title text-2xl dark:text-white uppercase font-medium">Em Alta</h2>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/5 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/5 mt-8">
           {FEATURED_ARTISTS.map((artist) => {
             const followed = isFavorite(artist.id);
             return (
               <div 
                 key={artist.id} 
                 onClick={() => handleArtistClick(artist.name)}
-                className="group relative aspect-square overflow-hidden bg-black cursor-pointer"
+                className="group relative aspect-square overflow-hidden bg-black cursor-pointer transition-all duration-500"
               >
                 <img 
                   src={artist.image} 
                   alt={artist.name} 
-                  className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-100 group-hover:scale-110"
+                  className="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-1000 scale-100 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-500"></div>
                 
-                <div className="absolute bottom-0 left-0 p-8 w-full transform transition-transform duration-500">
-                  <span className="text-[#ff6600] text-[10px] font-bold uppercase tracking-[0.3em] mb-2 block">
+                <div className="absolute bottom-0 left-0 p-8 md:p-10 w-full transform transition-transform duration-500">
+                  <span className="text-[#ff6600] text-[10px] font-medium uppercase tracking-[0.3em] mb-3 block">
                     {artist.genre}
                   </span>
-                  <h3 className="text-3xl font-black text-white uppercase tracking-tighter leading-none group-hover:text-[#ff6600] transition-colors duration-300">
+                  <h3 className="text-3xl md:text-4xl font-medium text-white uppercase tracking-tighter leading-none group-hover:text-[#ff6600] transition-colors duration-300">
                     {artist.name}
                   </h3>
                   
-                  {/* Top 3 Songs */}
-                  <div className="mt-4 h-0 group-hover:h-auto overflow-hidden transition-all duration-700 opacity-0 group-hover:opacity-100">
-                    <p className="text-gray-400 text-[8px] font-bold uppercase tracking-widest mb-3 flex items-center">
-                      <Music className="w-3 h-3 mr-2 text-[#ff6600]" /> Principais Faixas
+                  {/* Top 3 Songs Selection */}
+                  <div className="mt-6 h-0 group-hover:h-auto overflow-hidden transition-all duration-700 opacity-0 group-hover:opacity-100">
+                    <p className="text-gray-400 text-[9px] font-medium uppercase tracking-widest mb-4 flex items-center">
+                      <Music className="w-3 h-3 mr-2 text-[#ff6600]" /> Maiores Sucessos
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {artist.hits.map((hit, i) => (
+                      {artist.hits.slice(0, 3).map((hit, i) => (
                         <button 
                           key={i} 
                           onClick={(e) => handleSongClick(e, artist.name, hit)}
-                          className="bg-white/10 text-white text-[8px] px-2 py-1 uppercase tracking-widest backdrop-blur-md border border-white/10 hover:bg-[#ff6600] transition-all"
+                          className="bg-white/10 text-white text-[9px] px-3 py-1.5 uppercase tracking-widest backdrop-blur-md border border-white/10 hover:bg-[#ff6600] hover:text-white transition-all active:scale-95"
                         >
                           {hit}
                         </button>
@@ -133,37 +148,40 @@ const FeaturedArtistsPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="absolute top-6 right-6 flex flex-col space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                <div className="absolute top-8 right-8 flex flex-col space-y-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-x-4 group-hover:translate-x-0">
                   <button 
                     onClick={(e) => handleFollowArtist(e, artist)}
-                    className={`p-3 rounded-full transition-all ${followed ? 'bg-white text-[#ff6600]' : 'bg-[#ff6600] text-white'}`}
+                    className={`p-4 rounded-full shadow-2xl transition-all ${followed ? 'bg-white text-[#ff6600]' : 'bg-[#ff6600] text-white hover:bg-white hover:text-black'}`}
                   >
-                    {followed ? <Check className="w-5 h-5" /> : <Heart className="w-5 h-5" />}
+                    {followed ? <Check className="w-6 h-6" /> : <Heart className="w-6 h-6" />}
                   </button>
+                  <div className="bg-black/50 text-white p-4 rounded-full shadow-2xl backdrop-blur-md">
+                    <Play className="w-6 h-6 fill-current" />
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Seção de Envio de Músicas */}
-        <div className="mt-24 bg-gray-50 dark:bg-[#111] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between border border-gray-100 dark:border-white/5">
+        {/* Submissions Section */}
+        <div className="mt-24 bg-gray-50 dark:bg-[#111] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between border border-gray-100 dark:border-white/5 transition-colors">
            <div className="flex flex-col md:flex-row items-center md:space-x-10 text-center md:text-left mb-10 md:mb-0">
-             <div className="w-20 h-20 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-xl mb-6 md:mb-0">
-               <Users className="w-10 h-10" />
-             </div>
-             <div className="max-w-md">
-               <h4 className="text-3xl font-black uppercase tracking-tighter dark:text-white leading-none mb-4">Envie sua Música</h4>
-               <p className="text-gray-500 text-sm font-normal uppercase tracking-tight leading-relaxed">
-                 Apoiamos a próxima geração. Se você cria música que inspira, queremos ouvir sua história e seu som para potencial inclusão na nossa programação.
-               </p>
-             </div>
+              <div className="w-20 h-20 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-xl mb-6 md:mb-0 transition-colors">
+                <Users className="w-10 h-10" />
+              </div>
+              <div className="max-w-md">
+                <h4 className="text-3xl font-medium uppercase tracking-tighter dark:text-white leading-none mb-4">Envie Seu Louvor</h4>
+                <p className="text-gray-500 text-sm font-normal uppercase tracking-tight leading-relaxed">
+                  Nós apoiamos a nova geração. Se você cria música que inspira, queremos ouvir sua história e seu som para possível veiculação na rádio.
+                </p>
+              </div>
            </div>
            <button 
              onClick={() => navigate('/feedback?type=music')}
-             className="bg-[#ff6600] text-white px-10 py-6 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-black transition-all whitespace-nowrap flex items-center space-x-3"
+             className="bg-[#ff6600] text-white px-10 py-6 text-[10px] font-medium uppercase tracking-[0.4em] hover:bg-black transition-all shadow-xl active:scale-95 whitespace-nowrap flex items-center space-x-3"
            >
-             <span>Enviar Minha Faixa</span>
+             <span>Enviar Seu Louvor</span>
              <ArrowRight className="w-4 h-4" />
            </button>
         </div>

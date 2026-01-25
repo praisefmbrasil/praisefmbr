@@ -10,7 +10,6 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Função para traduzir erros comuns do Supabase/Auth
   const getErrorMessage = (msg: string) => {
     if (msg.includes('Invalid login credentials')) return 'E-mail ou senha incorretos.';
     if (msg.includes('Email not confirmed')) return 'Por favor, confirme seu e-mail antes de acessar.';
@@ -37,8 +36,9 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-[#f3f3f3] dark:bg-[#121212] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-xl p-8 transition-colors">
         <div className="text-center mb-8">
+          {/* ✅ Logo corrigida do Praise FM Brasil */}
           <img 
-            src="https://res.cloudinary.com/dtecypmsh/image/upload/v1766869698/SVGUSA_lduiui.webp" 
+            src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Brasil_p1qfof.webp" 
             alt="Praise FM Brasil" 
             className="h-10 mx-auto mb-6 dark:invert"
           />
