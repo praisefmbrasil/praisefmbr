@@ -121,10 +121,13 @@ const AppContent = () => {
 
       <main className="flex-grow">
         {selectedProgram ? (
+          // ✅ Correção: adicionar onListenClick e isPlaying
           <ProgramDetail
             program={selectedProgram}
             onBack={() => setSelectedProgram(null)}
             onViewSchedule={() => navigate('/schedule')}
+            onListenClick={togglePlay}
+            isPlaying={isPlaying}
           />
         ) : (
           <Routes>
@@ -150,7 +153,6 @@ const AppContent = () => {
             <Route path="/events" element={<EventsPage />} />
             <Route path="/artists" element={<FeaturedArtistsPage />} />
             
-            {/* ✅ Corrigido: PresentersPage agora aceita onNavigateToProgram */}
             <Route 
               path="/presenters" 
               element={<PresentersPage onNavigateToProgram={setSelectedProgram} />} 
