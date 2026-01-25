@@ -1,6 +1,8 @@
-// src/data/presenters.ts
+// src/pages/PresentersPage.tsx
 
-export const PRESENTERS_DATA = [
+import React from 'react';
+
+const PRESENTERS_DATA = [
   {
     name: 'Samuel Andrade',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp',
@@ -50,3 +52,38 @@ export const PRESENTERS_DATA = [
     programTitle: 'Praise FM Brasil Clássicos'
   }
 ];
+
+interface Presenter {
+  name: string;
+  image: string;
+  bio: string;
+  programTitle: string;
+}
+
+const PresentersPage: React.FC = () => {
+  return (
+    <div className="min-h-screen bg-white dark:bg-[#121212] py-12">
+      <div className="max-w-7xl mx-auto px-4">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-12">Apresentadores</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {PRESENTERS_DATA.map((presenter: Presenter) => (
+            <div key={presenter.name} className="bg-gray-50 dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              <img 
+                src={presenter.image} 
+                alt={presenter.name}
+                className="w-full h-64 object-cover"
+              />
+              <div className="p-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{presenter.name}</h2>
+                <p className="text-sm font-semibold text-praise-accent mb-3">{presenter.programTitle}</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">{presenter.bio}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PresentersPage;
