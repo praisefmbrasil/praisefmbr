@@ -1,36 +1,32 @@
+// src/components/Hero.tsx
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, ChevronRight, Zap, ArrowRight } from 'lucide-react';
 import { SCHEDULES } from '../constants';
 import { Program } from '../types';
 import { useNavigate } from 'react-router-dom';
 
-// ✅ Usa fuso de São Paulo (Brasil)
+// ✅ Usa fuso de São Paulo
 const getSaoPauloInfo = () => {
   const now = new Date();
-  const saoPauloString = now.toLocaleString('pt-BR', {
-    timeZone: 'America/Sao_Paulo',
-  });
+  const saoPauloString = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
   const saoPauloDate = new Date(saoPauloString);
   const h = saoPauloDate.getHours();
   const m = saoPauloDate.getMinutes();
-  const day = saoPauloDate.getDay(); // 0 = domingo, 1 = segunda, ..., 6 = sábado
+  const day = saoPauloDate.getDay();
   return { day, totalMinutes: h * 60 + m };
 };
-
-// ✅ Não usamos mais formato 12h — mantemos HH:mm
-const formatTimeBR = (time24: string) => time24;
 
 interface HeroProps {
   onListenClick: () => void;
   isPlaying: boolean;
-  liveMetadata?: { artist: string; title: string; artwork?: string } | null;
+  // ✅ liveMetadata removido (não usado no mock)
   onNavigateToProgram: (program: Program) => void;
 }
 
 const Hero: React.FC<HeroProps> = ({
   onListenClick,
   isPlaying,
-  liveMetadata,
   onNavigateToProgram,
 }) => {
   const [tick, setTick] = useState(0);
@@ -45,19 +41,15 @@ const Hero: React.FC<HeroProps> = ({
   const saoPaulo = useMemo(() => getSaoPauloInfo(), [tick]);
 
   const { currentProgram, upNextPrograms } = useMemo(() => {
-    const schedule = SCHEDULES[saoPaulo.day] || SCHEDULES[0]; // fallback para domingo
+    const schedule = SCHEDULES[saoPaulo.day] || SCHEDULES[0];
     
-    const currentIndex = schedule.findIndex((p: Program) => {
+    const currentIndex = schedule.findIndex((p) => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
       let start = sH * 60 + sM;
       let end = eH * 60 + eM;
-      if (end <= start) end += 24 * 60; // programa cruza meia-noite
-      
-      let nowMinutes = saoPaulo.totalMinutes;
-      if (start > end && nowMinutes < start) nowMinutes += 24 * 60;
-      
-      return nowMinutes >= start && nowMinutes < end;
+      if (end <= start) end += 24 * 60;
+      return saoPaulo.totalMinutes >= start && saoPaulo.totalMinutes < end;
     });
 
     const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
@@ -73,11 +65,7 @@ const Hero: React.FC<HeroProps> = ({
     let start = sH * 60 + sM;
     let end = eH * 60 + eM;
     if (end <= start) end += 24 * 60;
-    
-    let nowMinutes = saoPaulo.totalMinutes;
-    if (start > end && nowMinutes < start) nowMinutes += 24 * 60;
-    
-    const elapsed = nowMinutes - start;
+    const elapsed = saoPaulo.totalMinutes - start;
     const duration = end - start;
     return Math.min(Math.max(elapsed / duration, 0), 1);
   }, [currentProgram, saoPaulo.totalMinutes]);
@@ -120,7 +108,7 @@ const Hero: React.FC<HeroProps> = ({
           {/* RIGHT SIDE: TEXT AND PLAY BUTTON */}
           <div className="flex-grow pt-4 text-center md:text-left">
             <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
-              <span>{formatTimeBR(currentProgram.startTime)} - {formatTimeBR(currentProgram.endTime)}</span>
+              <span>{currentProgram.startTime} - {currentProgram.endTime}</span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
@@ -149,7 +137,7 @@ const Hero: React.FC<HeroProps> = ({
             {/* UP NEXT SECTION */}
             <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {upNextPrograms.map((prog: Program) => (
+                {upNextPrograms.map((prog) => (
                   <div 
                     key={prog.id} 
                     className="flex items-start space-x-5 group cursor-pointer"
@@ -165,7 +153,7 @@ const Hero: React.FC<HeroProps> = ({
                     <div className="flex flex-col">
                       <div className="text-[11px] font-normal mb-1">
                         <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">PRÓXIMOS</span>
-                        <span className="text-gray-400 font-normal">{formatTimeBR(prog.startTime)} - {formatTimeBR(prog.endTime)}</span>
+                        <span className="text-gray-400 font-normal">{prog.startTime} - {prog.endTime}</span>
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-[#ff6600] transition-colors">
                         {prog.title}
@@ -226,11 +214,7 @@ const Hero: React.FC<HeroProps> = ({
                onClick={() => setShowDetails(!showDetails)}
                className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
              >
-               {showDetails ? (
-                 <>Mostrar menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
-               ) : (
-                 <>Mostrar mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
-               )}
+               {showDetails ? <>Mostrar menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></> : <>Mostrar mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>}
              </button>
            </div>
         </div>
@@ -239,7 +223,6 @@ const Hero: React.FC<HeroProps> = ({
   );
 };
 
-// Ícones personalizados (mantidos)
 const ExternalLinkIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
