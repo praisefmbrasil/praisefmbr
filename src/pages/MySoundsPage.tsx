@@ -64,8 +64,15 @@ const MySoundsPage: React.FC = () => {
                 <p className="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest text-[9px] mb-4">
                   {fav.subtitle}
                 </p>
+                {/* ✅ Correção: passa o objeto completo */}
                 <button 
-                  onClick={() => toggleFavorite({ id: fav.item_id })}
+                  onClick={() => toggleFavorite({
+                    id: fav.item_id,
+                    title: fav.title,
+                    subtitle: fav.subtitle,
+                    image: fav.image,
+                    type: fav.item_type
+                  })}
                   className="flex items-center space-x-2 text-[10px] font-black text-gray-400 hover:text-red-500 uppercase tracking-widest transition-colors pt-4 border-t border-gray-100 dark:border-white/10 w-full"
                 >
                   <Trash2 className="w-4 h-4" />
