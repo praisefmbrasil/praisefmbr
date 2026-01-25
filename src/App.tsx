@@ -3,12 +3,12 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LivePlayerProvider } from './contexts/LivePlayerContext'; // ✅ Novo import
+import { LivePlayerProvider } from './contexts/LivePlayerContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
 import RecentlyPlayed from './components/RecentlyPlayed';
-import { LivePlayerBar } from './components/LivePlayerBar'; // ✅ Correção de import
+import { LivePlayerBar } from './components/LivePlayerBar';
 import ProgramDetail from './components/ProgramDetail';
 import Playlist from './components/Playlist';
 import ScheduleList from './components/ScheduleList';
@@ -27,40 +27,25 @@ import EventsPage from './pages/EventsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import CookiesPolicyPage from './pages/CookiesPolicyPage';
-import AppHomePage from import React from 'react';
-
-const AppHomePage: React.FC = () => {
-    return (
-        <div>
-            <h1>Welcome to the App Home Page</h1>
-            {/* Add your content here */}
-        </div>
-    );
-};
-
-export default AppHomePage; // Ensure you export the component;
 import { SCHEDULES } from './constants';
 import { Program } from './types';
 
-// ✅ Stream do Praise FM Brasil
+/* ================= STREAM PRAISE FM BRASIL ================= */
+
 const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
 const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/olisuxy9v3vtv';
 
 const BLOCKED_METADATA_KEYWORDS = [
-  'praise fm', 'praisefm', 'comercial', 'spot', 'promo', 'identificação', 'vinheta',
-  'intro', 'outro', 'anúncio', 'manhã com cristo', 'graça diária',
-  'graça da meia-noite', 'carona', 'novos talentos', 'worship', 'non stop',
-  'clássicos', 'pop hits', 'live show', 'identificação da rádio', 'ramp', 'publicidade',
-  'jingle', 'bumper', 'teaser', 'em breve'
+  'praise fm', 'praisefm', 'comercial', 'spot', 'promo', 'identificação',
+  'vinheta', 'intro', 'outro', 'anúncio', 'jingle', 'bumper', 'teaser'
 ];
 
-// ✅ Usa fuso de São Paulo
+/* ================= UTIL ================= */
+
 const getSaoPauloDayAndTotalMinutes = () => {
   const now = new Date();
-  const saoPauloDate = new Date(now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
-  const h = saoPauloDate.getHours();
-  const m = saoPauloDate.getMinutes();
-  return { day: saoPauloDate.getDay(), total: h * 60 + m };
+  const sp = new Date(now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+  return { day: sp.getDay(), total: sp.getHours() * 60 + sp.getMinutes() };
 };
 
 interface LiveMetadata {
@@ -73,202 +58,157 @@ interface LiveMetadata {
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 };
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-white dark:bg-[#121212]"></div>;
+  if (loading) return null;
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
+
+/* ================= APP CONTENT ================= */
 
 const AppContent: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [liveMetadata, setLiveMetadata] = useState<LiveMetadata | null>(null);
   const [trackHistory, setTrackHistory] = useState<LiveMetadata[]>([]);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    () => (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'light'
+  );
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const location = useLocation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { day, total } = getSaoPauloDayAndTotalMinutes();
-  
-  const { currentProgram, queue } = useMemo(() => {
+
+  const { currentProgram } = useMemo(() => {
     const schedule = SCHEDULES[day] || SCHEDULES[0];
-    const currentIndex = schedule.findIndex(p => {
-      const [sH, sM] = p.startTime.split(':').map(Number);
-      const [eH, eM] = p.endTime.split(':').map(Number);
-      let start = sH * 60 + sM;
-      let end = eH * 60 + eM;
-      if (end <= start) end += 24 * 60;
-      return total >= start && total < end;
-    });
-    
-    const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
-    const nextFour = schedule.slice(currentIndex + 1, currentIndex + 5);
-    
-    return { currentProgram: current, queue: nextFour };
+    const current =
+      schedule.find(p => {
+        const [sH, sM] = p.startTime.split(':').map(Number);
+        const [eH, eM] = p.endTime.split(':').map(Number);
+        let start = sH * 60 + sM;
+        let end = eH * 60 + eM;
+        if (end <= start) end += 1440;
+        return total >= start && total < end;
+      }) || schedule[0];
+
+    return { currentProgram: current };
   }, [day, total]);
+
+  /* ================= THEME ================= */
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('praise-theme', theme);
   }, [theme]);
 
-  useEffect(() => {
-    if (selectedProgram) {
-      setSelectedProgram(null);
-    }
-  }, [location.pathname]);
+  /* ================= STREAM METADATA ================= */
 
   useEffect(() => {
-    const connectMetadata = () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
-      
+    const es = new EventSource(METADATA_URL);
+    eventSourceRef.current = es;
+
+    es.onmessage = e => {
       try {
-        const es = new EventSource(METADATA_URL);
-        eventSourceRef.current = es;
+        const data = JSON.parse(e.data);
+        const title = data.streamTitle || '';
+        if (!title.includes(' - ')) return;
 
-        es.onmessage = (event) => {
-          if (!event.data) return;
-          try {
-            const data = JSON.parse(event.data);
-            const streamTitle = data.streamTitle || "";
-            if (streamTitle.includes(' - ')) {
-              const [artistPart, ...titleParts] = streamTitle.split(' - ');
-              const artist = artistPart.trim();
-              const title = titleParts.join(' - ').trim();
-              if (!artist || !title) return;
-              
-              const musicCheck = !BLOCKED_METADATA_KEYWORDS.some(k => 
-                `${artist} ${title}`.toLowerCase().includes(k)
-              );
-              
-              const newMetadata: LiveMetadata = { 
-                artist, 
-                title, 
-                playedAt: new Date(), 
-                isMusic: musicCheck 
-              };
-              
-              setLiveMetadata(prev => {
-                const isNewTrack = !prev || prev.title !== newMetadata.title || prev.artist !== newMetadata.artist;
-                if (isNewTrack) {
-                  if (newMetadata.isMusic) {
-                    setTrackHistory(h => {
-                      if (h.length > 0 && h[0].title === newMetadata.title && h[0].artist === newMetadata.artist) {
-                        return h;
-                      }
-                      return [newMetadata, ...h].slice(0, 10);
-                    });
-                  }
-                  return newMetadata;
-                }
-                return prev;
-              });
-            }
-          } catch (err) { }
+        const [artist, ...rest] = title.split(' - ');
+        const song = rest.join(' - ').trim();
+        const cleanArtist = artist.trim();
+
+        const isMusic = !BLOCKED_METADATA_KEYWORDS.some(k =>
+          `${cleanArtist} ${song}`.toLowerCase().includes(k)
+        );
+
+        const meta: LiveMetadata = {
+          artist: cleanArtist,
+          title: song,
+          playedAt: new Date(),
+          isMusic
         };
 
-        es.onerror = () => {
-          if (es) es.close();
-          if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
-          reconnectTimeoutRef.current = window.setTimeout(connectMetadata, 5000);
-        };
-      } catch (err) { }
+        setLiveMetadata(meta);
+
+        if (isMusic) {
+          setTrackHistory(h =>
+            h.length && h[0].title === song ? h : [meta, ...h].slice(0, 10)
+          );
+        }
+      } catch {}
     };
-    
-    connectMetadata();
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
-      if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
-    };
+
+    return () => es.close();
+  }, []);
+
+  /* ================= AUDIO ================= */
+
+  useEffect(() => {
+    audioRef.current = new Audio(STREAM_URL);
+    audioRef.current.volume = 0.8;
+    return () => audioRef.current?.pause();
   }, []);
 
   const togglePlayback = () => {
     if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.load();
-      audioRef.current.play().catch(e => {
-        if (e.name !== 'AbortError' && !e.message?.includes('interrupted')) {
-          console.error("Playback failed", e);
-        }
-      });
-    }
-    setIsPlaying(!isPlaying);
+    isPlaying ? audioRef.current.pause() : audioRef.current.play();
+    setIsPlaying(p => !p);
   };
-
-  useEffect(() => {
-    audioRef.current = new Audio(STREAM_URL);
-    audioRef.current.crossOrigin = "anonymous";
-    const savedVol = localStorage.getItem('praise-volume');
-    const initialVol = savedVol ? parseFloat(savedVol) : 0.8;
-    audioRef.current.volume = initialVol;
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current = null;
-      }
-    };
-  }, []);
 
   const handleNavigateToProgram = (program: Program) => {
     setSelectedProgram(program);
     window.scrollTo(0, 0);
   };
 
-  const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
   const isAppRoute = location.pathname === '/app';
+  const activeTab = location.pathname === '/' ? 'home' : location.pathname.slice(1);
 
   return (
-    <div className="min-h-screen flex flex-col pb-[120px] bg-white text-black dark:bg-[#121212] dark:text-white transition-colors duration-300">
+    <div className="min-h-screen flex flex-col pb-[120px] bg-white dark:bg-[#121212]">
       {!isAppRoute && (
-        <Navbar 
-          activeTab={activeTab} 
+        <Navbar
+          activeTab={activeTab}
           theme={theme}
-          onToggleTheme={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+          onToggleTheme={() => setTheme(t => (t === 'light' ? 'dark' : 'light'))}
         />
       )}
-      
+
       <main className="flex-grow">
         {selectedProgram ? (
-          <ProgramDetail 
-            program={selectedProgram} 
-            onBack={() => setSelectedProgram(null)} 
-            onViewSchedule={() => { setSelectedProgram(null); navigate('/schedule'); }} 
+          <ProgramDetail
+            program={selectedProgram}
+            onBack={() => setSelectedProgram(null)}
+            onViewSchedule={() => navigate('/schedule')}
             onListenClick={togglePlayback}
             isPlaying={isPlaying}
           />
         ) : (
           <Routes>
-            <Route path="/" element={
-              <>
-                <Hero onListenClick={togglePlayback} isPlaying={isPlaying} liveMetadata={liveMetadata} onNavigateToProgram={handleNavigateToProgram} />
-                <RecentlyPlayed tracks={trackHistory} />
-              </>
-            } />
-            <Route path="/app" element={<AppHomePage />} />
+            <Route
+              path="/"
+              element={
+                <>
+                  <Hero
+                    onListenClick={togglePlayback}
+                    isPlaying={isPlaying}
+                    liveMetadata={liveMetadata}
+                    onNavigateToProgram={handleNavigateToProgram}
+                  />
+                  <RecentlyPlayed tracks={trackHistory} />
+                </>
+              }
+            />
             <Route path="/music" element={<Playlist />} />
-            <Route path="/new-releases" element={<NewReleasesPage />} />
-            <Route path="/live-recordings" element={<LiveRecordingsPage />} />
-            <Route path="/artists" element={<FeaturedArtistsPage />} />
-            <Route path="/schedule" element={<ScheduleList onNavigateToProgram={handleNavigateToProgram} onBack={() => navigate('/')} />} />
+            <Route path="/schedule" element={<ScheduleList onNavigateToProgram={handleNavigateToProgram} />} />
             <Route path="/events" element={<EventsPage />} />
+            <Route path="/artists" element={<FeaturedArtistsPage />} />
             <Route path="/presenters" element={<PresentersPage onNavigateToProgram={handleNavigateToProgram} />} />
             <Route path="/devotional" element={<DevotionalPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
@@ -291,10 +231,12 @@ const AppContent: React.FC = () => {
   );
 };
 
+/* ================= ROOT ================= */
+
 export default function App() {
   return (
     <AuthProvider>
-      <LivePlayerProvider> {/* ✅ Envolvido com o novo provider */}
+      <LivePlayerProvider>
         <HashRouter>
           <ScrollToTop />
           <AppContent />
