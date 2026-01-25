@@ -11,10 +11,9 @@ const Footer: React.FC = () => {
           <div className="col-span-2">
             <div className="flex items-center mb-6 cursor-pointer" onClick={() => navigate('/')}>
               <img 
-                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Brasil_p1qfof.webp" 
+                src="/logo.webp" 
                 alt="Praise FM Brasil Logo" 
-                className="h-10 w-auto object-contain"
-                style={{ filter: 'invert(1) hue-rotate(180deg)' }}
+                className="h-10 w-auto object-contain brightness-0 invert"
               />
             </div>
             <p className="text-gray-400 text-sm leading-relaxed max-sm font-normal">
