@@ -1,498 +1,302 @@
-import React, { useState, useContext, useRef, useEffect, createContext } from 'react';
-import { Play, Pause, Loader2, Volume2, Home, Calendar, ArrowRight, Zap } from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Footer from './components/Footer';
+import RecentlyPlayed from './components/RecentlyPlayed';
+import LivePlayerBar from './components/LivePlayerBar'; // ✅ Importa corretamente
+import ProgramDetail from './components/ProgramDetail';
+import Playlist from './components/Playlist';
+import ScheduleList from './components/ScheduleList';
+import DevotionalPage from './pages/DevotionalPage';
+import LoginPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage';
+import MySoundsPage from './pages/MySoundsPage';
+import ProfilePage from './pages/ProfilePage';
+import FeaturedArtistsPage from './pages/FeaturedArtistsPage';
+import PresentersPage from './pages/PresentersPage'; // ✅ Importa corretamente
+import NewReleasesPage from './pages/NewReleasesPage';
+import LiveRecordingsPage from './pages/LiveRecordingsPage'; // ✅ Importa corretamente
+import HelpCenterPage from './pages/HelpCenterPage';
+import FeedbackPage from './pages/FeedbackPage';
+import EventsPage from './pages/EventsPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfUsePage from './pages/TermsOfUsePage';
+import CookiesPolicyPage from './pages/CookiesPolicyPage';
+import AppHomePage from './pages/AppHomePage';
 
-// ============ TYPES ============
-interface PlayerContextData {
-  isPlaying: boolean;
-  isBuffering: boolean;
-  volume: number;
-  togglePlay: () => void;
-  changeVolume: (value: number) => void;
-  currentTrack: { artist: string; title: string };
-}
+import { SCHEDULES } from './constants';
+import { Program } from './types';
 
-interface Program {
-  startTime: string;
-  endTime: string;
+// ✅ Stream do Praise FM Brasil
+const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
+const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/olisuxy9v3vtv';
+
+const BLOCKED_METADATA_KEYWORDS = [
+  'praise fm', 'praisefm', 'comercial', 'spot', 'promo', 'identificação', 'vinheta',
+  'intro', 'outro', 'anúncio', 'manhã com cristo', 'graça diária',
+  'graça da meia-noite', 'carona', 'novos talentos', 'worship', 'non stop',
+  'clássicos', 'pop hits', 'live show', 'identificação da rádio', 'ramp', 'publicidade',
+  'jingle', 'bumper', 'teaser', 'em breve'
+];
+
+// ✅ Usa fuso de São Paulo
+const getSaoPauloDayAndTotalMinutes = () => {
+  const now = new Date();
+  const saoPauloDate = new Date(now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+  const h = saoPauloDate.getHours();
+  const m = saoPauloDate.getMinutes();
+  return { day: saoPauloDate.getDay(), total: h * 60 + m };
+};
+
+interface LiveMetadata {
+  artist: string;
   title: string;
-  host: string;
-  image: string;
-  description: string;
+  artwork?: string;
+  playedAt?: Date;
+  isMusic?: boolean;
 }
 
-interface NavbarProps {
-  activeSection: string;
-  onNavigate: (section: string) => void;
-}
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
-// ============ CONTEXT ============
-const PlayerContext = createContext<PlayerContextData | null>(null);
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen bg-white dark:bg-[#121212]"></div>;
+  return user ? <>{children}</> : <Navigate to="/login" />;
+};
 
-function PlayerProvider({ children }: { children: React.ReactNode }) {
+const AppContent: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
-  const [volume, setVolume] = useState(0.8);
-  const [currentTrack] = useState({
-    artist: 'with Praise FM Team',
-    title: 'Praise FM Worship'
-  });
+  const [liveMetadata, setLiveMetadata] = useState<LiveMetadata | null>(null);
+  const [trackHistory, setTrackHistory] = useState<LiveMetadata[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'light');
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const reconnectTimeoutRef = useRef<number | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv";
+  // ✅ Usa São Paulo
+  const { day, total } = getSaoPauloDayAndTotalMinutes();
+  
+  const { currentProgram, queue } = useMemo(() => {
+    const schedule = SCHEDULES[day] || SCHEDULES[0]; // fallback para domingo
+    const currentIndex = schedule.findIndex(p => {
+      const [sH, sM] = p.startTime.split(':').map(Number);
+      const [eH, eM] = p.endTime.split(':').map(Number);
+      let start = sH * 60 + sM;
+      let end = eH * 60 + eM;
+      if (end <= start) end += 24 * 60;
+      return total >= start && total < end;
+    });
+    
+    const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
+    const nextFour = schedule.slice(currentIndex + 1, currentIndex + 5);
+    
+    return { currentProgram: current, queue: nextFour };
+  }, [day, total]);
 
   useEffect(() => {
-    const audio = new Audio(STREAM_URL);
-    audio.preload = "none";
-    audio.volume = volume;
-    audioRef.current = audio;
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('praise-theme', theme);
+  }, [theme]);
 
-    const handleWaiting = () => setIsBuffering(true);
-    const handlePlaying = () => {
-      setIsBuffering(false);
-      setIsPlaying(true);
-    };
-    const handlePause = () => setIsPlaying(false);
-
-    audio.addEventListener('waiting', handleWaiting);
-    audio.addEventListener('playing', handlePlaying);
-    audio.addEventListener('pause', handlePause);
-
-    return () => {
-      audio.removeEventListener('waiting', handleWaiting);
-      audio.removeEventListener('playing', handlePlaying);
-      audio.removeEventListener('pause', handlePause);
-      audio.pause();
-      audio.src = '';
-    };
-  }, [volume]);
-
-  const togglePlay = async () => {
-    if (!audioRef.current) return;
-    try {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        setIsBuffering(true);
-        await audioRef.current.play();
-      }
-    } catch (error) {
-      console.error('Erro ao reproduzir:', error);
-      setIsBuffering(false);
+  useEffect(() => {
+    if (selectedProgram) {
+      setSelectedProgram(null);
     }
-  };
+  }, [location.pathname]);
 
-  const changeVolume = (value: number) => {
-    setVolume(value);
-    if (audioRef.current) audioRef.current.volume = value;
-  };
-
-  return (
-    <PlayerContext.Provider value={{ isPlaying, isBuffering, volume, togglePlay, changeVolume, currentTrack }}>
-      {children}
-    </PlayerContext.Provider>
-  );
-}
-
-const usePlayer = (): PlayerContextData => {
-  const context = useContext(PlayerContext);
-  if (!context) {
-    throw new Error('usePlayer must be used within PlayerProvider');
-  }
-  return context;
-};
-
-// ============ SCHEDULE DATA ============
-const SCHEDULE_DATA: { weekday: Program[]; sunday: Program[] } = {
-  weekday: [
-    { startTime: '00:00', endTime: '06:00', title: 'Madrugada com Cristo', host: 'Samuel Andrade', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp', description: 'Louvores que acalmam a alma na sua madrugada.' },
-    { startTime: '06:00', endTime: '07:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Músicas de adoração para começar o dia.' },
-    { startTime: '07:00', endTime: '12:00', title: 'Manhã com Cristo', host: 'Lucas Martins', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp', description: 'Começando o dia com muita energia e louvor.' },
-    { startTime: '12:00', endTime: '13:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Momento de adoração ao meio-dia.' },
-    { startTime: '13:00', endTime: '16:00', title: 'Tarde Gospel', host: 'Rafael Costa', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp', description: 'As melhores músicas gospel da tarde.' },
-    { startTime: '16:00', endTime: '17:00', title: 'Praise FM Non Stop', host: 'Praise FM', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp', description: 'Músicas sem parar!' },
-    { startTime: '17:00', endTime: '18:00', title: 'Praise FM Nova Geração', host: 'Ana Paula', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp', description: 'Para a nova geração de adoradores.' },
-    { startTime: '18:00', endTime: '20:00', title: 'De Carona com a Praise FM', host: 'Bruno Almeida', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp', description: 'Acompanhe seu trajeto com muita música.' },
-    { startTime: '20:00', endTime: '21:00', title: 'Praise FM Live Show', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_Fm_Live_Show_blfy7o.webp', description: 'Show ao vivo toda quarta-feira!' },
-    { startTime: '21:00', endTime: '22:00', title: 'Praise FM Brasil Clássicos', host: 'Rodrigo Veras', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp', description: 'Os clássicos do gospel brasileiro.' },
-    { startTime: '22:00', endTime: '00:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Encerrando o dia em adoração.' },
-  ],
-  sunday: [
-    { startTime: '00:00', endTime: '06:00', title: 'Madrugada com Cristo', host: 'Samuel Andrade', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp', description: 'Louvores que acalmam a alma na sua madrugada.' },
-    { startTime: '06:00', endTime: '07:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Músicas de adoração para começar o dia.' },
-    { startTime: '07:00', endTime: '12:00', title: 'Domingo com Cristo', host: 'Felipe Santos', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp', description: 'Domingo especial com muito louvor.' },
-    { startTime: '12:00', endTime: '13:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Momento de adoração ao meio-dia.' },
-    { startTime: '13:00', endTime: '16:00', title: 'Tarde Gospel', host: 'Rafael Costa', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp', description: 'As melhores músicas gospel da tarde.' },
-    { startTime: '16:00', endTime: '17:00', title: 'Praise FM Non Stop', host: 'Praise FM', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp', description: 'Músicas sem parar!' },
-    { startTime: '17:00', endTime: '18:00', title: 'Praise FM Nova Geração', host: 'Ana Paula', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp', description: 'Para a nova geração de adoradores.' },
-    { startTime: '18:00', endTime: '20:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Adoração dominical.' },
-    { startTime: '20:00', endTime: '21:00', title: 'Praise FM Pop', host: 'Thiago Moreira', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp', description: 'O melhor do pop gospel.' },
-    { startTime: '21:00', endTime: '22:00', title: 'Praise FM Brasil Clássicos', host: 'Rodrigo Veras', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp', description: 'Os clássicos do gospel brasileiro.' },
-    { startTime: '22:00', endTime: '23:00', title: 'Pregação da Palavra', host: 'Ministério', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp', description: 'Palavra de Deus para edificação.' },
-    { startTime: '23:00', endTime: '00:00', title: 'Praise FM Worship Brasil', host: 'Praise FM Team', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp', description: 'Encerrando o domingo em adoração.' },
-  ]
-};
-
-// ============ ANEL PROGRESSIVO ============
-function ProgressRing({ progress, size = 280 }: { progress: number; size?: number }) {
-  const strokeWidth = 8;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (progress / 100) * circumference;
-
-  return (
-    <svg width={size} height={size} className="absolute top-0 left-0 -rotate-90">
-      {/* Anel de fundo */}
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke="rgba(255, 255, 255, 0.1)"
-        strokeWidth={strokeWidth}
-      />
-      {/* Anel de progresso */}
-      <circle
-        cx={size / 2}
-        cy={size / 2}
-        r={radius}
-        fill="none"
-        stroke="#ff6600"
-        strokeWidth={strokeWidth}
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        className="transition-all duration-1000 ease-linear"
-      />
-    </svg>
-  );
-}
-
-// ============ NAVBAR ============
-function Navbar({ activeSection, onNavigate }: NavbarProps) {
-  return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          <h1 className="text-2xl font-bold tracking-tight">
-            <span className="text-white">PRAISE FM</span>
-            <span className="text-[#ff6600] ml-2">BRA</span>
-          </h1>
-
-          <div className="flex items-center gap-8">
-            <button
-              onClick={() => onNavigate('home')}
-              className={`flex items-center gap-2 text-sm font-medium tracking-wider transition-colors ${
-                activeSection === 'home' ? 'text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Home size={18} />
-              HOME
-            </button>
-            <button
-              onClick={() => onNavigate('schedule')}
-              className={`flex items-center gap-2 text-sm font-medium tracking-wider transition-colors ${
-                activeSection === 'schedule' ? 'text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Calendar size={18} />
-              SCHEDULE
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-}
-
-// ============ HERO ============
-function HeroSection() {
-  const { togglePlay, isPlaying, isBuffering } = usePlayer();
-  const [currentProgram, setCurrentProgram] = useState<Program>(SCHEDULE_DATA.weekday[2]);
-  const [progress, setProgress] = useState(0);
-
-  // Atualiza programa atual e progresso baseado no horário de São Paulo
   useEffect(() => {
-    const updateCurrentProgram = () => {
-      const now = new Date();
-      
-      // Converter para horário de São Paulo (UTC-3)
-      const saoPauloTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
-      const day = saoPauloTime.getDay();
-      const hours = saoPauloTime.getHours();
-      const minutes = saoPauloTime.getMinutes();
-      const currentMinutes = hours * 60 + minutes;
-
-      // Seleciona programação do dia
-      const todaySchedule = day === 0 ? SCHEDULE_DATA.sunday : SCHEDULE_DATA.weekday;
-
-      // Encontra programa atual
-      const current = todaySchedule.find(program => {
-        const [startH, startM] = program.startTime.split(':').map(Number);
-        const [endH, endM] = program.endTime.split(':').map(Number);
-        const start = startH * 60 + startM;
-        const end = endH === 0 ? 24 * 60 : endH * 60 + endM;
-        
-        return currentMinutes >= start && currentMinutes < end;
-      });
-
-      if (current) {
-        setCurrentProgram(current);
-
-        // Calcula progresso
-        const [startH, startM] = current.startTime.split(':').map(Number);
-        const [endH, endM] = current.endTime.split(':').map(Number);
-        const start = startH * 60 + startM;
-        const end = endH === 0 ? 24 * 60 : endH * 60 + endM;
-        const total = end - start;
-        const elapsed = currentMinutes - start;
-        const progressPercent = (elapsed / total) * 100;
-        
-        setProgress(Math.min(100, Math.max(0, progressPercent)));
+    const connectMetadata = () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
       }
-    };
+      
+      try {
+        const es = new EventSource(METADATA_URL);
+        eventSourceRef.current = es;
 
-    updateCurrentProgram();
-    const interval = setInterval(updateCurrentProgram, 30000); // Atualiza a cada 30s
-    return () => clearInterval(interval);
+        es.onmessage = (event) => {
+          if (!event.data) return;
+          try {
+            const data = JSON.parse(event.data);
+            const streamTitle = data.streamTitle || "";
+            if (streamTitle.includes(' - ')) {
+              const [artistPart, ...titleParts] = streamTitle.split(' - ');
+              const artist = artistPart.trim();
+              const title = titleParts.join(' - ').trim();
+              if (!artist || !title) return;
+              
+              const musicCheck = !BLOCKED_METADATA_KEYWORDS.some(k => 
+                `${artist} ${title}`.toLowerCase().includes(k)
+              );
+              
+              const newMetadata: LiveMetadata = { 
+                artist, 
+                title, 
+                playedAt: new Date(), 
+                isMusic: musicCheck 
+              };
+              
+              setLiveMetadata(prev => {
+                const isNewTrack = !prev || prev.title !== newMetadata.title || prev.artist !== newMetadata.artist;
+                if (isNewTrack) {
+                  if (newMetadata.isMusic) {
+                    setTrackHistory(h => {
+                      if (h.length > 0 && h[0].title === newMetadata.title && h[0].artist === newMetadata.artist) {
+                        return h;
+                      }
+                      return [newMetadata, ...h].slice(0, 10);
+                    });
+                  }
+                  return newMetadata;
+                }
+                return prev;
+              });
+            }
+          } catch (err) { }
+        };
+
+        es.onerror = () => {
+          if (es) es.close();
+          if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = window.setTimeout(connectMetadata, 5000);
+        };
+      } catch (err) { }
+    };
+    
+    connectMetadata();
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
+    };
   }, []);
 
-  return (
-    <section className="min-h-screen bg-black pt-20 pb-32 px-6">
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Horário */}
-        <div className="text-center mb-10 mt-12">
-          <p className="text-gray-500 text-sm tracking-wider font-medium">
-            {currentProgram.startTime} - {currentProgram.endTime}
-          </p>
-        </div>
+  const togglePlayback = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.load();
+      audioRef.current.play().catch(e => {
+        if (e.name !== 'AbortError' && !e.message?.includes('interrupted')) {
+          console.error("Playback failed", e);
+        }
+      });
+    }
+    setIsPlaying(!isPlaying);
+  };
 
-        {/* Layout Lado a Lado */}
-        <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-12 items-start mb-16">
-          
-          {/* Imagem à Esquerda COM ANEL PROGRESSIVO */}
-          <div className="flex justify-center md:justify-start">
-            <div className="relative w-[280px] h-[280px]">
-              {/* Anel Progressivo */}
-              <ProgressRing progress={progress} size={280} />
-              
-              {/* Imagem */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full overflow-hidden border-4 border-white/10">
-                <img 
-                  src={currentProgram.image} 
-                  alt={currentProgram.title} 
-                  className="w-full h-full object-cover" 
-                />
-              </div>
-              
-              {/* Badge com número */}
-              <div className="absolute bottom-4 right-4 w-12 h-12 bg-black rounded-full flex items-center justify-center border-2 border-white/20 z-10">
-                <span className="text-white font-bold text-xl">1</span>
-              </div>
-            </div>
-          </div>
+  useEffect(() => {
+    audioRef.current = new Audio(STREAM_URL);
+    audioRef.current.crossOrigin = "anonymous";
+    const savedVol = localStorage.getItem('praise-volume');
+    const initialVol = savedVol ? parseFloat(savedVol) : 0.8;
+    audioRef.current.volume = initialVol;
 
-          {/* Conteúdo à Direita */}
-          <div className="text-left md:pt-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 leading-tight">
-              {currentProgram.title} <span className="text-gray-400">with {currentProgram.host}</span>
-            </h1>
-            <p className="text-gray-400 text-lg mb-8">
-              {currentProgram.description}
-            </p>
-            
-            {/* Botão Play */}
-            <button
-              onClick={togglePlay}
-              disabled={isBuffering}
-              className="bg-[#ff6600] hover:bg-[#e65c00] text-white px-8 py-3 rounded text-base font-semibold flex items-center gap-3 disabled:opacity-70 transition-all"
-            >
-              {isBuffering ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Loading...
-                </>
-              ) : isPlaying ? (
-                <>
-                  <Pause size={20} fill="currentColor" />
-                  Pause
-                </>
-              ) : (
-                <>
-                  <Play size={20} fill="currentColor" />
-                  Play
-                </>
-              )}
-            </button>
-          </div>
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
-        </div>
+  const handleNavigateToProgram = (program: Program) => {
+    setSelectedProgram(program);
+    window.scrollTo(0, 0);
+  };
 
-        {/* Banner NEW MUSIC ALERT */}
-        <div className="bg-[#1a1a1a] border border-white/10 rounded-xl p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center flex-shrink-0">
-                <Zap className="text-[#ff6600]" size={28} strokeWidth={2.5} />
-              </div>
-              <div>
-                <h3 className="text-white font-bold text-xl mb-1">
-                  NEW MUSIC ALERT
-                </h3>
-                <p className="text-gray-400 text-sm uppercase tracking-wide">
-                  Fresh anthems dropping now
-                </p>
-              </div>
-            </div>
-            
-            <button className="hidden md:flex items-center gap-2 text-white hover:text-[#ff6600] transition-colors text-sm font-bold tracking-wider uppercase">
-              Explore All
-              <ArrowRight size={20} />
-            </button>
-          </div>
-        </div>
+  const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
 
-        {/* Rodapé Texto */}
-        <div className="mt-16 text-center text-gray-500 text-sm space-y-3">
-          <p className="italic">{currentProgram.description}</p>
-          <p className="text-xs uppercase tracking-widest">
-            Produzido por Praise FM Brasil para Praise FM Global.
-          </p>
-        </div>
-
-      </div>
-    </section>
-  );
-}
-
-// ============ SCHEDULE ============
-function ScheduleSection() {
-  const [activeTab, setActiveTab] = useState<'weekday' | 'sunday'>('weekday');
-  const currentSchedule = SCHEDULE_DATA[activeTab];
+  // Verifica se está na rota do app (sem navbar/footer)
+  const isAppRoute = location.pathname === '/app';
 
   return (
-    <section className="min-h-screen bg-black pt-24 pb-32 px-6">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Programação</h1>
-          <p className="text-gray-400 text-lg">Confira nossa grade completa de programas</p>
-        </div>
-
-        <div className="flex justify-center gap-4 mb-12">
-          <button
-            onClick={() => setActiveTab('weekday')}
-            className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === 'weekday' ? 'bg-[#ff6600] text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
-            }`}
-          >
-            Segunda - Sábado
-          </button>
-          <button
-            onClick={() => setActiveTab('sunday')}
-            className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === 'sunday' ? 'bg-[#ff6600] text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'
-            }`}
-          >
-            Domingo
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {currentSchedule.map((program, index) => (
-            <div key={index} className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-6 transition-all group cursor-pointer">
-              <div className="flex items-center gap-6">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white/20 group-hover:border-[#ff6600] transition-colors flex-shrink-0">
-                  <img src={program.image} alt={program.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-400 text-sm mb-2 font-medium">
-                    {program.startTime} - {program.endTime}
-                  </p>
-                  <h3 className="text-white font-bold text-xl mb-1 group-hover:text-[#ff6600] transition-colors">
-                    {program.title}
-                  </h3>
-                  <p className="text-gray-400 text-sm">com {program.host}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ============ PLAYER BAR ============
-function LivePlayerBar() {
-  const { isPlaying, isBuffering, togglePlay, currentTrack, volume, changeVolume } = usePlayer();
-
-  return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-black border-t border-white/10">
-      <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between gap-6">
-        
-        {/* Info Esquerda */}
-        <div className="flex items-center gap-4 flex-1 min-w-0">
-          <div className="w-14 h-14 bg-[#ff6600] rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-xl">1</span>
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2 h-2 bg-[#ff6600] rounded-full animate-pulse" />
-              <span className="text-xs font-bold text-[#ff6600] uppercase tracking-wider">Ao Vivo</span>
-            </div>
-            <h3 className="text-base font-bold text-white truncate">{currentTrack.title}</h3>
-            <p className="text-sm text-gray-400 truncate">{currentTrack.artist}</p>
-          </div>
-        </div>
-
-        {/* Botão Central */}
-        <button
-          onClick={togglePlay}
-          disabled={isBuffering}
-          className="w-14 h-14 bg-[#ff6600] hover:bg-[#e65c00] rounded-full flex items-center justify-center text-white transition-colors flex-shrink-0"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-        >
-          {isBuffering ? (
-            <Loader2 className="w-6 h-6 animate-spin" />
-          ) : isPlaying ? (
-            <Pause size={24} fill="currentColor" />
-          ) : (
-            <Play size={24} fill="currentColor" />
-          )}
-        </button>
-
-        {/* Volume Direita */}
-        <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
-          <Volume2 size={20} className="text-gray-400" />
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={(e) => changeVolume(parseFloat(e.target.value))}
-            className="w-32 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#ff6600]"
-            aria-label="Volume"
+    <div className="min-h-screen flex flex-col pb-[120px] bg-white text-black dark:bg-[#121212] dark:text-white transition-colors duration-300">
+      {!isAppRoute && (
+        <Navbar 
+          activeTab={activeTab} 
+          theme={theme}
+          onToggleTheme={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
+        />
+      )}
+      
+      <main className="flex-grow">
+        {selectedProgram ? (
+          <ProgramDetail 
+            program={selectedProgram} 
+            onBack={() => setSelectedProgram(null)} 
+            onViewSchedule={() => { setSelectedProgram(null); navigate('/schedule'); }} 
+            onListenClick={togglePlayback}
+            isPlaying={isPlaying}
           />
-        </div>
+        ) : (
+          <Routes>
+            <Route path="/" element={
+              <>
+                <Hero onListenClick={togglePlayback} isPlaying={isPlaying} liveMetadata={liveMetadata} onNavigateToProgram={handleNavigateToProgram} />
+                <RecentlyPlayed tracks={trackHistory} />
+              </>
+            } />
+            <Route path="/app" element={<AppHomePage />} />
+            <Route path="/music" element={<Playlist />} />
+            <Route path="/new-releases" element={<NewReleasesPage />} />
+            <Route path="/live-recordings" element={<LiveRecordingsPage />} />
+            <Route path="/artists" element={<FeaturedArtistsPage />} />
+            <Route path="/schedule" element={<ScheduleList onNavigateToProgram={handleNavigateToProgram} onBack={() => navigate('/')} />} />
+            <Route path="/events" element={<EventsPage />} />
+            <Route path="/presenters" element={<PresentersPage onNavigateToProgram={handleNavigateToProgram} />} />
+            <Route path="/devotional" element={<DevotionalPage />} />
+            <Route path="/help" element={<HelpCenterPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsOfUsePage />} />
+            <Route path="/cookies" element={<CookiesPolicyPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/my-sounds" element={<ProtectedRoute><MySoundsPage /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        )}
+      </main>
 
-      </div>
+      {!isAppRoute && <Footer />}
+      {!isAppRoute && currentProgram && (
+        <LivePlayerBar 
+          isPlaying={isPlaying} 
+          onTogglePlayback={togglePlayback} 
+          program={currentProgram} 
+          liveMetadata={liveMetadata}
+          queue={queue}
+          audioRef={audioRef}
+        />
+      )}
     </div>
   );
-}
+};
 
-// ============ MAIN APP ============
 export default function App() {
-  const [activeSection, setActiveSection] = useState<string>('home');
-
   return (
-    <PlayerProvider>
-      <div className="min-h-screen bg-black">
-        <Navbar activeSection={activeSection} onNavigate={setActiveSection} />
-        {activeSection === 'home' && <HeroSection />}
-        {activeSection === 'schedule' && <ScheduleSection />}
-        <LivePlayerBar />
-      </div>
-    </PlayerProvider>
+    <AuthProvider>
+      <HashRouter>
+        <ScrollToTop />
+        <AppContent />
+      </HashRouter>
+    </AuthProvider>
   );
 }
