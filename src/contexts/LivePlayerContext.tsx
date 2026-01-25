@@ -2,11 +2,18 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// ✅ Estrutura correta para liveMetadata
+interface LiveMetadata {
+  artist: string;
+  title: string;
+  artwork?: string;
+}
+
 interface LivePlayerContextType {
   isPlaying: boolean;
   isBuffering: boolean;
   togglePlay: () => void;
-  currentTrack: { title: string; artist: string };
+  currentTrack: LiveMetadata; // ✅ Tipo correto
   volume: number;
   changeVolume: (vol: number) => void;
 }
@@ -17,9 +24,10 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [isPlaying, setIsPlaying] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [volume, setVolume] = useState(0.8);
-  const [currentTrack, setCurrentTrack] = useState({ 
-    title: 'Praise FM Brasil', 
-    artist: 'Rádio Cristã 24h' 
+  const [currentTrack, setCurrentTrack] = useState<LiveMetadata>({
+    artist: 'Praise FM Brasil',
+    title: 'Rádio Cristã 24h',
+    artwork: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp'
   });
 
   useEffect(() => {
