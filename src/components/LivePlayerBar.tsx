@@ -1,77 +1,86 @@
-// src/components/LivePlayerBar.tsx
+import React from "react";
 
-import { Play, Pause, Loader2, Volume2, ListMusic } from 'lucide-react';
-import { usePlayer } from '../contexts/LivePlayerContext';
+interface Program {
+  id: string;
+  title: string;
+  host: string;
+  image: string;
+  startTime: string;
+  endTime: string;
+}
 
-export function LivePlayerBar() {
-  const { isPlaying, isBuffering, togglePlay, currentTrack, volume, changeVolume } = usePlayer();
+interface LivePlayerBarProps {
+  isPlaying: boolean;
+  onTogglePlayback: () => void;
+  program: Program;
+}
 
+const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
+  isPlaying,
+  onTogglePlayback,
+  program,
+}) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-white/10 transition-colors duration-300">
-      
-      {/* Barra de Progresso Laranja */}
-      <div className="absolute top-0 left-0 w-full h-[3px] bg-gray-100 dark:bg-zinc-800">
-        <div className="h-full bg-praise-accent w-full shadow-[0_0_8px_#ff6600]" />
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white flex items-center p-3 gap-4 shadow-lg z-50">
+      {/* Imagem do programa */}
+      <div className="w-16 h-16 flex-shrink-0">
+        <img
+          src={program.image}
+          alt={program.title}
+          className="w-full h-full object-cover rounded-md"
+        />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between gap-4">
-        
-        {/* Info da Música (Esquerda) */}
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="w-12 h-12 md:w-14 md:h-14 bg-praise-accent rounded flex-shrink-0 flex items-center justify-center shadow-sm">
-            <ListMusic className="text-white w-6 h-6" />
-          </div>
-          
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 bg-praise-accent rounded-full animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-wider text-praise-accent">Ao Vivo</span>
-            </div>
-            <h3 className="text-sm md:text-base font-bold text-gray-900 dark:text-white truncate">
-              {currentTrack.title || 'Praise FM Brasil'}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              {currentTrack.artist || 'Rádio Cristã 24h'}
-            </p>
-          </div>
+      {/* Informações do programa */}
+      <div className="flex-1 overflow-hidden">
+        <div className="font-semibold text-sm truncate">{program.title}</div>
+        <div className="text-xs text-gray-300 truncate">{program.host}</div>
+        <div className="text-xs text-gray-400">
+          {program.startTime} - {program.endTime}
         </div>
+      </div>
 
-        {/* Controle Central (Play/Pause) */}
-        <div className="flex items-center justify-center">
-          <button
-            onClick={togglePlay}
-            disabled={isBuffering}
-            className="w-12 h-12 md:w-14 md:h-14 bg-praise-accent hover:scale-105 active:scale-95 transition-all rounded-full flex items-center justify-center text-white shadow-lg disabled:opacity-70"
-            aria-label={isPlaying ? "Pausar transmissão ao vivo" : "Tocar transmissão ao vivo"}
+      {/* Botão play/pause */}
+      <button
+        onClick={onTogglePlayback}
+        className="w-12 h-12 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-colors"
+      >
+        {isPlaying ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            {isBuffering ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
-            ) : isPlaying ? (
-              <Pause size={28} fill="currentColor" />
-            ) : (
-              <Play size={28} fill="currentColor" className="ml-1" />
-            )}
-          </button>
-        </div>
-
-        {/* Volume (Direita - Desktop) */}
-        <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
-          <Volume2 size={20} className="text-gray-400" />
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={(e) => changeVolume(parseFloat(e.target.value))}
-            className="w-24 h-1 bg-gray-200 dark:bg-zinc-700 rounded-lg appearance-none cursor-pointer accent-praise-accent"
-          />
-          <div className="text-[10px] font-bold text-gray-400 ml-2 border border-gray-400 px-1 rounded uppercase">
-            AO VIVO
-          </div>
-        </div>
-
-      </div>
+            {/* Pause Icon */}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 9v6m4-6v6"
+            />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 ml-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            {/* Play Icon */}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M14.752 11.168l-6.518-3.758A1 1 0 007 8.24v7.52a1 1 0 001.234.97l6.518-1.758a1 1 0 000-1.72z"
+            />
+          </svg>
+        )}
+      </button>
     </div>
   );
-}
+};
+
+export default LivePlayerBar;

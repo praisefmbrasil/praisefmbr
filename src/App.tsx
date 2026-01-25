@@ -1,70 +1,65 @@
 import { useEffect, useRef, useState } from "react";
-import Navbar from "./components/Navbar";
+import LivePlayerBar from "./components/LivePlayerBar"; // componente visual do player
+
+const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv"; // Praise FM BRA
 
 function App() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // cria o áudio UMA ÚNICA VEZ
+  // Inicializa o áudio
   useEffect(() => {
     if (!audioRef.current) {
-      audioRef.current = new Audio("https://stream.zeno.fm/olisuxy9v3vtv");
-      audioRef.current.preload = "none";
+      audioRef.current = new Audio(STREAM_URL);
+      audioRef.current.preload = "none"; // evita autoplay bug
       audioRef.current.crossOrigin = "anonymous";
 
-      // 🔑 sincroniza estado com o áudio REAL
-      audioRef.current.addEventListener("play", () => {
-        setIsPlaying(true);
-      });
-
-      audioRef.current.addEventListener("pause", () => {
-        setIsPlaying(false);
-      });
-
-      audioRef.current.addEventListener("ended", () => {
-        setIsPlaying(false);
-      });
-
-      audioRef.current.addEventListener("error", (e) => {
-        console.error("Erro no stream:", e);
-        setIsPlaying(false);
-      });
+      audioRef.current.addEventListener("play", () => setIsPlaying(true));
+      audioRef.current.addEventListener("pause", () => setIsPlaying(false));
+      audioRef.current.addEventListener("ended", () => setIsPlaying(false));
     }
 
+    // Limpa ao desmontar
     return () => {
       audioRef.current?.pause();
+      audioRef.current = null;
     };
   }, []);
 
-  // play / pause controlado
+  // Alterna play/pause
   const togglePlayback = async () => {
     if (!audioRef.current) return;
 
     try {
       if (audioRef.current.paused) {
-        await audioRef.current.play(); // iOS exige clique
+        await audioRef.current.play();
       } else {
         audioRef.current.pause();
       }
     } catch (err) {
-      console.error("Falha ao tocar o stream:", err);
+      console.error("Erro ao tocar stream:", err);
     }
   };
 
   return (
     <>
-      {/* CONTEÚDO DA PÁGINA (evita tela branca) */}
-      <main className="min-h-screen pb-[90px] flex items-center justify-center bg-white dark:bg-black">
-        <h1 className="text-2xl font-bold text-black dark:text-white">
-          Praise FM Brasil
-        </h1>
+      {/* SEU SITE / ROTAS */}
+      <main className="min-h-screen pb-[120px]">
+        {/* conteúdo das páginas aqui */}
       </main>
 
-      {/* NAVBAR / PLAYER GLOBAL */}
-      <Navbar
+      {/* PLAYER FIXO NA PARTE INFERIOR */}
+      <LivePlayerBar
         isPlaying={isPlaying}
         onTogglePlayback={togglePlayback}
-        audioRef={audioRef}
+        program={{
+          id: "live",
+          title: "Praise FM USA",
+          host: "On Air",
+          image: "/icon-512.png",
+          startTime: "24/7",
+          endTime: "Live",
+        }}
       />
     </>
   );
