@@ -1,7 +1,7 @@
 // src/components/Hero.tsx
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Play, Pause, ChevronRight, Zap, ArrowRight } from 'lucide-react';
+import { Play, Pause, ChevronRight, Zap, ArrowRight, ExternalLink, ChevronsUpDown } from 'lucide-react';
 import { SCHEDULES } from '../constants';
 import { Program } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -20,7 +20,6 @@ const getSaoPauloInfo = () => {
 interface HeroProps {
   onListenClick: () => void;
   isPlaying: boolean;
-  // ✅ liveMetadata removido (não usado no mock)
   onNavigateToProgram: (program: Program) => void;
 }
 
@@ -207,14 +206,14 @@ const Hero: React.FC<HeroProps> = ({
                  onClick={() => onNavigateToProgram(currentProgram)}
                  className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit group"
                >
-                 Site do Programa <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
+                 Site do Programa <ExternalLink className="w-4 h-4 ml-2 text-[#ff6600]" />
                </button>
              )}
              <button 
                onClick={() => setShowDetails(!showDetails)}
                className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
              >
-               {showDetails ? <>Mostrar menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></> : <>Mostrar mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>}
+               {showDetails ? <>Mostrar menos <ChevronsUpDown className="w-4 h-4 ml-1 text-[#ff6600] rotate-180" /></> : <>Mostrar mais <ChevronsUpDown className="w-4 h-4 ml-1 text-[#ff6600]" /></>}
              </button>
            </div>
         </div>
@@ -222,25 +221,5 @@ const Hero: React.FC<HeroProps> = ({
     </section>
   );
 };
-
-const ExternalLinkIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-    <polyline points="15 3 21 3 21 9"></polyline>
-    <line x1="10" y1="14" x2="21" y2="3"></line>
-  </svg>
-);
-
-const ChevronUpIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="18 15 12 9 6 15"></polyline>
-  </svg>
-);
-
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="6 9 12 15 18 9"></polyline>
-  </svg>
-);
 
 export default Hero;
