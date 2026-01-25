@@ -19,7 +19,7 @@ import Hero from './components/Hero';
 import Footer from './components/Footer';
 import RecentlyPlayed from './components/RecentlyPlayed';
 import { LivePlayerBar } from './components/LivePlayerBar';
-import ProgramDetail from './components/ProgramDetailProps';
+import ProgramDetail from './components/ProgramDetail';
 import Playlist from './components/Playlist';
 import ScheduleList from './components/ScheduleList';
 
