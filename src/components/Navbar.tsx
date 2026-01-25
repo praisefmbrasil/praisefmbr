@@ -47,9 +47,9 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
             className="flex items-center cursor-pointer h-full" 
             onClick={() => navigate('/')}
           >
-            {/* ✅ Corrigido: removido espaço extra na URL */}
+            {/* ✅ Logo local de public/ */}
             <img 
-              src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Brasil_p1qfof.webp" 
+              src="/logo.webp" 
               alt="Praise FM Brasil Logo"
               className={`h-7 w-auto object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''}`} 
             />
@@ -86,7 +86,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
               }`}
             >
               <Library className="w-4 h-4" strokeWidth={1.5} />
-              <span>Minhas Músicas</span> {/* ✅ Traduzido */}
+              <span>Minhas Músicas</span>
             </button>
           </nav>
         </div>
@@ -118,7 +118,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
                     )}
                   </div>
                   <span className="text-[10px] font-medium uppercase tracking-widest text-gray-500 group-hover:text-black dark:group-hover:text-white">
-                    Perfil {/* ✅ Traduzido */}
+                    Perfil
                   </span>
                 </button>
               </div>
@@ -127,7 +127,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
                 onClick={() => navigate('/login')}
                 className="hidden md:block text-[10px] font-medium uppercase tracking-widest text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
               >
-                Entrar {/* ✅ Traduzido */}
+                Entrar
               </button>
             )}
 
@@ -165,7 +165,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
               className="flex items-center space-x-4 p-4 rounded-xl text-lg font-medium text-gray-600 dark:text-gray-400 uppercase tracking-tighter"
             >
               <Library className="w-5 h-5" />
-              <span>Minhas Músicas</span> {/* ✅ Traduzido */}
+              <span>Minhas Músicas</span>
             </button>
             {user && (
               <button 
@@ -176,7 +176,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
                 className="flex items-center space-x-4 p-4 rounded-xl text-lg font-medium text-[#ff6600] uppercase tracking-tighter border-t border-gray-100 dark:border-white/5 mt-4 pt-8"
               >
                 <Settings className="w-5 h-5" />
-                <span>Configurações da Conta</span> {/* ✅ Traduzido */}
+                <span>Configurações da Conta</span>
               </button>
             )}
           </nav>
