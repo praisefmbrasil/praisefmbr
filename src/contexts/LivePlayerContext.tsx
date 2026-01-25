@@ -1,19 +1,18 @@
-// src/contexts/LivePlayerContext.tsx
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-// ✅ Estrutura correta para liveMetadata
 interface LiveMetadata {
   artist: string;
   title: string;
   artwork?: string;
+  url?: string; // Adicionado para suportar o link do áudio do podcast
 }
 
 interface LivePlayerContextType {
   isPlaying: boolean;
   isBuffering: boolean;
   togglePlay: () => void;
-  currentTrack: LiveMetadata; // ✅ Tipo correto
+  playTrack: (track: LiveMetadata) => void; // Função para mudar a track/podcast
+  currentTrack: LiveMetadata;
   volume: number;
   changeVolume: (vol: number) => void;
 }
@@ -32,22 +31,23 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   useEffect(() => {
     const savedVol = localStorage.getItem('praise-volume');
-    if (savedVol) {
-      setVolume(parseFloat(savedVol));
-    }
+    if (savedVol) setVolume(parseFloat(savedVol));
   }, []);
 
   useEffect(() => {
     localStorage.setItem('praise-volume', volume.toString());
   }, [volume]);
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+  const togglePlay = () => setIsPlaying(!isPlaying);
+
+  // Define uma nova trilha e inicia a reprodução automaticamente
+  const playTrack = (track: LiveMetadata) => {
+    setCurrentTrack(track);
+    setIsPlaying(true);
+    // Aqui você integraria a mudança de source do seu elemento <audio> HTML5
   };
 
-  const changeVolume = (vol: number) => {
-    setVolume(vol);
-  };
+  const changeVolume = (vol: number) => setVolume(vol);
 
   return (
     <LivePlayerContext.Provider
@@ -55,6 +55,7 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         isPlaying,
         isBuffering,
         togglePlay,
+        playTrack,
         currentTrack,
         volume,
         changeVolume
@@ -67,8 +68,6 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
 export const usePlayer = () => {
   const context = useContext(LivePlayerContext);
-  if (!context) {
-    throw new Error('usePlayer must be used within a LivePlayerProvider');
-  }
+  if (!context) throw new Error('usePlayer must be used within a LivePlayerProvider');
   return context;
 };

@@ -38,8 +38,7 @@ const DevotionalSection: React.FC = () => {
 
 const PodcastCard = ({ podcast }: { podcast: any }) => {
   const { toggleFavorite, isFavorite, user } = useAuth();
-  // Corrigindo erro de tipagem do context
-  const player = usePlayer() as any; 
+  const player = usePlayer(); 
   const navigate = useNavigate();
   const saved = isFavorite(podcast.id);
 
@@ -49,20 +48,20 @@ const PodcastCard = ({ podcast }: { podcast: any }) => {
 
     if (type === 'save') {
       toggleFavorite({
-        id: podcast.id, title: podcast.title, subtitle: podcast.author,
-        image: podcast.image, type: 'devotional'
+        id: podcast.id,
+        title: podcast.title,
+        subtitle: podcast.author,
+        image: podcast.image,
+        type: 'devotional'
       });
     } else {
-      // Verifica se a função existe no seu contexto (ajuste o nome se for play, handlePlay, etc)
-      const playFn = player.playTrack || player.play || player.togglePlay;
-      if (playFn) {
-        playFn({
-          title: podcast.title,
-          artist: podcast.author,
-          url: podcast.audioUrl,
-          image: podcast.image
-        });
-      }
+      // Agora o TS reconhece playTrack e mapeia os campos corretamente
+      player.playTrack({
+        title: podcast.title,
+        artist: podcast.author,
+        artwork: podcast.image,
+        url: podcast.audioUrl
+      });
     }
   };
 
