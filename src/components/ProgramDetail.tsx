@@ -1,189 +1,61 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Volume2, ArrowLeft, Calendar, Music, Loader2 } from 'lucide-react';
+import React from 'react';
 import { Program } from '../types';
-import { supabase } from '../lib/supabase';
-import { usePlayer } from '../contexts/LivePlayerContext';
-
-interface PlayedTrack {
-  artist: string;
-  title: string;
-  label: string;
-  image: string;
-  timestamp: number;
-  isLive?: boolean;
-}
-
-interface DailyHistory { [date: string]: PlayedTrack[]; }
+import { Play, Pause, Clock, ArrowLeft, Calendar } from 'lucide-react';
 
 interface ProgramDetailProps {
   program: Program;
   onBack: () => void;
   onViewSchedule: () => void;
+  onListenClick: () => void; // ✅ Adicionado para resolver Erro 2322
+  isPlaying: boolean;
 }
 
-const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/hvwifp8ezc6tv';
-
-const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSchedule }) => {
-  const { isPlaying, togglePlay, playTrack } = usePlayer();
-  const [loadingHistory, setLoadingHistory] = useState(true);
-  const [historyGroups, setHistoryGroups] = useState<DailyHistory>({});
-  const eventSourceRef = useRef<EventSource | null>(null);
-
-  // 1. Carregar Histórico do Banco de Dados
-  useEffect(() => {
-    const loadSavedHistory = async () => {
-      setLoadingHistory(true);
-      try {
-        const { data, error } = await supabase
-          .from('program_history')
-          .select('*')
-          .eq('program_id', program.id)
-          .order('played_at', { ascending: false })
-          .limit(50);
-
-        if (error) throw error;
-
-        if (data) {
-          const grouped: DailyHistory = {};
-          data.forEach(item => {
-            const date = item.played_at.split('T')[0];
-            if (!grouped[date]) grouped[date] = [];
-            grouped[date].push({
-              artist: item.artist,
-              title: item.title,
-              label: item.label || "ANTERIOR",
-              image: item.image_url,
-              timestamp: new Date(item.played_at).getTime()
-            });
-          });
-          setHistoryGroups(grouped);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar histórico:", err);
-      } finally {
-        setLoadingHistory(false);
-      }
-    };
-    loadSavedHistory();
-  }, [program.id]);
-
-  // 2. Monitorar Metadados em Tempo Real (Zeno FM)
-  useEffect(() => {
-    const es = new EventSource(METADATA_URL);
-    eventSourceRef.current = es;
-
-    es.onmessage = async (event) => {
-      if (!event.data) return;
-      try {
-        const data = JSON.parse(event.data);
-        const streamTitle = data.streamTitle || "";
-        if (!streamTitle.includes(' - ')) return;
-
-        const [artist, ...titleParts] = streamTitle.split(' - ');
-        const title = titleParts.join(' - ').trim();
-
-        setHistoryGroups(prev => {
-          const today = new Date().toISOString().split('T')[0];
-          const currentTracks = prev[today] || [];
-          
-          if (currentTracks.length > 0 && currentTracks[0].title === title) return prev;
-
-          const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(artist + title)}/200/200`;
-          
-          // Salva no banco de forma assíncrona
-          supabase.from('program_history').insert([{
-            program_id: program.id,
-            artist,
-            title,
-            image_url: imageUrl,
-            played_at: new Date().toISOString(),
-            label: "AO VIVO"
-          }]).then(({ error }) => { if (error) console.error(error); });
-
-          const newTrack = { artist, title, label: "AO VIVO", image: imageUrl, timestamp: Date.now(), isLive: true };
-          return { ...prev, [today]: [newTrack, ...currentTracks].slice(0, 50) };
-        });
-      } catch (e) { console.error("Erro metadados:", e); }
-    };
-
-    return () => es.close();
-  }, [program.id]);
-
-  const sortedDateKeys = Object.keys(historyGroups).sort((a, b) => b.localeCompare(a));
-
+const ProgramDetail: React.FC<ProgramDetailProps> = ({ 
+  program, 
+  onBack, 
+  onViewSchedule,
+  onListenClick,
+  isPlaying 
+}) => {
   return (
-    <div className="bg-[#0a0a0a] min-h-screen text-white pb-20">
-      <div className="max-w-7xl mx-auto px-4 pt-12">
-        <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white mb-8 uppercase text-[10px] tracking-[0.3em] font-bold">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Voltar para o início
-        </button>
+    <div className="flex flex-col min-h-screen bg-black text-white p-6">
+      <button onClick={onBack} className="flex items-center text-orange-500 mb-8 hover:opacity-80 transition">
+        <ArrowLeft className="mr-2" size={20} />
+        <span>Voltar para a Home</span>
+      </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Coluna Principal: Capa e Histórico */}
-          <div className="lg:col-span-8">
-            <div className="relative aspect-video mb-12 group overflow-hidden bg-[#111]">
-              <img src={program.image} alt={program.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="absolute bottom-8 left-8">
-                <h1 className="text-5xl md:text-7xl font-bold uppercase tracking-tighter mb-6">{program.title}</h1>
-                <button 
-                  onClick={() => playTrack({ artist: program.host, title: program.title, artwork: program.image })}
-                  className="bg-[#ff6600] hover:bg-white hover:text-black text-white px-10 py-5 flex items-center space-x-4 uppercase font-black tracking-widest transition-all shadow-2xl"
-                >
-                  <Volume2 className={isPlaying ? 'animate-bounce' : ''} />
-                  <span>{isPlaying ? 'Ouvindo Agora' : 'Ouvir a rádio'}</span>
-                </button>
-              </div>
-            </div>
+      <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto w-full">
+        <div className="relative group">
+          <img 
+            src={program.image} 
+            alt={program.title} 
+            className="w-full aspect-square object-cover rounded-2xl shadow-2xl border border-gray-800"
+          />
+          <button 
+            onClick={onListenClick}
+            className="absolute bottom-6 right-6 bg-orange-500 p-6 rounded-full shadow-orange-500/20 shadow-xl hover:scale-105 transition-transform"
+          >
+            {isPlaying ? <Pause fill="white" size={32} /> : <Play fill="white" size={32} />}
+          </button>
+        </div>
 
-            <div className="bg-white text-black p-0 shadow-2xl border-t-8 border-[#ff6600]">
-              <div className="p-8 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-3xl font-bold uppercase tracking-tighter flex items-center">
-                  <Music className="w-6 h-6 mr-3 text-[#ff6600]" /> Recentemente Tocadas
-                </h3>
-              </div>
-              
-              <div className="divide-y divide-gray-100">
-                {loadingHistory ? (
-                  <div className="py-20 text-center"><Loader2 className="animate-spin mx-auto text-[#ff6600] w-12 h-12" /></div>
-                ) : sortedDateKeys.length > 0 ? (
-                  sortedDateKeys.map(date => (
-                    <div key={date}>
-                      <div className="bg-gray-50 px-8 py-3 text-[10px] font-black uppercase text-gray-400 tracking-[0.2em]">{date}</div>
-                      {historyGroups[date].map((track, i) => (
-                        <div key={i} className="flex items-center p-6 hover:bg-gray-50 transition-colors group">
-                          <div className="relative w-16 h-16 mr-6 flex-shrink-0">
-                            <img src={track.image} className="w-full h-full object-cover shadow-lg" alt="" />
-                            {track.isLive && <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#ff6600] rounded-full animate-ping" />}
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="font-black uppercase text-lg leading-none truncate group-hover:text-[#ff6600] transition-colors">{track.artist}</h4>
-                            <p className="text-gray-500 text-sm mt-1 uppercase font-medium">{track.title}</p>
-                          </div>
-                          <span className="ml-auto text-[9px] font-bold text-gray-300 uppercase">{track.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ))
-                ) : <div className="py-20 text-center text-gray-400 uppercase text-xs tracking-widest font-bold">Nenhum registro encontrado</div>}
-              </div>
-            </div>
+        <div className="flex flex-col justify-center">
+          <div className="flex items-center gap-3 text-orange-500 mb-4 font-bold uppercase tracking-widest text-sm">
+            <Clock size={18} />
+            <span>{program.startTime} - {program.endTime}</span>
           </div>
-
-          {/* Lateral: Info Apresentador */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-[#1a1a1a] p-10 border-l-8 border-[#ff6600]">
-              <p className="text-[11px] uppercase tracking-[0.4em] text-gray-500 mb-4 font-bold">Apresentador</p>
-              <h4 className="text-3xl font-black uppercase tracking-tighter leading-none mb-2">{program.host}</h4>
+          
+          <h1 className="text-5xl font-black mb-4 tracking-tighter uppercase">{program.title}</h1>
+          <p className="text-xl text-gray-400 mb-8 leading-relaxed">{program.description}</p>
+          
+          <div className="flex items-center gap-4 p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+            <div className="w-12 h-12 bg-orange-500/10 rounded-full flex items-center justify-center text-orange-500">
+              <Calendar size={24} />
             </div>
-            
-            <button 
-              onClick={onViewSchedule}
-              className="w-full group flex items-center justify-between p-8 bg-[#1a1a1a] border border-white/5 hover:bg-white hover:text-black transition-all uppercase text-[11px] font-black tracking-[0.3em]"
-            >
-              <span>Ver Grade Completa</span>
-              <Calendar className="w-5 h-5 text-[#ff6600] group-hover:text-black" />
-            </button>
+            <div>
+              <p className="text-sm text-gray-500 uppercase font-bold">Apresentador</p>
+              <p className="text-lg font-semibold">{program.host}</p>
+            </div>
           </div>
         </div>
       </div>
