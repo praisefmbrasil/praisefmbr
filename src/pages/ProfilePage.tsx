@@ -70,11 +70,9 @@ const ProfilePage: React.FC = () => {
       if (uploadError) throw uploadError;
 
       // ✅ Correção: desestruturação correta
-      const { data, error: urlError } = supabase.storage
+      const { data } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
-
-      if (urlError) throw urlError;
 
       setProfile(prev => ({ ...prev, avatar_url: data.publicUrl }));
       setMessage({ type: 'success', text: 'Foto enviada! Não esqueça de salvar as alterações.' });
