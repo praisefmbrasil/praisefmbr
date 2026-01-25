@@ -1,31 +1,41 @@
 // src/components/Hero.tsx
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Play, Pause, ChevronRight, Zap, ArrowRight, ExternalLink, ChevronsUpDown } from 'lucide-react';
+import { Play, Pause, ChevronRight, Zap, ArrowRight } from 'lucide-react';
 import { SCHEDULES } from '../constants';
 import { Program } from '../types';
 import { useNavigate } from 'react-router-dom';
 
-// ✅ Usa fuso de São Paulo
-const getSaoPauloInfo = () => {
+// ✅ Ajustado para o fuso horário de Brasília
+const getBrazilInfo = () => {
   const now = new Date();
-  const saoPauloString = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-  const saoPauloDate = new Date(saoPauloString);
-  const h = saoPauloDate.getHours();
-  const m = saoPauloDate.getMinutes();
-  const day = saoPauloDate.getDay();
+  const brazilString = now.toLocaleString('en-US', {
+    timeZone: 'America/Sao_Paulo',
+  });
+  const brazilDate = new Date(brazilString);
+  const h = brazilDate.getHours();
+  const m = brazilDate.getMinutes();
+  const day = brazilDate.getDay();
   return { day, totalMinutes: h * 60 + m };
+};
+
+// ✅ Formatado para o padrão brasileiro de 24h
+const format24h = (time24: string) => {
+  const [h, m] = time24.split(':').map(Number);
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 };
 
 interface HeroProps {
   onListenClick: () => void;
   isPlaying: boolean;
+  liveMetadata?: { artist: string; title: string; artwork?: string } | null;
   onNavigateToProgram: (program: Program) => void;
 }
 
 const Hero: React.FC<HeroProps> = ({
   onListenClick,
   isPlaying,
+  liveMetadata,
   onNavigateToProgram,
 }) => {
   const [tick, setTick] = useState(0);
@@ -37,37 +47,36 @@ const Hero: React.FC<HeroProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  const saoPaulo = useMemo(() => getSaoPauloInfo(), [tick]);
+  const brazil = useMemo(() => getBrazilInfo(), [tick]);
 
   const { currentProgram, upNextPrograms } = useMemo(() => {
-    const schedule = SCHEDULES[saoPaulo.day] || SCHEDULES[0];
-    
+    const schedule = SCHEDULES[brazil.day] || SCHEDULES[1];
     const currentIndex = schedule.findIndex((p) => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
-      let start = sH * 60 + sM;
+      const start = sH * 60 + sM;
       let end = eH * 60 + eM;
-      if (end <= start) end += 24 * 60;
-      return saoPaulo.totalMinutes >= start && saoPaulo.totalMinutes < end;
+      if (end === 0 || end <= start) end = 24 * 60;
+      return brazil.totalMinutes >= start && brazil.totalMinutes < end;
     });
 
     const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
     const next = schedule.slice(currentIndex + 1, currentIndex + 3);
     
     return { currentProgram: current, upNextPrograms: next };
-  }, [saoPaulo]);
+  }, [brazil]);
 
   const progress = useMemo(() => {
     if (!currentProgram) return 0;
     const [sH, sM] = currentProgram.startTime.split(':').map(Number);
     const [eH, eM] = currentProgram.endTime.split(':').map(Number);
-    let start = sH * 60 + sM;
+    const start = sH * 60 + sM;
     let end = eH * 60 + eM;
-    if (end <= start) end += 24 * 60;
-    const elapsed = saoPaulo.totalMinutes - start;
+    if (end === 0 || end <= start) end = 24 * 60;
+    const elapsed = brazil.totalMinutes - start;
     const duration = end - start;
     return Math.min(Math.max(elapsed / duration, 0), 1);
-  }, [currentProgram, saoPaulo.totalMinutes]);
+  }, [currentProgram, brazil.totalMinutes]);
 
   if (!currentProgram) return null;
 
@@ -83,7 +92,7 @@ const Hero: React.FC<HeroProps> = ({
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
           
-          {/* LEFT SIDE: CIRCULAR IMAGE */}
+          {/* LADO ESQUERDO: IMAGEM CIRCULAR */}
           <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => onNavigateToProgram(currentProgram)}>
             <div className="relative rounded-full overflow-hidden" style={{ width: circleSize, height: circleSize }}>
               <img 
@@ -104,10 +113,11 @@ const Hero: React.FC<HeroProps> = ({
             </div>
           </div>
 
-          {/* RIGHT SIDE: TEXT AND PLAY BUTTON */}
+          {/* LADO DIREITO: TEXTO E BOTÃO PLAY */}
           <div className="flex-grow pt-4 text-center md:text-left">
             <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
-              <span>{currentProgram.startTime} - {currentProgram.endTime}</span>
+              <span className="uppercase font-bold text-[#ff6600] tracking-widest mr-2">No Ar Agora</span>
+              <span>{format24h(currentProgram.startTime)} - {format24h(currentProgram.endTime)}</span>
             </div>
             
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
@@ -133,7 +143,7 @@ const Hero: React.FC<HeroProps> = ({
 
         {showDetails && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            {/* UP NEXT SECTION */}
+            {/* SEÇÃO A SEGUIR */}
             <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 {upNextPrograms.map((prog) => (
@@ -142,7 +152,7 @@ const Hero: React.FC<HeroProps> = ({
                     className="flex items-start space-x-5 group cursor-pointer"
                     onClick={() => onNavigateToProgram(prog)}
                   >
-                    <div className="w-24 h-24 flex-shrink-0 bg-gray-100 overflow-hidden">
+                    <div className="w-24 h-24 flex-shrink-0 bg-gray-100 overflow-hidden rounded-sm">
                       <img 
                         src={prog.image} 
                         alt={prog.title} 
@@ -151,8 +161,8 @@ const Hero: React.FC<HeroProps> = ({
                     </div>
                     <div className="flex flex-col">
                       <div className="text-[11px] font-normal mb-1">
-                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">PRÓXIMOS</span>
-                        <span className="text-gray-400 font-normal">{prog.startTime} - {prog.endTime}</span>
+                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">A Seguir</span>
+                        <span className="text-gray-400 font-normal">{format24h(prog.startTime)} - {format24h(prog.endTime)}</span>
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-[#ff6600] transition-colors">
                         {prog.title}
@@ -166,7 +176,7 @@ const Hero: React.FC<HeroProps> = ({
               </div>
             </div>
 
-            {/* NEW MUSIC ALERT SECTION */}
+            {/* ALERTA DE NOVA MÚSICA */}
             <div className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50" onClick={() => navigate('/new-releases')}>
               <div className="flex items-center space-x-6 mb-6 md:mb-0">
                 <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center relative">
@@ -174,21 +184,21 @@ const Hero: React.FC<HeroProps> = ({
                   <div className="absolute inset-0 rounded-full border-2 border-[#ff6600] scale-110 animate-ping opacity-20"></div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Novos Lançamentos</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">Os melhores louvores chegando agora</p>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Radar de Lançamentos</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">Novos hinos chegando agora</p>
                 </div>
               </div>
               <button 
                 className="flex items-center space-x-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-black dark:text-white group-hover:text-[#ff6600] transition-colors"
               >
-                <span>Explorar</span>
+                <span>Explorar Todos</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
               </button>
             </div>
           </div>
         )}
 
-        {/* SECTION FOOTER */}
+        {/* RODAPÉ DA SEÇÃO */}
         <div className="mt-12 pt-6">
            {showDetails && (
              <>
@@ -196,7 +206,7 @@ const Hero: React.FC<HeroProps> = ({
                  {currentProgram.description.split('.')[0]}.
                </p>
                <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-medium tracking-widest mb-4">
-                 Produzido por PRAISE FM BRASIL.
+                 Produzido pela PRAISE FM BRASIL para PRAISE FM Global.
                </p>
              </>
            )}
@@ -206,14 +216,18 @@ const Hero: React.FC<HeroProps> = ({
                  onClick={() => onNavigateToProgram(currentProgram)}
                  className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit group"
                >
-                 Site do Programa <ExternalLink className="w-4 h-4 ml-2 text-[#ff6600]" />
+                 Página do Programa <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
                </button>
              )}
              <button 
                onClick={() => setShowDetails(!showDetails)}
                className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
              >
-               {showDetails ? <>Mostrar menos <ChevronsUpDown className="w-4 h-4 ml-1 text-[#ff6600] rotate-180" /></> : <>Mostrar mais <ChevronsUpDown className="w-4 h-4 ml-1 text-[#ff6600]" /></>}
+               {showDetails ? (
+                 <>Ver menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
+               ) : (
+                 <>Ver mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
+               )}
              </button>
            </div>
         </div>
@@ -221,5 +235,25 @@ const Hero: React.FC<HeroProps> = ({
     </section>
   );
 };
+
+const ExternalLinkIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+    <polyline points="15 3 21 3 21 9"></polyline>
+    <line x1="10" y1="14" x2="21" y2="3"></line>
+  </svg>
+);
+
+const ChevronUpIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+);
+
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+);
 
 export default Hero;

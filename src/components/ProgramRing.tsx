@@ -1,53 +1,75 @@
 import React from 'react';
 
 interface ProgramRingProps {
-  progress: number;
-  size?: number;
-  strokeWidth?: number;
+  title: string;
+  image: string;
+  progress: number; // 0 a 100
+  isLive?: boolean;
 }
 
-export function ProgramRing({ progress, size = 160, strokeWidth = 5 }: ProgramRingProps) {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (progress / 100) * circumference;
+export function ProgramRing({
+  title,
+  image,
+  progress,
+  isLive
+}: ProgramRingProps) {
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  
+  // Garante que o progresso não ultrapasse os limites visuais
+  const safeProgress = Math.min(Math.max(progress, 0), 100);
+  const offset = circumference - (safeProgress / 100) * circumference;
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} className="rotate-[-90deg]">
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="currentColor"
-          strokeWidth={strokeWidth}
-          fill="transparent"
-          className="text-gray-100 dark:text-white/10"
-        />
-        <circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="#ff6600"
-          strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          strokeLinecap="round"
-          fill="transparent"
-          className="transition-all duration-500"
-        />
-      </svg>
-      {/* Imagem do Locutor Circular como no modelo USA */}
-      <div className="absolute inset-2 rounded-full overflow-hidden">
-        <img 
-          src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp" 
-          alt="Locutor"
-          className="w-full h-full object-cover"
-        />
+    <div className="flex flex-col items-center min-w-[120px] group">
+      <div className="relative w-28 h-28">
+        {/* SVG do Anel de Progresso */}
+        <svg className="absolute inset-0 rotate-[-90deg] w-full h-full">
+          {/* Círculo de Fundo (Track) */}
+          <circle
+            cx="56"
+            cy="56"
+            r={radius}
+            stroke="#2a2a2a"
+            strokeWidth="6"
+            fill="none"
+          />
+          {/* Círculo de Progresso (Indicator) */}
+          <circle
+            cx="56"
+            cy="56"
+            r={radius}
+            stroke="#ff6600"
+            strokeWidth="6"
+            fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-700 ease-in-out"
+          />
+        </svg>
+
+        {/* Imagem do Apresentador */}
+        <div className="absolute inset-[10px] rounded-full overflow-hidden bg-[#1a1a1a]">
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        </div>
+
+        {/* Badge LIVE */}
+        {isLive && (
+          <span className="absolute bottom-1 right-1 bg-[#ff6600] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-lg animate-pulse">
+            LIVE
+          </span>
+        )}
       </div>
-      {/* Badge "1" no canto, igual à referência */}
-      <div className="absolute bottom-1 right-1 bg-black text-white text-[10px] font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-white dark:border-[#0f0f0f]">
-        1
-      </div>
+
+      {/* Título do Programa */}
+      <span className="mt-3 text-xs font-medium text-center text-white/80 uppercase tracking-tighter group-hover:text-white transition-colors">
+        {title}
+      </span>
     </div>
   );
 }

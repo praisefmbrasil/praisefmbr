@@ -1,186 +1,114 @@
-import React, { useState, useEffect } from 'react';
-import { Share2, Copy, BookOpen, Quote, Loader2, Check, AlertCircle } from 'lucide-react';
+// src/components/DevotionalSection.tsx
 
-interface VerseData {
-  reference: string;
-  text: string;
-  translation_name: string;
-}
+import React from 'react';
+import { Mic2, ChevronRight, Play, Clock, Check } from 'lucide-react';
+import { DEVOTIONAL_PODCASTS } from '../constants';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-// Referências bíblicas mantidas (funcionam na API em português)
-const BIBLE_REFERENCES = [
-  "João 3:16", "Filipenses 4:13", "Salmos 23:1", "Provérbios 3:5", "Isaías 40:31",
-  "Romanos 8:28", "Josué 1:9", "Mateus 28:19", "Gálatas 5:22", "Jeremias 29:11",
-  "Salmos 46:1", "1 Coríntios 13:4", "Romanos 12:2", "Mateus 5:16", "Provérbios 18:10",
-  "Salmos 119:105", "Efésios 2:8", "Hebreus 11:1", "1 Pedro 5:7", "Tiago 1:5",
-  "2 Timóteo 1:7", "Romanos 15:13", "Salmos 37:4", "Mateus 11:28", "João 14:6",
-  "Isaías 41:10", "Filipenses 4:6", "Colossenses 3:23", "Provérbios 16:3", "Lamentações 3:22"
-];
+const DevotionalSection: React.FC = () => {
+  const { toggleFavorite, isFavorite, user } = useAuth();
+  const navigate = useNavigate();
 
-const DailyVerse: React.FC = () => {
-  const [verse, setVerse] = useState<VerseData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const [shared, setShared] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchVerse = async () => {
-      setLoading(true);
-      try {
-        const now = new Date();
-        const start = new Date(now.getFullYear(), 0, 0);
-        const diff = (now.getTime() - start.getTime()) + ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
-        const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const refIndex = dayOfYear % BIBLE_REFERENCES.length;
-        const reference = BIBLE_REFERENCES[refIndex];
-        
-        // ✅ Agora usa tradução em português (Almeida)
-        const response = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}?translation=almeida`);
-        if (!response.ok) throw new Error('Versículo não encontrado');
-        const data = await response.json();
-        setVerse({
-          reference: data.reference,
-          text: data.text.trim(),
-          translation_name: "Almeida Revista e Corrigida"
-        });
-      } catch (error) {
-        console.error("Erro ao buscar versículo:", error);
-        setError("Não foi possível carregar o versículo do dia.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchVerse();
-  }, []);
-
-  const copyToClipboard = async () => {
-    if (!verse) return;
-    const shareText = `"${verse.text}" — ${verse.reference} | Praise FM Brasil`;
-    
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(shareText);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } else {
-        const textArea = document.createElement("textarea");
-        textArea.value = shareText;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-          console.error('Fallback copy failed', err);
-        }
-        document.body.removeChild(textArea);
-      }
-    } catch (err) {
-      console.error("Falha ao copiar:", err);
+  const handleListenLater = (e: React.MouseEvent, podcast: any) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate('/login');
+      return;
     }
+    toggleFavorite({
+      id: podcast.id,
+      title: podcast.title,
+      subtitle: podcast.author,
+      image: podcast.image,
+      type: 'devotional'
+    });
   };
-
-  const handleShare = async () => {
-    if (!verse) return;
-    const shareUrl = window.location.origin + window.location.pathname + window.location.hash;
-    const shareData = {
-      title: 'Praise FM Brasil - Versículo do Dia',
-      text: `"${verse.text}" — ${verse.reference}`,
-      url: shareUrl,
-    };
-
-    try {
-      if (navigator.share && navigator.canShare?.(shareData)) {
-        await navigator.share(shareData);
-        setShared(true);
-        setTimeout(() => setShared(false), 2000);
-      } else {
-        copyToClipboard();
-      }
-    } catch (err) {
-      if ((err as Error).name !== 'AbortError') {
-        console.error("Erro ao compartilhar:", err);
-        copyToClipboard();
-      }
-    }
-  };
-
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-      <Loader2 className="w-8 h-8 animate-spin mb-4 text-[#ff6600]" />
-      <p className="font-medium uppercase tracking-[0.2em] text-[10px]">Carregando Versículo...</p>
-    </div>
-  );
-
-  if (error) return (
-    <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-      <div className="bg-red-50 dark:bg-red-900/10 p-10 border border-red-100 dark:border-red-900/20">
-        <AlertCircle className="w-10 h-10 text-red-500 mx-auto mb-4" />
-        <p className="text-red-600 dark:text-red-400 text-sm font-regular uppercase tracking-widest">{error}</p>
-      </div>
-    </div>
-  );
-  
-  if (!verse) return null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <div className="bg-white dark:bg-[#111] shadow-2xl overflow-hidden border border-gray-100 dark:border-white/5 flex flex-col md:flex-row transition-colors">
-        <div className="md:w-1/3 bg-black relative p-10 flex flex-col justify-between overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <Quote className="w-24 h-24 text-white fill-current" />
+    <section className="py-16 bg-[#f8f8f8] dark:bg-[#0a0a0a]">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center space-x-3">
+             <div className="p-2 bg-[#ff6600] rounded-lg">
+                <Mic2 className="w-5 h-5 text-white" />
+             </div>
+             <h2 className="text-3xl font-medium uppercase tracking-tighter dark:text-white">Devocionais</h2>
           </div>
-          <div className="relative z-10">
-            <span className="bg-[#ff6600] text-white text-[9px] font-medium uppercase px-2.5 py-1 rounded-sm inline-block mb-6 tracking-widest">
-              VERSÍCULO DO DIA
-            </span>
-            <h3 className="text-white text-3xl md:text-4xl font-medium uppercase tracking-tighter leading-tight">
-              Escritura<br />Diária
-            </h3>
-          </div>
-          <div className="relative z-10 mt-12 flex items-center space-x-3">
-            <BookOpen className="w-6 h-6 text-[#ff6600]" />
-            <p className="text-gray-500 text-[9px] font-medium uppercase tracking-widest">{verse.translation_name}</p>
-          </div>
+          <button 
+            onClick={() => navigate('/devotional')}
+            className="flex items-center text-black dark:text-white font-medium uppercase tracking-widest text-[10px] hover:underline"
+          >
+            Ver todos <ChevronRight className="w-4 h-4 ml-1 text-[#ff6600]" />
+          </button>
         </div>
-        <div className="md:w-2/3 p-8 md:p-12 flex flex-col">
-          <p className="text-xl md:text-2xl font-normal tracking-tight text-gray-800 dark:text-gray-100 leading-relaxed mb-8 italic">
-            "{verse.text}"
-          </p>
-          <div className="mt-auto pt-8 border-t border-gray-50 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div>
-              <p className="text-black dark:text-white bg-[#ff6600] text-xl font-medium uppercase tracking-tighter px-2 inline-block leading-none py-1">
-                {verse.reference}
-              </p>
-              <p className="text-gray-400 text-[9px] font-medium uppercase tracking-widest mt-2">BÍBLIA SAGRADA</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button 
-                onClick={copyToClipboard} 
-                className="flex items-center space-x-2 bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 px-4 py-2 transition-colors min-w-[100px] justify-center"
-              >
-                {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                <span className="text-[10px] font-medium uppercase tracking-widest">
-                  {copied ? 'Copiado' : 'Copiar'}
-                </span>
-              </button>
-              <button 
-                onClick={handleShare}
-                className="flex items-center space-x-2 bg-black text-white px-5 py-2 hover:bg-[#ff6600] transition-all min-w-[120px] justify-center"
-              >
-                {shared ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
-                <span className="text-[10px] font-medium uppercase tracking-widest">
-                  {shared ? 'Compartilhado' : 'Compartilhar'}
-                </span>
-              </button>
-            </div>
-          </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {DEVOTIONAL_PODCASTS.map((podcast) => {
+            const saved = isFavorite(podcast.id);
+            return (
+              <div key={podcast.id} className="group cursor-pointer bg-white dark:bg-[#121212] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 dark:border-white/5">
+                <div className="relative aspect-square overflow-hidden">
+                  <img 
+                    src={podcast.image} 
+                    alt={podcast.title} 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <div className="w-14 h-14 bg-[#ff6600] rounded-full flex items-center justify-center text-white transform scale-90 group-hover:scale-100 transition-all duration-300">
+                      <Play className="w-6 h-6 fill-current" />
+                    </div>
+                  </div>
+                  <div className="absolute bottom-4 left-4">
+                    <span className="bg-black text-[#ff6600] text-[9px] font-medium uppercase px-2 py-1 rounded">
+                      {podcast.category}
+                    </span>
+                  </div>
+                  {/* Botão Flutuante Ouvir Depois */}
+                  <button 
+                    onClick={(e) => handleListenLater(e, podcast)}
+                    className={`absolute top-4 right-4 p-3 rounded-full backdrop-blur-md transition-all z-10 ${saved ? 'bg-[#ff6600] text-white opacity-100' : 'bg-black/20 text-white opacity-0 group-hover:opacity-100 hover:bg-black/40'}`}
+                    title={saved ? "Salvo nos Favoritos" : "Ouvir Depois"}
+                  >
+                    {saved ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                  </button>
+                </div>
+                <div className="p-6">
+                  <h3 className="text-lg font-medium uppercase leading-tight mb-2 group-hover:underline transition-all dark:text-white">
+                    {podcast.title}
+                  </h3>
+                  <p className="text-gray-500 text-xs font-normal uppercase mb-4 tracking-tight">
+                    Com {podcast.author}
+                  </p>
+                  <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-4">
+                    <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{podcast.duration}</span>
+                    <div className="flex items-center space-x-4">
+                      <button 
+                        onClick={(e) => handleListenLater(e, podcast)}
+                        className={`text-[10px] font-medium uppercase tracking-widest transition-colors flex items-center space-x-1 ${saved ? 'text-[#ff6600]' : 'text-gray-400 hover:text-black dark:hover:text-white'}`}
+                      >
+                        {saved ? (
+                          <>
+                            <Check className="w-3 h-3" />
+                            <span>Salvo</span>
+                          </>
+                        ) : (
+                          <span>Ouvir Depois</span>
+                        )}
+                      </button>
+                      <button className="text-[10px] font-medium uppercase tracking-widest hover:text-[#ff6600] transition-colors dark:text-gray-300">
+                        Ouvir Agora
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
-export default DailyVerse;
+export default DevotionalSection;

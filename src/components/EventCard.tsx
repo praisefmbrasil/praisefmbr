@@ -1,3 +1,5 @@
+// src/components/EventCard.tsx
+
 import React from 'react';
 import { MapPin, Calendar, ExternalLink, Ticket } from 'lucide-react';
 
@@ -7,7 +9,7 @@ interface EventProps {
     venue: {
       name: string;
       city: string;
-      region: string; // No Brasil, isso é o estado (ex: SP, RJ)
+      region: string;
       country: string;
     };
     url: string;
@@ -17,31 +19,28 @@ interface EventProps {
 const EventCard: React.FC<EventProps> = ({ event }) => {
   const date = new Date(event.datetime);
   
-  // Formato brasileiro: "5 de abr. de 2026"
+  // ✅ Formatação para o padrão brasileiro: 25 de jan. de 2026
   const formattedDate = date.toLocaleDateString('pt-BR', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
-  }).replace('.', ''); // Remove ponto de "abr." → "abr"
+  });
 
-  // Formato 24h sem "h" (ex: "19:30")
+  // ✅ Formatação 24h para o Brasil: 19:00
   const formattedTime = date.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false
   });
 
-  // Mostra apenas cidade + estado (não mostra "Brazil")
-  const location = event.venue.country === 'Brazil' || event.venue.country === 'Brasil'
-    ? `${event.venue.city} - ${event.venue.region}`
-    : `${event.venue.city}, ${event.venue.region} ${event.venue.country}`;
-
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-white dark:bg-black border border-gray-100 dark:border-white/5 group hover:border-[#ff6600] transition-all shadow-sm">
       <div className="flex items-center space-x-6">
-        <div className="flex flex-col items-center justify-center bg-gray-50 dark:bg-white/5 p-3 min-w-[80px] border border-gray-100 dark:border-white/10">
+        <div className="flex flex-col items-center justify-center bg-gray-50 dark:bg-white/5 p-3 min-w-[100px] border border-gray-100 dark:border-white/10">
           <Calendar className="w-5 h-5 text-[#ff6600] mb-1" />
-          <span className="text-[11px] font-black uppercase tracking-tighter dark:text-white">{formattedDate}</span>
+          <span className="text-[11px] font-black uppercase tracking-tighter dark:text-white text-center">
+            {formattedDate}
+          </span>
         </div>
         <div>
           <h4 className="text-xl font-medium dark:text-white leading-none mb-2 uppercase tracking-tighter">
@@ -49,9 +48,11 @@ const EventCard: React.FC<EventProps> = ({ event }) => {
           </h4>
           <p className="text-[11px] text-gray-500 uppercase tracking-widest flex items-center font-medium">
             <MapPin className="w-3.5 h-3.5 mr-1 text-[#ff6600]" /> 
-            {location}
+            {event.venue.city}, {event.venue.region} {event.venue.country !== 'Brazil' && event.venue.country !== 'Brasil' ? `| ${event.venue.country}` : ''}
           </p>
-          <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em]">Início: {formattedTime}</p>
+          <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em]">
+            Abertura dos Portões: {formattedTime}
+          </p>
         </div>
       </div>
       <a 

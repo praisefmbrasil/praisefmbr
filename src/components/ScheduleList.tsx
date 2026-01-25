@@ -10,22 +10,23 @@ interface ScheduleListProps {
   onBack?: () => void;
 }
 
-// ✅ Usa fuso de São Paulo
+// ✅ Ajustado para fuso horário de Brasília/São Paulo
 const getSaoPauloDate = (baseDate: Date = new Date()) => {
   return new Date(baseDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
 };
 
-// ✅ Formato 24h
-const formatTimeBR = (time24: string) => time24;
+// ✅ Ajustado para Formato 24h (ex: 18:00 em vez de 06:00 PM)
+const format24h = (time24: string) => time24;
 
 const ProgramProgressRing: React.FC<{ program: Program; isActive: boolean; nowMinutes: number }> = ({ program, isActive, nowMinutes }) => {
   const progress = useMemo(() => {
     if (!isActive) return 0;
     const [sH, sM] = program.startTime.split(':').map(Number);
     const [eH, eM] = program.endTime.split(':').map(Number);
-    let start = sH * 60 + sM;
+    const start = sH * 60 + sM;
     let end = eH * 60 + eM;
-    if (end <= start) end += 24 * 60;
+    // Ajuste para programas que cruzam a meia-noite
+    if (end === 0 || end <= start) end = 24 * 60;
     const elapsed = nowMinutes - start;
     const duration = end - start;
     return Math.min(Math.max(elapsed / duration, 0), 1);
@@ -84,13 +85,13 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
   }, []);
 
   const currentSchedule = useMemo(() => {
-    const dayIndex = now.getDay(); // 0 = dom, 1 = seg, ..., 6 = sáb
-    return SCHEDULES[dayIndex] || SCHEDULES[0];
+    const dayIndex = now.getDay(); // 0 = Dom, 1 = Seg, etc.
+    return SCHEDULES[dayIndex] || SCHEDULES[1];
   }, [now]);
 
   const sections = useMemo(() => {
     const groups: Record<string, Program[]> = {
-      'MADRUGADA': [], 'MANHÃ': [], 'TARDE': [], 'NOITE': [], 'LATE_NIGHT': []
+      'MADRUGADA': [], 'MANHÃ': [], 'TARDE': [], 'NOITE': [], 'FIM DE NOITE': []
     };
     currentSchedule.forEach(prog => {
       const h = parseInt(prog.startTime.split(':')[0]);
@@ -98,7 +99,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
       else if (h >= 6 && h < 12) groups['MANHÃ'].push(prog);
       else if (h >= 12 && h < 18) groups['TARDE'].push(prog);
       else if (h >= 18 && h < 22) groups['NOITE'].push(prog);
-      else groups['LATE_NIGHT'].push(prog);
+      else groups['FIM DE NOITE'].push(prog);
     });
     return groups;
   }, [currentSchedule]);
@@ -106,9 +107,9 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
   const isLiveNow = (startStr: string, endStr: string) => {
     const [sH, sM] = startStr.split(':').map(Number);
     const [eH, eM] = endStr.split(':').map(Number);
-    let start = sH * 60 + sM;
+    const start = sH * 60 + sM;
     let end = eH * 60 + eM;
-    if (end <= start) end += 24 * 60;
+    if (end === 0 || end <= start) end = 24 * 60;
     const nowMinutes = now.getHours() * 60 + now.getMinutes();
     return nowMinutes >= start && nowMinutes < end;
   };
@@ -130,7 +131,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
       <div className="max-w-7xl mx-auto px-4 py-20">
         {onBack && (
           <button onClick={onBack} className="flex items-center text-gray-400 hover:text-[#ff6600] transition-colors mb-6 text-xs font-normal uppercase tracking-widest">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Voltar para Início
+            <ArrowLeft className="w-4 h-4 mr-2" /> VOLTAR PARA O INÍCIO
           </button>
         )}
         
@@ -143,11 +144,11 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
 
         <div className="sticky top-16 z-[40] bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5 py-4 mb-16 -mx-4 px-4 sm:mx-0 sm:px-0">
           <div className="flex items-center space-x-6 text-[11px] font-semibold uppercase tracking-wide overflow-x-auto no-scrollbar">
-            <span className="text-gray-400 flex-shrink-0">IR PARA:</span>
+            <span className="text-gray-400 flex-shrink-0">PULAR PARA:</span>
             <div className="flex items-center space-x-6 whitespace-nowrap">
               {(Object.keys(sections) as string[]).map((title) => (
                 <React.Fragment key={title}>
-                  <a 
+                   <a 
                     href={`#${title}`} 
                     onClick={(e) => {
                       e.preventDefault();
@@ -157,7 +158,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
                   >
                     {title}
                   </a>
-                  {title !== 'LATE_NIGHT' && <span className="text-gray-200 dark:text-gray-800">|</span>}
+                  {title !== 'FIM DE NOITE' && <span className="text-gray-200 dark:text-gray-800">|</span>}
                 </React.Fragment>
               ))}
             </div>
@@ -183,11 +184,11 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
                     >
                       <div className="w-32 flex-shrink-0 flex flex-col mb-6 md:mb-0 pt-1">
                         <span className={`text-2xl font-bold tracking-tight ${active ? 'text-[#ff6600]' : 'text-gray-300 dark:text-gray-700 group-hover:text-black dark:group-hover:text-white'}`}>
-                          {formatTimeBR(prog.startTime)}
+                          {format24h(prog.startTime)}
                         </span>
                         {active && (
                           <div className="mt-3 inline-flex items-center justify-center bg-[#ff6600] text-white text-[10px] font-bold px-3 py-1 uppercase tracking-wider w-24">
-                            AO VIVO
+                            NO AR
                           </div>
                         )}
                       </div>

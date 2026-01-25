@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Praise FM Brasil</title>
     
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#ff6600" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Praise FM Brasil" />
+    <meta name="apple-mobile-web-app-title" content="Praise FM BR" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
 
-    <!-- Tailwind via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -41,6 +39,17 @@
 
   <body>
     <div id="root"></div>
+
     <script type="module" src="/src/main.tsx"></script>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ Service Worker Brasil registrado:', reg.scope))
+            .catch(err => console.log('❌ Falha ao registrar Service Worker:', err));
+        });
+      }
+    </script>
   </body>
 </html>
