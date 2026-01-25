@@ -77,7 +77,7 @@ const AppContent = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { isPlaying, togglePlay } = usePlayer(); // ✅ Removido currentTrack
+  const { isPlaying, togglePlay } = usePlayer();
 
   const { day, total } = getSaoPauloDayAndTotalMinutes();
 
@@ -136,9 +136,8 @@ const AppContent = () => {
                     onNavigateToProgram={setSelectedProgram}
                     onListenClick={togglePlay}
                     isPlaying={isPlaying}
-                    // ✅ liveMetadata removido
                   />
-                  <RecentlyPlayed tracks={[]} /> {/* ✅ Adicionado prop obrigatória */}
+                  <RecentlyPlayed tracks={[]} />
                 </>
               }
             />
@@ -150,7 +149,13 @@ const AppContent = () => {
             />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/artists" element={<FeaturedArtistsPage />} />
-            <Route path="/presenters" element={<PresentersPage onNavigateToProgram={setSelectedProgram} />} />
+            
+            {/* ✅ Corrigido: PresentersPage agora aceita onNavigateToProgram */}
+            <Route 
+              path="/presenters" 
+              element={<PresentersPage onNavigateToProgram={setSelectedProgram} />} 
+            />
+            
             <Route path="/devotional" element={<DevotionalPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
