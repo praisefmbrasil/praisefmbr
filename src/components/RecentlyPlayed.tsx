@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Music, Loader2 } from 'lucide-react';
+import { Music, Loader2, ArrowLeft } from 'lucide-react';
+import { Program } from '../types';
 
 interface Track {
   artist: string;
@@ -10,10 +11,18 @@ interface Track {
 }
 
 interface RecentlyPlayedProps {
-  tracks: Track[];
+  tracks?: Track[];
+  program?: Program;
+  onBack?: () => void;
+  onViewSchedule?: () => void;
 }
 
-const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ tracks }) => {
+const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ 
+  tracks = [],
+  program,
+  onBack,
+  onViewSchedule
+}) => {
   const [artworks, setArtworks] = useState<Record<string, string>>({});
 
   const displayedTracks = useMemo(
@@ -76,20 +85,43 @@ const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ tracks }) => {
     <section className="bg-white dark:bg-[#121212] py-16 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4">
 
-        {/* Cabeçalho */}
+        {/* Header with back button if program is selected */}
         <div className="flex items-center justify-between mb-8 border-l-4 border-[#ff6600] pl-6">
           <div>
             <h2 className="text-3xl font-medium text-gray-900 dark:text-white tracking-tighter uppercase">
-              Recentemente Tocadas
+              {program ? program.title : 'Recentemente Tocadas'}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-              As últimas faixas na Praise FM
+              {program ? `${program.host} • ${program.startTime} - ${program.endTime}` : 'As últimas faixas na Praise FM'}
             </p>
           </div>
           <Music className="w-8 h-8 text-[#ff6600] opacity-20" />
         </div>
 
-        {/* Tabela */}
+        {/* Program actions */}
+        {program && (
+          <div className="flex gap-4 mb-8">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600 dark:text-gray-300 hover:text-[#ff6600] transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar
+              </button>
+            )}
+            {onViewSchedule && (
+              <button
+                onClick={onViewSchedule}
+                className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff6600] hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                Ver horário completo →
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Table */}
         <div className="grid grid-cols-12 gap-4 pb-3 border-b-2 border-gray-900 dark:border-white text-[11px] font-bold uppercase tracking-widest mb-2">
           <div className="col-span-8 md:col-span-6">Música</div>
           <div className="col-span-4 md:col-span-6">Artista</div>
@@ -154,11 +186,13 @@ const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ tracks }) => {
           )}
         </div>
 
-        <div className="mt-8 flex justify-end">
-          <button className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff6600] hover:text-gray-900 dark:hover:text-white transition-colors">
-            Ver playlist completa →
-          </button>
-        </div>
+        {!program && (
+          <div className="mt-8 flex justify-end">
+            <button className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#ff6600] hover:text-gray-900 dark:hover:text-white transition-colors">
+              Ver playlist completa →
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
