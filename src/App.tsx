@@ -12,6 +12,7 @@ import {
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LivePlayerProvider } from './contexts/LivePlayerContext';
+import { usePlayer } from './contexts/LivePlayerContext';
 
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -77,6 +78,7 @@ const AppContent = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { isPlaying, togglePlay, currentTrack } = usePlayer();
 
   const { day, total } = getSaoPauloDayAndTotalMinutes();
 
@@ -131,7 +133,12 @@ const AppContent = () => {
               path="/"
               element={
                 <>
-                  <Hero onNavigateToProgram={setSelectedProgram} />
+                  <Hero
+                    onNavigateToProgram={setSelectedProgram}
+                    onListenClick={togglePlay}
+                    isPlaying={isPlaying}
+                    liveMetadata={currentTrack}
+                  />
                   <RecentlyPlayed />
                 </>
               }
@@ -140,18 +147,11 @@ const AppContent = () => {
             <Route path="/music" element={<Playlist />} />
             <Route
               path="/schedule"
-              element={
-                <ScheduleList onNavigateToProgram={setSelectedProgram} />
-              }
+              element={<ScheduleList onNavigateToProgram={setSelectedProgram} />}
             />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/artists" element={<FeaturedArtistsPage />} />
-            <Route
-              path="/presenters"
-              element={
-                <PresentersPage onNavigateToProgram={setSelectedProgram} />
-              }
-            />
+            <Route path="/presenters" element={<PresentersPage />} />
             <Route path="/devotional" element={<DevotionalPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
@@ -176,6 +176,8 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
+            <Route path="/live-recordings" element={<LiveRecordingsPage />} />
+            <Route path="/new-releases" element={<NewReleasesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         )}
