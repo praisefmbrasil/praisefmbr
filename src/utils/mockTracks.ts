@@ -2,7 +2,7 @@
 
 export const getDailyBrazilianPlaylist = () => {
   return [
-    // LISTA A - Em Alta
+    // LISTA A - As Mais Pedidas na Praise
     {
       trackId: 101,
       trackName: "Jeová Jireh",
@@ -27,7 +27,7 @@ export const getDailyBrazilianPlaylist = () => {
       artistName: "Fernandinho",
       artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp",
     },
-    // LISTA B - Em Ascensão
+    // LISTA B - Sucessos Worship
     {
       trackId: 201,
       trackName: "A Casa é Sua",
@@ -39,43 +39,6 @@ export const getDailyBrazilianPlaylist = () => {
       trackName: "Todavia Me Alegrarei",
       artistName: "Samuel Messias",
       artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp",
-    },
-    {
-      trackId: 203,
-      trackName: "O Convidado",
-      artistName: "Rafael Costa",
-      artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp",
-    },
-    {
-      trackId: 204,
-      trackName: "Eis-me Aqui",
-      artistName: "Rodrigo Veras",
-      artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp",
-    },
-    // LISTA C - Novidades
-    {
-      trackId: 301,
-      trackName: "Madrugada com Cristo",
-      artistName: "Samuel Andrade",
-      artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp",
-    },
-    {
-      trackId: 302,
-      trackName: "Nova Geração",
-      artistName: "Ana Paula",
-      artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8f8.webp",
-    },
-    {
-      trackId: 303,
-      trackName: "Vem Fluir",
-      artistName: "Lucas Martins",
-      artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_Fm_Live_Show_blfy7o.webp",
-    },
-    {
-      trackId: 304,
-      trackName: "Caminho no Deserto",
-      artistName: "Thiago Moreira",
-      artworkUrl100: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp",
-    },
+    }
   ];
 };

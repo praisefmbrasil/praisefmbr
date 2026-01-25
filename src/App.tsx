@@ -1,64 +1,92 @@
-import { useEffect, useRef, useState } from "react";
-import LivePlayerBar from "./components/LivePlayerBar";
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+// Importe seus componentes aqui...
+import { SCHEDULES } from './constants'; 
+import { Program } from './types';
 
-// ✅ Corrigido: sem espaços extras
-const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv"; // Praise FM BRASIL
+const STREAM_URL = 'https://stream.zeno.fm/hvwifp8ezc6tv';
+const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/hvwifp8ezc6tv';
 
-function App() {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+const BLOCKED_METADATA_KEYWORDS = [
+  'praise fm', 'praisefm', 'commercial', 'spot', 'promo', 'ident', 'sweeper',
+  'intro', 'outro', 'announcement', 'nova geração', 'de carona', 'domingo com cristo'
+];
 
-  useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio(STREAM_URL);
-      audioRef.current.preload = "none";
-      audioRef.current.crossOrigin = "anonymous";
-
-      audioRef.current.addEventListener("play", () => setIsPlaying(true));
-      audioRef.current.addEventListener("pause", () => setIsPlaying(false));
-      audioRef.current.addEventListener("ended", () => setIsPlaying(false));
-    }
-
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
-
-  const togglePlayback = async () => {
-    if (!audioRef.current) return;
-
-    try {
-      if (audioRef.current.paused) {
-        await audioRef.current.play();
-      } else {
-        audioRef.current.pause();
-      }
-    } catch (err) {
-      console.error("Erro ao tocar stream:", err);
-    }
-  };
-
-  return (
-    <>
-      <main className="min-h-screen pb-[120px]">
-        {/* conteúdo das páginas aqui */}
-      </main>
-
-      <LivePlayerBar
-        isPlaying={isPlaying}
-        onTogglePlayback={togglePlayback}
-        program={{
-          id: "live",
-          title: "Praise FM Brasil", // ✅ Corrigido
-          host: "Ao Vivo 24h",
-          image: "/icon-512.png",
-          startTime: "24/7",
-          endTime: "AO VIVO",
-        }}
-      />
-    </>
-  );
+interface LiveMetadata {
+  artist: string;
+  title: string;
+  playedAt?: Date;
+  isMusic?: boolean;
 }
 
-export default App;
+const getBrazilDayAndTotalMinutes = () => {
+  const now = new Date();
+  const brazilDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  const h = brazilDate.getHours();
+  const m = brazilDate.getMinutes();
+  return { day: brazilDate.getDay(), total: h * 60 + m };
+};
+
+const AppContent: React.FC = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [liveMetadata, setLiveMetadata] = useState<LiveMetadata | null>(null);
+  const [trackHistory, setTrackHistory] = useState<LiveMetadata[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'light');
+  
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null); // ✅ Corrigido
+  const reconnectTimeoutRef = useRef<number | null>(null); // ✅ Corrigido
+
+  const { day, total } = getBrazilDayAndTotalMinutes();
+  
+  const { currentProgram, queue } = useMemo(() => {
+    const schedule = SCHEDULES[day] || SCHEDULES[1]; // ✅ Certifique-se que SCHEDULES está em constants.ts
+    const currentIndex = schedule.findIndex(p => {
+      const [sH, sM] = p.startTime.split(':').map(Number);
+      const [eH, eM] = p.endTime.split(':').map(Number);
+      const start = sH * 60 + sM;
+      const end = eH === 0 ? 24 * 60 : eH * 60 + eM;
+      return total >= start && total < end;
+    });
+    
+    const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
+    const nextFour = schedule.slice(currentIndex + 1, currentIndex + 5);
+    
+    return { currentProgram: current, queue: nextFour };
+  }, [day, total]);
+
+  // Lógica de Metadados corrigida
+  useEffect(() => {
+    const connectMetadata = () => {
+      if (eventSourceRef.current) eventSourceRef.current.close();
+      const es = new EventSource(METADATA_URL);
+      eventSourceRef.current = es;
+
+      es.onmessage = (event) => {
+        if (!event.data) return;
+        try {
+          const data = JSON.parse(event.data);
+          const streamTitle = data.streamTitle || "";
+          if (streamTitle.includes(' - ')) {
+            const [artist, ...titleParts] = streamTitle.split(' - ');
+            const title = titleParts.join(' - ').trim();
+            const musicCheck = !BLOCKED_METADATA_KEYWORDS.some(k => streamTitle.toLowerCase().includes(k));
+            
+            const newMeta = { artist, title, playedAt: new Date(), isMusic: musicCheck };
+            setLiveMetadata(newMeta);
+            if (musicCheck) setTrackHistory(prev => [newMeta, ...prev].slice(0, 10));
+          }
+        } catch (e) {}
+      };
+    };
+    connectMetadata();
+    return () => eventSourceRef.current?.close();
+  }, []);
+
+  // ... Restante do componente (Routes, Navbar, etc)
+  return (
+      // Seu JSX aqui...
+      <div /> 
+  );
+};

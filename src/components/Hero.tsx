@@ -1,259 +1,119 @@
-// src/components/Hero.tsx
-
-import React, { useState, useEffect, useMemo } from 'react';
-import { Play, Pause, ChevronRight, Zap, ArrowRight } from 'lucide-react';
-import { SCHEDULES } from '../constants';
+import React from 'react';
+import { Play, Pause, Radio, Music } from 'lucide-react';
 import { Program } from '../types';
-import { useNavigate } from 'react-router-dom';
-
-// ✅ Ajustado para o fuso horário de Brasília
-const getBrazilInfo = () => {
-  const now = new Date();
-  const brazilString = now.toLocaleString('en-US', {
-    timeZone: 'America/Sao_Paulo',
-  });
-  const brazilDate = new Date(brazilString);
-  const h = brazilDate.getHours();
-  const m = brazilDate.getMinutes();
-  const day = brazilDate.getDay();
-  return { day, totalMinutes: h * 60 + m };
-};
-
-// ✅ Formatado para o padrão brasileiro de 24h
-const format24h = (time24: string) => {
-  const [h, m] = time24.split(':').map(Number);
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-};
 
 interface HeroProps {
   onListenClick: () => void;
   isPlaying: boolean;
-  liveMetadata?: { artist: string; title: string; artwork?: string } | null;
+  liveMetadata: {
+    artist: string;
+    title: string;
+    isMusic?: boolean;
+  } | null;
   onNavigateToProgram: (program: Program) => void;
 }
 
-const Hero: React.FC<HeroProps> = ({
-  onListenClick,
-  isPlaying,
-  liveMetadata,
-  onNavigateToProgram,
-}) => {
-  const [tick, setTick] = useState(0);
-  const [showDetails, setShowDetails] = useState(true);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const brazil = useMemo(() => getBrazilInfo(), [tick]);
-
-  const { currentProgram, upNextPrograms } = useMemo(() => {
-    const schedule = SCHEDULES[brazil.day] || SCHEDULES[1];
-    const currentIndex = schedule.findIndex((p) => {
-      const [sH, sM] = p.startTime.split(':').map(Number);
-      const [eH, eM] = p.endTime.split(':').map(Number);
-      const start = sH * 60 + sM;
-      let end = eH * 60 + eM;
-      if (end === 0 || end <= start) end = 24 * 60;
-      return brazil.totalMinutes >= start && brazil.totalMinutes < end;
-    });
-
-    const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
-    const next = schedule.slice(currentIndex + 1, currentIndex + 3);
-    
-    return { currentProgram: current, upNextPrograms: next };
-  }, [brazil]);
-
-  const progress = useMemo(() => {
-    if (!currentProgram) return 0;
-    const [sH, sM] = currentProgram.startTime.split(':').map(Number);
-    const [eH, eM] = currentProgram.endTime.split(':').map(Number);
-    const start = sH * 60 + sM;
-    let end = eH * 60 + eM;
-    if (end === 0 || end <= start) end = 24 * 60;
-    const elapsed = brazil.totalMinutes - start;
-    const duration = end - start;
-    return Math.min(Math.max(elapsed / duration, 0), 1);
-  }, [currentProgram, brazil.totalMinutes]);
-
-  if (!currentProgram) return null;
-
-  const circleSize = 192;    
-  const strokeWidth = 4;
-  const center = circleSize / 2;
-  const radius = center - strokeWidth / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - progress * circumference;
-
+const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onNavigateToProgram }) => {
   return (
-    <section className="bg-white dark:bg-[#000000] py-10 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
-          
-          {/* LADO ESQUERDO: IMAGEM CIRCULAR */}
-          <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => onNavigateToProgram(currentProgram)}>
-            <div className="relative rounded-full overflow-hidden" style={{ width: circleSize, height: circleSize }}>
-              <img 
-                src={currentProgram.image} 
-                alt={currentProgram.title} 
-                className="w-full h-full object-cover" 
-              />
-              <svg 
-                width={circleSize} height={circleSize} 
-                className="absolute inset-0 -rotate-90 pointer-events-none"
-              >
-                <circle cx={center} cy={center} r={radius} stroke="#dbdbdb" strokeWidth={strokeWidth} fill="transparent" className="dark:stroke-white/10" />
-                <circle cx={center} cy={center} r={radius} stroke="#ff6600" strokeWidth={strokeWidth} fill="transparent" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="butt" />
-              </svg>
+    <div className="relative h-[80vh] min-h-[600px] flex items-center overflow-hidden bg-black">
+      {/* Background com Overlay Dinâmico */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&q=80" 
+          alt="Background" 
+          className="w-full h-full object-cover opacity-50 scale-105 animate-pulse-slow"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 w-full relative z-10">
+        <div className="max-w-3xl">
+          {/* Badge de Status */}
+          <div className="flex items-center space-x-3 mb-8 animate-fade-in">
+            <div className="flex items-center space-x-2 bg-[#ff6600] px-3 py-1 rounded-full">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">Ao Vivo</span>
             </div>
-            <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white dark:border-black shadow-lg">
-              <span className="text-white text-2xl font-bold">1</span>
-            </div>
+            <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em]">Praise FM Brasil</span>
           </div>
 
-          {/* LADO DIREITO: TEXTO E BOTÃO PLAY */}
-          <div className="flex-grow pt-4 text-center md:text-left">
-            <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
-              <span className="uppercase font-bold text-[#ff6600] tracking-widest mr-2">No Ar Agora</span>
-              <span>{format24h(currentProgram.startTime)} - {format24h(currentProgram.endTime)}</span>
-            </div>
-            
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
-              {currentProgram.title} com {currentProgram.host}
-              <ChevronRight className="w-6 h-6 ml-1 text-[#ff6600]" />
-            </h2>
-            
-            <p className="text-lg text-gray-600 dark:text-gray-400 font-normal mb-6">
-              {currentProgram.description}
+          {/* Título Principal Dinâmico */}
+          <h1 className="text-6xl md:text-8xl font-medium text-white uppercase tracking-tighter leading-[0.85] mb-8">
+            {liveMetadata?.isMusic ? (
+              <>
+                <span className="text-[#ff6600]">Tocando:</span><br />
+                {liveMetadata.title}
+              </>
+            ) : (
+              <>
+                Sua Dose<br />Diária de <span className="text-[#ff6600]">Adoração</span>
+              </>
+            )}
+          </h1>
+
+          {/* Info da Música ou Locutor */}
+          <div className="flex flex-col space-y-6 mb-12">
+            <p className="text-xl text-gray-300 font-light uppercase tracking-tight max-w-xl">
+              {liveMetadata?.isMusic 
+                ? `Agora na voz de ${liveMetadata.artist}`
+                : "Conectando o seu coração ao trono de Deus com os melhores louvores e mensagens de fé."
+              }
             </p>
 
+            {liveMetadata?.isMusic && (
+              <div className="flex items-center space-x-4 text-[#ff6600]">
+                <Music className="w-5 h-5" />
+                <span className="text-sm font-bold uppercase tracking-widest animate-bounce-sideways">
+                  Música em destaque
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Botões de Ação */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <button 
               onClick={onListenClick}
-              className="bg-[#ff6600] text-white px-10 py-3.5 flex items-center justify-center space-x-3 hover:bg-[#e65c00] transition-all active:scale-95 mx-auto md:mx-0 rounded-sm shadow-md"
+              className="flex items-center justify-center space-x-4 bg-white text-black px-10 py-6 rounded-none hover:bg-[#ff6600] hover:text-white transition-all group active:scale-95 shadow-2xl"
             >
-              {isPlaying ? <Pause className="fill-current w-5 h-5" /> : <Play className="fill-current w-5 h-5" />}
-              <span className="text-lg font-bold tracking-tight">
-                {isPlaying ? 'Pausar' : 'Ouvir Agora'}
+              {isPlaying ? <Pause className="fill-current" /> : <Play className="fill-current" />}
+              <span className="text-xs font-black uppercase tracking-[0.3em]">
+                {isPlaying ? 'Pausar Rádio' : 'Ouvir Agora'}
               </span>
+            </button>
+
+            <button 
+              onClick={() => window.location.hash = '#/schedule'}
+              className="flex items-center justify-center space-x-4 border border-white/20 bg-white/5 backdrop-blur-md text-white px-10 py-6 rounded-none hover:bg-white hover:text-black transition-all active:scale-95"
+            >
+              <Radio className="w-5 h-5" />
+              <span className="text-xs font-black uppercase tracking-[0.3em]">Ver Programação</span>
             </button>
           </div>
         </div>
-
-        {showDetails && (
-          <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            {/* SEÇÃO A SEGUIR */}
-            <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {upNextPrograms.map((prog) => (
-                  <div 
-                    key={prog.id} 
-                    className="flex items-start space-x-5 group cursor-pointer"
-                    onClick={() => onNavigateToProgram(prog)}
-                  >
-                    <div className="w-24 h-24 flex-shrink-0 bg-gray-100 overflow-hidden rounded-sm">
-                      <img 
-                        src={prog.image} 
-                        alt={prog.title} 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <div className="text-[11px] font-normal mb-1">
-                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">A Seguir</span>
-                        <span className="text-gray-400 font-normal">{format24h(prog.startTime)} - {format24h(prog.endTime)}</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-[#ff6600] transition-colors">
-                        {prog.title}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-snug">
-                        {prog.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* ALERTA DE NOVA MÚSICA */}
-            <div className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50" onClick={() => navigate('/new-releases')}>
-              <div className="flex items-center space-x-6 mb-6 md:mb-0">
-                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center relative">
-                  <Zap className="w-6 h-6 text-[#ff6600] fill-current animate-pulse" />
-                  <div className="absolute inset-0 rounded-full border-2 border-[#ff6600] scale-110 animate-ping opacity-20"></div>
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Radar de Lançamentos</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">Novos hinos chegando agora</p>
-                </div>
-              </div>
-              <button 
-                className="flex items-center space-x-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-black dark:text-white group-hover:text-[#ff6600] transition-colors"
-              >
-                <span>Explorar Todos</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* RODAPÉ DA SEÇÃO */}
-        <div className="mt-12 pt-6">
-           {showDetails && (
-             <>
-               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">
-                 {currentProgram.description.split('.')[0]}.
-               </p>
-               <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-medium tracking-widest mb-4">
-                 Produzido pela PRAISE FM BRASIL para PRAISE FM Global.
-               </p>
-             </>
-           )}
-           <div className="flex flex-col space-y-3">
-             {showDetails && (
-               <button 
-                 onClick={() => onNavigateToProgram(currentProgram)}
-                 className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit group"
-               >
-                 Página do Programa <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
-               </button>
-             )}
-             <button 
-               onClick={() => setShowDetails(!showDetails)}
-               className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
-             >
-               {showDetails ? (
-                 <>Ver menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
-               ) : (
-                 <>Ver mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>
-               )}
-             </button>
-           </div>
-        </div>
       </div>
-    </section>
+
+      {/* Indicador Visual de Áudio (Visualizer) */}
+      {isPlaying && (
+        <div className="absolute bottom-0 right-0 p-12 hidden lg:flex items-end space-x-1 h-32">
+          {[...Array(12)].map((_, i) => (
+            <div 
+              key={i}
+              className="w-1 bg-[#ff6600] animate-music-bar"
+              style={{ 
+                height: `${Math.random() * 100}%`,
+                animationDelay: `${i * 0.1}s` 
+              }}
+            ></div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
-
-const ExternalLinkIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-    <polyline points="15 3 21 3 21 9"></polyline>
-    <line x1="10" y1="14" x2="21" y2="3"></line>
-  </svg>
-);
-
-const ChevronUpIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="18 15 12 9 6 15"></polyline>
-  </svg>
-);
-
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="6 9 12 15 18 9"></polyline>
-  </svg>
-);
 
 export default Hero;
