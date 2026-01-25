@@ -1,7 +1,16 @@
 // src/components/ProgramDetail.tsx
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Volume2, Clock, ArrowLeft, Calendar, Music, Activity, History as HistoryIcon, Loader2 } from 'lucide-react';
+import {
+  Volume2,
+  Clock,
+  ArrowLeft,
+  Calendar,
+  Music,
+  Activity,
+  History as HistoryIcon,
+  Loader2,
+} from 'lucide-react';
 import { Program } from '../types';
 import { SCHEDULES } from '../constants';
 import { supabase } from '../lib/supabase';
@@ -23,8 +32,8 @@ interface ProgramDetailProps {
   program: Program;
   onBack: () => void;
   onViewSchedule: () => void;
-  onListenClick: () => void;
-  isPlaying?: boolean; // ✅ Tornar opcional
+  onListenClick?: () => void; // ✅ Opcional
+  isPlaying?: boolean;        // ✅ Opcional
 }
 
 // ✅ Stream do Praise FM Brasil
@@ -41,20 +50,20 @@ const getLocalDateString = () => {
   return new Date().toISOString().split('T')[0];
 };
 
-// ✅ Não usamos mais formato 12h
+// ✅ Formato 24h
 const formatTimeBR = (time24: string) => time24;
 
-const ProgramDetail: React.FC<ProgramDetailProps> = ({ 
-  program, 
-  onBack, 
-  onViewSchedule, 
+const ProgramDetail: React.FC<ProgramDetailProps> = ({
+  program,
+  onBack,
+  onViewSchedule,
   onListenClick,
-  isPlaying = false // ✅ Valor padrão
+  isPlaying = false,
 }) => {
   const [nowMinutes, setNowMinutes] = useState(getSaoPauloTotalMinutes());
   const [loadingHistory, setLoadingHistory] = useState(true);
   const eventSourceRef = useRef<EventSource | null>(null);
-  
+
   const [historyGroups, setHistoryGroups] = useState<DailyHistory>(() => {
     const storageKey = `history_v2_${program.id}`;
     const saved = localStorage.getItem(storageKey);
@@ -68,7 +77,7 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
     return {};
   });
 
-  // Fetch history from Supabase on mount
+  // Fetch history from Supabase
   useEffect(() => {
     const loadSavedHistory = async () => {
       setLoadingHistory(true);
@@ -82,23 +91,23 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
 
         if (data && data.length > 0) {
           const grouped: DailyHistory = {};
-          data.forEach(item => {
+          data.forEach((item) => {
             const date = item.played_at.split('T')[0];
             if (!grouped[date]) grouped[date] = [];
             grouped[date].push({
               artist: item.artist,
               title: item.title,
-              label: item.label || "TOCADO ANTERIORMENTE",
+              label: item.label || 'TOCADO ANTERIORMENTE',
               image: item.image_url,
               timestamp: new Date(item.played_at).getTime(),
-              isLive: false
+              isLive: false,
             });
           });
           setHistoryGroups(grouped);
           localStorage.setItem(`history_v2_${program.id}`, JSON.stringify(grouped));
         }
       } catch (err) {
-        console.error("Erro ao carregar histórico", err);
+        console.error('Erro ao carregar histórico', err);
       } finally {
         setLoadingHistory(false);
       }
@@ -118,16 +127,21 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
     let start = sH * 60 + sM;
     let end = eH * 60 + eM;
     if (end <= start) end += 24 * 60;
-    
+
     const live = nowMinutes >= start && nowMinutes < end;
 
     const now = new Date();
-    const saoPauloDay = new Date(now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })).getDay();
+    const saoPauloDay = new Date(
+      now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+    ).getDay();
     const daySchedule = SCHEDULES[saoPauloDay] || SCHEDULES[0];
-    const currentIndex = daySchedule.findIndex(p => p.id === program.id);
-    const next = currentIndex !== -1 && currentIndex < daySchedule.length - 1 
-      ? daySchedule[currentIndex + 1] 
-      : (currentIndex === daySchedule.length - 1 ? (SCHEDULES[(saoPauloDay + 1) % 7] || daySchedule)[0] : null);
+    const currentIndex = daySchedule.findIndex((p) => p.id === program.id);
+    const next =
+      currentIndex !== -1 && currentIndex < daySchedule.length - 1
+        ? daySchedule[currentIndex + 1]
+        : currentIndex === daySchedule.length - 1
+        ? (SCHEDULES[(saoPauloDay + 1) % 7] || daySchedule)[0]
+        : null;
 
     return { isCurrentlyLive: live, nextProgram: next };
   }, [program, nowMinutes]);
@@ -140,57 +154,75 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
       try {
         const es = new EventSource(METADATA_URL);
         eventSourceRef.current = es;
-        
+
         es.onmessage = async (event) => {
           if (!event.data) return;
           try {
             const data = JSON.parse(event.data);
-            const streamTitle = data.streamTitle || "";
+            const streamTitle = data.streamTitle || '';
             if (streamTitle.includes(' - ')) {
               const [artistPart, ...titleParts] = streamTitle.split(' - ');
               const artist = artistPart.trim();
               const title = titleParts.join(' - ').trim();
               if (!artist || !title) return;
 
-              const blocked = ['praise fm', 'comercial', 'spot', 'promo', 'vinheta'].some(k => 
+              const blocked = ['praise fm', 'comercial', 'spot', 'promo', 'vinheta'].some((k) =>
                 title.toLowerCase().includes(k) || artist.toLowerCase().includes(k)
               );
               if (blocked) return;
 
               const todayKey = getLocalDateString();
               const trackTimestamp = Date.now();
-              const imageUrl = `https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/${encodeURIComponent(artist.replace(/\s+/g, '_'))}_placeholder.webp`;
-              
+              const imageUrl = `https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/${encodeURIComponent(
+                artist.replace(/\s+/g, '_')
+              )}_placeholder.webp`;
+
               const newTrack: PlayedTrack = {
-                artist, title, label: "AO VIVO NA PRAISE FM",
+                artist,
+                title,
+                label: 'AO VIVO NA PRAISE FM',
                 image: imageUrl,
-                isLive: true, timestamp: trackTimestamp
+                isLive: true,
+                timestamp: trackTimestamp,
               };
 
-              setHistoryGroups(prev => {
+              setHistoryGroups((prev) => {
                 const currentDayTracks = prev[todayKey] || [];
-                if (currentDayTracks.length > 0 && currentDayTracks[0].title === newTrack.title && currentDayTracks[0].artist === newTrack.artist) return prev;
-                
-                const updatedDay = [newTrack, ...currentDayTracks.map(t => ({ ...t, isLive: false }))].slice(0, 50);
+                if (
+                  currentDayTracks.length > 0 &&
+                  currentDayTracks[0].title === newTrack.title &&
+                  currentDayTracks[0].artist === newTrack.artist
+                )
+                  return prev;
+
+                const updatedDay = [
+                  newTrack,
+                  ...currentDayTracks.map((t) => ({ ...t, isLive: false })),
+                ].slice(0, 50);
                 const newState = { ...prev, [todayKey]: updatedDay };
                 localStorage.setItem(`history_v2_${program.id}`, JSON.stringify(newState));
-                
-                supabase.from('program_history').insert([{
-                  program_id: program.id,
-                  artist,
-                  title,
-                  image_url: imageUrl,
-                  played_at: new Date(trackTimestamp).toISOString(),
-                  label: "GRAVADO AO VIVO"
-                }]).then(({ error }) => {
-                   if (error) console.error("Erro ao salvar histórico:", error.message);
-                });
+
+                supabase
+                  .from('program_history')
+                  .insert([
+                    {
+                      program_id: program.id,
+                      artist,
+                      title,
+                      image_url: imageUrl,
+                      played_at: new Date(trackTimestamp).toISOString(),
+                      label: 'GRAVADO AO VIVO',
+                    },
+                  ])
+                  .then(({ error }) => {
+                    if (error) console.error('Erro ao salvar histórico:', error.message);
+                  });
 
                 return newState;
               });
             }
           } catch (err) {
-            console.error("Erro ao processar metadados", err);
+            console.error('Erro ao processar metadados', err);
           }
         };
         es.onerror = () => {
@@ -198,7 +230,7 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
           setTimeout(connectMetadata, 5000);
         };
       } catch (err) {
-        console.error("Falha na conexão", err);
+        console.error('Falha na conexão', err);
       }
     };
 
@@ -216,7 +248,10 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
   return (
     <div className="bg-[#121212] min-h-screen text-white font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
-        <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white transition-colors group mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center text-gray-400 hover:text-white transition-colors group mb-6"
+        >
           <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
           <span className="text-[11px] font-medium uppercase tracking-[0.2em]">Voltar para Início</span>
         </button>
@@ -228,11 +263,16 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
       <div className="bg-[#1a1a1a] border-b border-white/5 sticky top-16 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center space-x-8">
-            <button className="py-4 text-[#ff6600] border-b-2 border-[#ff6600] font-medium text-[11px] uppercase tracking-widest">Início</button>
+            <button className="py-4 text-[#ff6600] border-b-2 border-[#ff6600] font-medium text-[11px] uppercase tracking-widest">
+              Início
+            </button>
           </div>
-          <button onClick={onViewSchedule} className="flex items-center text-[#ff6600] space-x-2 hover:underline font-medium text-[11px] py-4 uppercase tracking-widest">
-             <Calendar className="w-4 h-4" />
-             <span>Ver Programação</span>
+          <button
+            onClick={onViewSchedule}
+            className="flex items-center text-[#ff6600] space-x-2 hover:underline font-medium text-[11px] py-4 uppercase tracking-widest"
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Ver Programação</span>
           </button>
         </div>
       </div>
@@ -243,17 +283,26 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
             <div className="relative aspect-video overflow-hidden mb-12 shadow-2xl group bg-[#000]">
               <img src={program.image} alt={program.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-              {isCurrentlyLive && (
-                <button onClick={onListenClick} className="absolute bottom-8 left-8 bg-[#ff6600] hover:bg-white text-black px-8 py-4 flex items-center space-x-4 transition-all">
+              {isCurrentlyLive && onListenClick && (
+                <button
+                  onClick={onListenClick}
+                  className="absolute bottom-8 left-8 bg-[#ff6600] hover:bg-white text-black px-8 py-4 flex items-center space-x-4 transition-all"
+                >
                   <Volume2 className={`w-8 h-8 ${isPlaying ? 'animate-pulse' : ''}`} />
-                  <span className="text-2xl font-medium uppercase tracking-tighter">{isPlaying ? 'No Ar Agora' : 'Ouvir ao vivo'}</span>
+                  <span className="text-2xl font-medium uppercase tracking-tighter">
+                    {isPlaying ? 'No Ar Agora' : 'Ouvir ao vivo'}
+                  </span>
                 </button>
               )}
             </div>
 
             <div className="mb-12">
-              <h2 className="bbc-section-title text-3xl font-medium mb-6 tracking-tighter uppercase dark:text-white">Sobre</h2>
-              <p className="text-lg text-gray-300 font-normal tracking-tight leading-relaxed mb-8">{program.description}</p>
+              <h2 className="bbc-section-title text-3xl font-medium mb-6 tracking-tighter uppercase dark:text-white">
+                Sobre
+              </h2>
+              <p className="text-lg text-gray-300 font-normal tracking-tight leading-relaxed mb-8">
+                {program.description}
+              </p>
             </div>
 
             <div className="bg-white text-black p-0 mb-12 shadow-2xl border border-gray-100 max-w-lg">
@@ -268,15 +317,17 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
                   </div>
                 )}
               </div>
-              
+
               <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto no-scrollbar">
                 {loadingHistory ? (
                   <div className="p-20 flex flex-col items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin text-[#ff6600] mb-4" />
-                    <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">Carregando Histórico...</p>
+                    <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">
+                      Carregando Histórico...
+                    </p>
                   </div>
                 ) : sortedDateKeys.length > 0 ? (
-                  sortedDateKeys.map(date => (
+                  sortedDateKeys.map((date) => (
                     <div key={date}>
                       <div className="bg-gray-50 px-6 py-2">
                         <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400">
@@ -284,16 +335,26 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
                         </span>
                       </div>
                       {historyGroups[date].map((track, i) => (
-                        <div key={i} className={`flex items-center p-5 transition-colors ${track.isLive ? 'bg-orange-50' : 'hover:bg-gray-50'}`}>
+                        <div
+                          key={i}
+                          className={`flex items-center p-5 transition-colors ${
+                            track.isLive ? 'bg-orange-50' : 'hover:bg-gray-50'
+                          }`}
+                        >
                           <div className="w-14 h-14 flex-shrink-0 bg-gray-100 mr-5 relative">
                             <img src={track.image} className="w-full h-full object-cover" alt="" />
                             {track.isLive && <div className="absolute inset-0 border-2 border-[#ff6600]"></div>}
                           </div>
                           <div className="flex flex-col min-w-0">
-                            <h4 className="text-base font-medium uppercase tracking-tight leading-tight truncate">{track.artist}</h4>
+                            <h4 className="text-base font-medium uppercase tracking-tight leading-tight truncate">
+                              {track.artist}
+                            </h4>
                             <p className="text-gray-500 text-sm font-normal truncate">{track.title}</p>
                             <span className="text-[9px] font-medium uppercase tracking-widest text-gray-400 mt-1">
-                              {new Date(track.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              {new Date(track.timestamp).toLocaleTimeString('pt-BR', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
                             </span>
                           </div>
                         </div>
@@ -312,18 +373,28 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({
 
           <div className="lg:col-span-4 space-y-12">
             <div className="bg-[#1a1a1a] p-8 border-l-4 border-[#ff6600]">
-               <h3 className="text-[10px] font-medium uppercase text-gray-500 tracking-[0.2em] mb-4">Apresentador</h3>
-               <p className="text-white font-medium text-2xl uppercase tracking-tighter">{program.host || "Praise FM Brasil"}</p>
+              <h3 className="text-[10px] font-medium uppercase text-gray-500 tracking-[0.2em] mb-4">
+                Apresentador
+              </h3>
+              <p className="text-white font-medium text-2xl uppercase tracking-tighter">
+                {program.host || 'Praise FM Brasil'}
+              </p>
             </div>
 
             <div className="bg-[#1a1a1a] p-8">
-               <h3 className="text-[10px] font-medium uppercase text-gray-500 tracking-[0.2em] mb-4">Próximo</h3>
-               {nextProgram ? (
-                 <div className="flex flex-col">
-                    <p className="text-white font-medium text-xl uppercase tracking-tight">{nextProgram.title}</p>
-                    <p className="text-[#ff6600] font-medium text-sm uppercase tracking-widest mt-1">{formatTimeBR(nextProgram.startTime)}</p>
-                 </div>
-               ) : <p className="text-gray-600 uppercase text-xs">Fim da programação</p>}
+              <h3 className="text-[10px] font-medium uppercase text-gray-500 tracking-[0.2em] mb-4">
+                Próximo
+              </h3>
+              {nextProgram ? (
+                <div className="flex flex-col">
+                  <p className="text-white font-medium text-xl uppercase tracking-tight">{nextProgram.title}</p>
+                  <p className="text-[#ff6600] font-medium text-sm uppercase tracking-widest mt-1">
+                    {formatTimeBR(nextProgram.startTime)}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-gray-600 uppercase text-xs">Fim da programação</p>
+              )}
             </div>
           </div>
         </div>
