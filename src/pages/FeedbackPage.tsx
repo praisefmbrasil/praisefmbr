@@ -30,7 +30,7 @@ const FeedbackPage: React.FC = () => {
 
     try {
       if (!formData.message.trim()) {
-        throw new Error("Por favor, insira uma mensagem ou link da música antes de enviar.");
+        throw new Error("Por favor, insira uma mensagem ou o link da sua música antes de transmitir.");
       }
 
       const feedbackData = {
@@ -51,38 +51,39 @@ const FeedbackPage: React.FC = () => {
       setSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
-      console.error("Submission Error:", err);
-      setError(err.message || "Ocorreu um erro inesperado ao enviar.");
+      console.error("Erro no envio:", err);
+      setError(err.message || "Ocorreu um erro inesperado ao transmitir sua mensagem.");
     } finally {
       setLoading(false);
     }
   };
 
   const categories = [
-    { id: 'general', label: 'Sugestões e Elogios', icon: Mic2, desc: 'Comente sobre nossos programas e locutores' },
-    { id: 'music', label: 'Envio de Artista', icon: Music, desc: 'Envie sua música para avaliação da nossa rádio' },
-    { id: 'technical', label: 'Problema Técnico', icon: Settings, desc: 'Relate bugs ou problemas na transmissão' },
-    { id: 'shoutout', label: 'Mandar Alô', icon: MessageSquare, desc: 'Mande um recado para alguém especial no ar' },
+    { id: 'general', label: 'Sugestões e Elogios', icon: Mic2, desc: 'Comente sobre nossa programação e locutores' },
+    { id: 'music', label: 'Envio de Música', icon: Music, desc: 'Envie sua faixa para avaliação da nossa curadoria' },
+    { id: 'technical', label: 'Problemas Técnicos', icon: Settings, desc: 'Relate bugs ou instabilidades no streaming' },
+    { id: 'shoutout', label: 'Mande um Alô', icon: MessageSquare, desc: 'Peça sua música ou mande um recado ao vivo' },
   ];
 
   return (
-    <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300">
+    <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300 font-sans">
+      {/* Header Editorial - Praise FM Brasil */}
       <div className="bg-black text-white py-24 border-b border-white/10 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#ff6600]/20 to-transparent opacity-50"></div>
         <div className="max-w-4xl mx-auto px-4 relative z-10">
           <button 
             onClick={() => navigate('/')}
-            className="flex items-center text-gray-400 hover:text-white mb-10 text-[10px] font-bold uppercase tracking-[0.4em] group"
+            className="flex items-center text-gray-400 hover:text-white mb-10 text-[10px] font-medium uppercase tracking-[0.4em] group"
           >
             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-            Sair para a Home
+            Voltar para o Início
           </button>
-          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-6">
-            {type === 'music' ? 'Envio de Artista' : 'Sua Voz'}
+          <h1 className="text-6xl md:text-8xl font-medium uppercase tracking-tighter leading-none mb-6">
+            {type === 'music' ? 'Nova Música' : 'Sua Voz'}
           </h1>
-          <p className="text-xl text-gray-400 font-normal uppercase tracking-tight max-w-xl">
+          <p className="text-xl text-gray-400 font-normal uppercase tracking-tight max-w-xl leading-tight">
             {type === 'music' 
-              ? 'Faça parte da nova geração da adoração. Nossa equipe de curadoria avalia todas as faixas recebidas.'
+              ? 'Faça parte da nova geração da adoração. Nossa equipe de curadoria ouve cada faixa enviada.'
               : 'Ajude a moldar o futuro da Praise FM Brasil. Sua opinião influencia diretamente nosso som.'
             }
           </p>
@@ -92,6 +93,7 @@ const FeedbackPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
           
+          {/* Seletor de Categorias */}
           <div className="lg:col-span-4 space-y-4">
             <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400 mb-8">Selecione o Assunto</h3>
             {categories.map((cat) => (
@@ -107,29 +109,30 @@ const FeedbackPage: React.FC = () => {
               >
                 <cat.icon className={`w-6 h-6 mt-1 ${type === cat.id ? 'text-[#ff6600]' : 'text-gray-400'}`} />
                 <div>
-                  <h4 className="font-bold uppercase tracking-tighter text-xl dark:text-white">{cat.label}</h4>
-                  <p className="text-gray-500 text-xs mt-1 uppercase tracking-tight">{cat.desc}</p>
+                  <h4 className="font-medium uppercase tracking-tighter text-xl dark:text-white">{cat.label}</h4>
+                  <p className="text-gray-500 text-[10px] mt-1 uppercase tracking-tight leading-none">{cat.desc}</p>
                 </div>
               </button>
             ))}
           </div>
 
+          {/* Área do Formulário */}
           <div className="lg:col-span-8">
             {submitted ? (
               <div className="bg-[#ff6600] p-16 text-black flex flex-col items-center text-center animate-in zoom-in-95 duration-500 shadow-2xl">
                 <CheckCircle2 className="w-20 h-20 mb-8" />
-                <h2 className="text-5xl font-black uppercase tracking-tighter leading-none mb-4">Envio Realizado</h2>
-                <p className="text-black/70 text-lg font-bold uppercase tracking-tight max-w-sm">
+                <h2 className="text-5xl font-medium uppercase tracking-tighter leading-none mb-4">Transmitido com Sucesso</h2>
+                <p className="text-black/70 text-lg font-normal uppercase tracking-tight max-w-sm">
                   {type === 'music' 
-                    ? 'Sua música já está com nossa equipe de curadoria. Se o seu som encaixar na nossa grade, entraremos em contato.'
-                    : 'Sua mensagem foi entregue com sucesso. Obrigado por contribuir com a Praise FM Brasil.'
+                    ? 'Sua música já está com nossa equipe de A&R. Se o seu som encaixar na nossa grade, entraremos em contato.'
+                    : 'Sua mensagem foi armazenada com segurança. Obrigado por construir a Praise FM Brasil conosco.'
                   }
                 </p>
                 <button 
                   onClick={() => { setSubmitted(false); setFormData({ name: '', email: '', message: '' }); }}
                   className="mt-10 border-2 border-black px-10 py-4 text-[10px] font-black uppercase tracking-widest hover:bg-black hover:text-[#ff6600] transition-all"
                 >
-                  Enviar outra mensagem
+                  Enviar nova mensagem
                 </button>
               </div>
             ) : (
@@ -138,7 +141,7 @@ const FeedbackPage: React.FC = () => {
                   <div className="bg-red-50 text-red-600 p-6 flex items-start space-x-4 border-l-4 border-red-600">
                     <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                     <div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-red-800">Erro de Transmissão</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Erro na Transmissão</span>
                       <p className="text-xs font-medium mt-1">{error}</p>
                     </div>
                   </div>
@@ -146,7 +149,7 @@ const FeedbackPage: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nome Completo / Nome Artístico</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Nome Completo / Artista</label>
                     <input 
                       type="text" 
                       required
@@ -154,7 +157,7 @@ const FeedbackPage: React.FC = () => {
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
                       className="w-full bg-white dark:bg-black border-2 border-gray-100 dark:border-white/10 p-5 outline-none focus:border-[#ff6600] transition-colors dark:text-white font-medium disabled:opacity-50" 
-                      placeholder="Ex: Ministério Morada"
+                      placeholder="Ex: Gabriela Rocha"
                     />
                   </div>
                   <div className="space-y-2">
@@ -166,13 +169,13 @@ const FeedbackPage: React.FC = () => {
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
                       className="w-full bg-white dark:bg-black border-2 border-gray-100 dark:border-white/10 p-5 outline-none focus:border-[#ff6600] transition-colors dark:text-white font-medium disabled:opacity-50" 
-                      placeholder="seu@email.com"
+                      placeholder="seuemail@exemplo.com"
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                    {type === 'music' ? 'Informações da Música / Link (SoundCloud, Drive, YouTube)' : 'Sua Mensagem'}
+                    {type === 'music' ? 'Link da Música (SoundCloud, Drive, YouTube)' : 'Sua Mensagem'}
                   </label>
                   <textarea 
                     rows={6} 
@@ -181,7 +184,7 @@ const FeedbackPage: React.FC = () => {
                     value={formData.message}
                     onChange={(e) => setFormData({...formData, message: e.target.value})}
                     className="w-full bg-white dark:bg-black border-2 border-gray-100 dark:border-white/10 p-5 outline-none focus:border-[#ff6600] transition-colors dark:text-white font-medium resize-none disabled:opacity-50" 
-                    placeholder={type === 'music' ? "Forneça um link privado ou público para sua música e uma breve bio do artista..." : "Conte para nós o que você está pensando..."}
+                    placeholder={type === 'music' ? "Insira o link para ouvirmos sua música e uma breve bio..." : "Como podemos te ouvir?"}
                   ></textarea>
                 </div>
                 <button 
@@ -191,12 +194,12 @@ const FeedbackPage: React.FC = () => {
                 >
                   {loading ? (
                     <>
-                      <span>Enviando...</span>
+                      <span>Transmitindo...</span>
                       <Loader2 className="w-4 h-4 animate-spin" />
                     </>
                   ) : (
                     <>
-                      <span>{type === 'music' ? 'Enviar Música' : 'Enviar Mensagem'}</span>
+                      <span>{type === 'music' ? 'Enviar Faixa' : 'Transmitir Mensagem'}</span>
                       <Send className="w-4 h-4" />
                     </>
                   )}

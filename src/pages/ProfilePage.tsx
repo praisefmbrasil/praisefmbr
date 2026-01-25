@@ -54,31 +54,29 @@ const ProfilePage: React.FC = () => {
       setMessage(null);
 
       if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('Você deve selecionar uma imagem para upload.');
+        throw new Error('Você deve selecionar uma imagem para fazer o upload.');
       }
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`; // ✅ Adiciona pasta "avatars/"
+      const filePath = `${fileName}`;
 
-      // ✅ Upload
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // ✅ Correção: desestruturação correta
-      const { data } = supabase.storage
+      const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      setProfile(prev => ({ ...prev, avatar_url: data.publicUrl }));
-      setMessage({ type: 'success', text: 'Foto enviada! Não esqueça de salvar as alterações.' });
+      setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
+      setMessage({ type: 'success', text: 'Foto enviada! Não esqueça de salvar as alterações abaixo.' });
 
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Erro ao fazer upload da imagem.' });
+      setMessage({ type: 'error', text: error.message || 'Erro ao carregar imagem. Verifique se o bucket "avatars" existe no seu Supabase.' });
     } finally {
       setUploading(false);
     }
@@ -120,24 +118,24 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300">
+      {/* Header Minimalista - Praise FM Brasil */}
       <div className="bg-black text-white py-20 border-b border-white/10 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 relative z-10">
           <button 
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-400 hover:text-white mb-8 text-[10px] font-black uppercase tracking-[0.4em] group"
+            className="flex items-center text-gray-400 hover:text-white mb-8 text-[10px] font-medium uppercase tracking-[0.4em] group"
           >
             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Voltar
           </button>
-          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">Minha Conta</h1>
+          <h1 className="text-5xl md:text-7xl font-medium uppercase tracking-tighter leading-none">Minha Conta</h1>
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-16">
+          {/* Coluna da Foto */}
           <div className="md:col-span-4 flex flex-col items-center">
-            
-            {/* Foto de Perfil */}
             <div 
               className="relative w-48 h-48 group cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
@@ -154,14 +152,14 @@ const ProfilePage: React.FC = () => {
                 ) : (
                   <div className="flex flex-col items-center text-gray-400">
                     <User className="w-12 h-12 mb-2" />
-                    <span className="text-[8px] font-black uppercase tracking-widest text-center px-4">Upload Foto</span>
+                    <span className="text-[8px] font-regular uppercase tracking-widest text-center px-4">Carregar Foto</span>
                   </div>
                 )}
               </div>
               
               <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
                 <Camera className="w-8 h-8 mb-2" />
-                <span className="text-[9px] font-black uppercase tracking-widest">Alterar</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">Alterar Imagem</span>
               </div>
 
               <input 
@@ -173,12 +171,12 @@ const ProfilePage: React.FC = () => {
               />
             </div>
             
-            <h2 className="mt-8 text-3xl font-black uppercase tracking-tighter dark:text-white text-center">
+            <h2 className="mt-8 text-3xl font-medium uppercase tracking-tighter dark:text-white text-center">
               {profile.username || 'Ouvinte Praise'}
             </h2>
             <div className="flex items-center mt-2 space-x-2">
               <ShieldCheck className="w-4 h-4 text-[#ff6600]" />
-              <p className="text-gray-500 text-[11px] font-black uppercase tracking-[0.2em]">ID Praise Verificado</p>
+              <p className="text-gray-500 text-[11px] font-medium uppercase tracking-[0.2em]">Perfil Verificado</p>
             </div>
 
             <button 
@@ -189,10 +187,11 @@ const ProfilePage: React.FC = () => {
             </button>
           </div>
 
+          {/* Coluna do Formulário */}
           <div className="md:col-span-8">
             <form onSubmit={handleUpdate} className="space-y-10">
               {message && (
-                <div className={`p-5 text-xs font-bold uppercase tracking-widest border-l-4 animate-in fade-in slide-in-from-top-2 ${message.type === 'success' ? 'bg-green-50 text-green-600 border-green-600' : 'bg-red-50 text-red-600 border-red-600'}`}>
+                <div className={`p-5 text-xs font-regular uppercase tracking-widest border-l-4 animate-in fade-in slide-in-from-top-2 ${message.type === 'success' ? 'bg-green-50 text-green-600 border-green-600' : 'bg-red-50 text-red-600 border-red-600'}`}>
                   {message.text}
                 </div>
               )}
@@ -206,7 +205,7 @@ const ProfilePage: React.FC = () => {
                   required
                   value={profile.username}
                   onChange={(e) => setProfile({...profile, username: e.target.value})}
-                  className="w-full bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-[#ff6600] p-5 outline-none transition-all dark:text-white text-lg font-bold"
+                  className="w-full bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-[#ff6600] p-5 outline-none transition-all dark:text-white text-lg font-medium"
                   placeholder="Seu Nome"
                 />
               </div>
@@ -219,7 +218,7 @@ const ProfilePage: React.FC = () => {
                   type="email"
                   disabled
                   value={profile.email}
-                  className="w-full bg-gray-100 dark:bg-white/10 p-5 outline-none text-gray-500 font-bold cursor-not-allowed border-2 border-transparent"
+                  className="w-full bg-gray-100 dark:bg-white/10 p-5 outline-none text-gray-500 font-medium cursor-not-allowed border-2 border-transparent"
                 />
               </div>
 
@@ -239,9 +238,9 @@ const ProfilePage: React.FC = () => {
               <div className="flex items-start space-x-5">
                 <Upload className="w-6 h-6 text-[#ff6600]" />
                 <div>
-                  <h4 className="text-sm font-black uppercase tracking-widest dark:text-white">Upload Direto Ativado</h4>
-                  <p className="text-xs text-gray-500 mt-2 uppercase leading-relaxed font-bold">
-                    Você pode clicar no seu avatar para enviar uma imagem. Utilizamos Supabase Storage para manter seus dados seguros e criptografados.
+                  <h4 className="text-sm font-black uppercase tracking-widest dark:text-white">Upload Direto Habilitado</h4>
+                  <p className="text-xs text-gray-500 mt-2 uppercase leading-relaxed font-normal">
+                    Você pode clicar no seu avatar para carregar uma imagem do seu dispositivo. Seus dados são armazenados de forma segura na Praise FM Brasil via Supabase Storage.
                   </p>
                 </div>
               </div>
