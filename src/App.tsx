@@ -11,8 +11,7 @@ import {
 } from 'react-router-dom';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { LivePlayerProvider } from './contexts/LivePlayerContext';
-import { usePlayer } from './contexts/LivePlayerContext';
+import { LivePlayerProvider, usePlayer } from './contexts/LivePlayerContext';
 
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -160,6 +159,7 @@ const AppContent = () => {
             <Route path="/cookies" element={<CookiesPolicyPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
+
             <Route
               path="/my-sounds"
               element={
@@ -168,6 +168,7 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
+
             <Route
               path="/profile"
               element={
@@ -176,6 +177,7 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
+
             <Route path="/live-recordings" element={<LiveRecordingsPage />} />
             <Route path="/new-releases" element={<NewReleasesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -184,7 +186,9 @@ const AppContent = () => {
       </main>
 
       {!isAppRoute && <Footer />}
-      {!isAppRoute && currentProgram && <LivePlayerBar />}
+
+      {/* 🔥 LivePlayerBar aparece SOMENTE quando estiver tocando */}
+      {!isAppRoute && isPlaying && <LivePlayerBar />}
     </div>
   );
 };
