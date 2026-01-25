@@ -1,9 +1,10 @@
+// src/components/ScheduleList.tsx
+
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Play, ArrowLeft, MapPin, Calendar as CalendarIcon } from 'lucide-react';
 import { SCHEDULES } from '../constants';
 import { Program } from '../types';
 
-// ✅ Define a interface ScheduleListProps
 interface ScheduleListProps {
   onNavigateToProgram: (program: Program) => void;
   onBack?: () => void;
