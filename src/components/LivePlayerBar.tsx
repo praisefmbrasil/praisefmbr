@@ -1,4 +1,5 @@
 import React from "react";
+import { Play, Pause } from 'lucide-react';
 
 interface Program {
   id: string;
@@ -21,21 +22,21 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
   program,
 }) => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white flex items-center p-3 gap-4 shadow-lg z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-black text-white flex items-center p-4 gap-4 shadow-2xl z-50 border-t border-white/10">
       {/* Imagem do programa */}
-      <div className="w-16 h-16 flex-shrink-0">
+      <div className="w-14 h-14 flex-shrink-0 rounded-full overflow-hidden border-2 border-[#ff6600]">
         <img
           src={program.image}
           alt={program.title}
-          className="w-full h-full object-cover rounded-md"
+          className="w-full h-full object-cover"
         />
       </div>
 
       {/* Informações do programa */}
-      <div className="flex-1 overflow-hidden">
-        <div className="font-semibold text-sm truncate">{program.title}</div>
-        <div className="text-xs text-gray-300 truncate">{program.host}</div>
-        <div className="text-xs text-gray-400">
+      <div className="flex-1 min-w-0">
+        <div className="font-bold text-sm truncate uppercase tracking-tight">{program.title}</div>
+        <div className="text-xs text-gray-400 truncate">{program.host}</div>
+        <div className="text-[10px] font-medium text-[#ff6600] uppercase tracking-widest mt-1">
           {program.startTime} - {program.endTime}
         </div>
       </div>
@@ -43,40 +44,13 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
       {/* Botão play/pause */}
       <button
         onClick={onTogglePlayback}
-        className="w-12 h-12 flex items-center justify-center rounded-full bg-red-600 hover:bg-red-700 transition-colors"
+        aria-label={isPlaying ? "Pausar transmissão" : "Tocar transmissão"}
+        className="w-12 h-12 flex items-center justify-center rounded-full bg-[#ff6600] hover:bg-[#e65c00] transition-colors shadow-lg active:scale-95"
       >
         {isPlaying ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            {/* Pause Icon */}
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 9v6m4-6v6"
-            />
-          </svg>
+          <Pause className="w-5 h-5 text-white" />
         ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 ml-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            {/* Play Icon */}
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M14.752 11.168l-6.518-3.758A1 1 0 007 8.24v7.52a1 1 0 001.234.97l6.518-1.758a1 1 0 000-1.72z"
-            />
-          </svg>
+          <Play className="w-5 h-5 text-white ml-0.5" />
         )}
       </button>
     </div>
