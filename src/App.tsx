@@ -77,7 +77,7 @@ const AppContent = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { isPlaying, togglePlay, currentTrack } = usePlayer();
+  const { isPlaying, togglePlay } = usePlayer(); // ✅ Removido currentTrack
 
   const { day, total } = getSaoPauloDayAndTotalMinutes();
 
@@ -136,9 +136,9 @@ const AppContent = () => {
                     onNavigateToProgram={setSelectedProgram}
                     onListenClick={togglePlay}
                     isPlaying={isPlaying}
-                    liveMetadata={currentTrack}
+                    // ✅ liveMetadata removido
                   />
-                  <RecentlyPlayed />
+                  <RecentlyPlayed tracks={[]} /> {/* ✅ Adicionado prop obrigatória */}
                 </>
               }
             />
@@ -150,7 +150,7 @@ const AppContent = () => {
             />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/artists" element={<FeaturedArtistsPage />} />
-            <Route path="/presenters" element={<PresentersPage />} />
+            <Route path="/presenters" element={<PresentersPage onNavigateToProgram={setSelectedProgram} />} />
             <Route path="/devotional" element={<DevotionalPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
