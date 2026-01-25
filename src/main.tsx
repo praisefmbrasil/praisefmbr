@@ -1,23 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import App from './App'; // Importação do export default do App.tsx
 import './index.css';
-import { registerSW } from './registerSW';
 
-// Inicializa o Service Worker para suporte a PWA (Modo Offline e Instalação)
-registerSW();
+// Registro do PWA
+// Se houver erro de tipos no VS Code, certifique-se que o vite-plugin-pwa está no package.json
+import { registerSW } from 'virtual:pwa-register';
 
-// Seleção do elemento root com tratamento de erro
-const rootElement = document.getElementById('root');
+registerSW({ immediate: true });
 
-if (!rootElement) {
-  throw new Error("Erro fatal: O elemento 'root' não foi encontrado no DOM.");
-  }
-
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <React.StrictMode>
-        <App />
-          </React.StrictMode>
-          );
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
