@@ -60,19 +60,23 @@ const ProfilePage: React.FC = () => {
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
       const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const filePath = `avatars/${fileName}`; // ✅ Adiciona pasta "avatars/"
 
+      // ✅ Upload
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      // ✅ Correção: desestruturação correta
+      const { data, error: urlError } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
+      if (urlError) throw urlError;
+
+      setProfile(prev => ({ ...prev, avatar_url: data.publicUrl }));
       setMessage({ type: 'success', text: 'Foto enviada! Não esqueça de salvar as alterações.' });
 
     } catch (error: any) {
