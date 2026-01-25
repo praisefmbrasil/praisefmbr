@@ -1,3 +1,5 @@
+import React from 'react';
+
 // ✅ Função confiável para obter hora de São Paulo
 const getBrasiliaTime = () => {
   const now = new Date();
@@ -28,3 +30,14 @@ const getBrasiliaTime = () => {
     totalMinutes: hours * 60 + minutes
   };
 };
+
+const AppHomePage: React.FC = () => {
+    return (
+        <div>
+            <h1>Welcome to the App Home Page</h1>
+            {/* Add your content here */}
+        </div>
+    );
+};
+
+export default AppHomePage; // Ensure you export the component

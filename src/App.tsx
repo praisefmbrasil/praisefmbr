@@ -27,7 +27,18 @@ import EventsPage from './pages/EventsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import CookiesPolicyPage from './pages/CookiesPolicyPage';
-import AppHomePage from './pages/AppHomePage';
+import AppHomePage from import React from 'react';
+
+const AppHomePage: React.FC = () => {
+    return (
+        <div>
+            <h1>Welcome to the App Home Page</h1>
+            {/* Add your content here */}
+        </div>
+    );
+};
+
+export default AppHomePage; // Ensure you export the component;
 import { SCHEDULES } from './constants';
 import { Program } from './types';
 
