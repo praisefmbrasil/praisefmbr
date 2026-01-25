@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import LivePlayerBar from "./components/LivePlayerBar"; // componente visual do player
+import LivePlayerBar from "./components/LivePlayerBar";
 
-const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv"; // Praise FM BRA
+// ✅ Corrigido: sem espaços extras
+const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv"; // Praise FM BRASIL
 
 function App() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Inicializa o áudio
   useEffect(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio(STREAM_URL);
-      audioRef.current.preload = "none"; // evita autoplay bug
+      audioRef.current.preload = "none";
       audioRef.current.crossOrigin = "anonymous";
 
       audioRef.current.addEventListener("play", () => setIsPlaying(true));
@@ -19,14 +19,12 @@ function App() {
       audioRef.current.addEventListener("ended", () => setIsPlaying(false));
     }
 
-    // Limpa ao desmontar
     return () => {
       audioRef.current?.pause();
       audioRef.current = null;
     };
   }, []);
 
-  // Alterna play/pause
   const togglePlayback = async () => {
     if (!audioRef.current) return;
 
@@ -43,22 +41,20 @@ function App() {
 
   return (
     <>
-      {/* SEU SITE / ROTAS */}
       <main className="min-h-screen pb-[120px]">
         {/* conteúdo das páginas aqui */}
       </main>
 
-      {/* PLAYER FIXO NA PARTE INFERIOR */}
       <LivePlayerBar
         isPlaying={isPlaying}
         onTogglePlayback={togglePlayback}
         program={{
           id: "live",
-          title: "Praise FM USA",
-          host: "On Air",
+          title: "Praise FM Brasil", // ✅ Corrigido
+          host: "Ao Vivo 24h",
           image: "/icon-512.png",
           startTime: "24/7",
-          endTime: "Live",
+          endTime: "AO VIVO",
         }}
       />
     </>
