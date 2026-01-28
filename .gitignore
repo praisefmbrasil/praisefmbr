@@ -1,60 +1,24 @@
-# Dependências
-node_modules/
-
-# Ambiente e variáveis sensíveis
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Supabase (se usado)
-supabase/.temp/
-
-# Deploy (Vercel / Netlify)
-.vercel
-.netlify
-
-# Build e cache
-.next/
-out/
-build/
-dist/
-.cache/
-.nuxt/          # Caso use Nuxt no futuro
-.swc/           # Cache do SWC (compilador rápido)
-
-# TypeScript
-*.tsbuildinfo
-*.tsx.buildinfo
-
-# PWA – Arquivos gerados automaticamente
-public/sw.js
-public/workbox-*.js
-public/precache-manifest.*.js
-public/fallback-*.html
-
-# Logs e debug
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# IDEs e editores
-.idea/
-.vscode/
-*.swp
-*.swo
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-Thumbs.db
-
-# Outros
-coverage/
-*.log
-
-# Arquivos de ambiente
-.env
-.env.local
-.env.*.local
-
-# Dependências
-node_modules/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

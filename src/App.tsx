@@ -1,31 +1,35 @@
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState } from 'react'
+import reactLogo from './assets/react.svg'
+import viteLogo from '/vite.svg'
+import './App.css'
 
-import AppHomePage from "./pages/AppHomePage";
-import LivePlayerBar from "./components/LivePlayerBar";
-import { LivePlayerProvider } from "./contexts/LivePlayerContext";
+function App() {
+  const [count, setCount] = useState(0)
 
-function AppLayout() {
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<AppHomePage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-
-      {/* BBC Sounds Global Player */}
-      <LivePlayerBar />
-    </div>
-  );
+    <>
+      <div>
+        <a href="https://vite.dev" target="_blank">
+          <img src={viteLogo} className="logo" alt="Vite logo" />
+        </a>
+        <a href="https://react.dev" target="_blank">
+          <img src={reactLogo} className="logo react" alt="React logo" />
+        </a>
+      </div>
+      <h1>Vite + React</h1>
+      <div className="card">
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+        <p>
+          Edit <code>src/App.tsx</code> and save to test HMR
+        </p>
+      </div>
+      <p className="read-the-docs">
+        Click on the Vite and React logos to learn more
+      </p>
+    </>
+  )
 }
 
-export default function App() {
-  return (
-    <LivePlayerProvider>
-      <HashRouter>
-        <AppLayout />
-      </HashRouter>
-    </LivePlayerProvider>
-  );
-}
+export default App
