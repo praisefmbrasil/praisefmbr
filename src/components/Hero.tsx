@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Program, FavoriteItem } from '../types';
 import { programs } from '../constants';
+import { Music, Loader2 } from 'lucide-react';
 
 interface HeroProps {
   favoriteItems: FavoriteItem[];
@@ -11,8 +12,8 @@ const Hero: React.FC<HeroProps> = ({ favoriteItems, liveProgram }) => {
   return (
     <section className="hero-section">
       <div className="hero-content">
-        <h1 className="hero-title">Praise FM Brasil</h1>
-        <p className="hero-subtitle">Sua rádio gospel online 24h</p>
+        <h1>Praise FM Brasil</h1>
+        <p>Sua rádio gospel online 24h</p>
 
         {liveProgram && (
           <div className="live-program">
@@ -24,13 +25,9 @@ const Hero: React.FC<HeroProps> = ({ favoriteItems, liveProgram }) => {
         <div className="favorite-items">
           {favoriteItems.map((item: FavoriteItem) => (
             <div key={item.id} className="favorite-card">
-              <img
-                src={item.image ?? '/placeholder-image.png'}
-                alt={item.title}
-                className="favorite-image"
-              />
-              <h3 className="favorite-title">{item.title}</h3>
-              {item.subtitle && <p className="favorite-subtitle">{item.subtitle}</p>}
+              <img src={item.image ?? '/placeholder-image.png'} alt={item.title} />
+              <h3>{item.title}</h3>
+              {item.subtitle && <p>{item.subtitle}</p>}
             </div>
           ))}
         </div>
@@ -39,9 +36,9 @@ const Hero: React.FC<HeroProps> = ({ favoriteItems, liveProgram }) => {
           <h2>Programação</h2>
           {programs.map((prog: Program) => (
             <div key={prog.id} className="program-card">
-              <span className="program-time">{prog.startTime} - {prog.endTime}</span>
-              <span className="program-title">{prog.title}</span>
-              <span className="program-host">{prog.host}</span>
+              <span>{prog.startTime} - {prog.endTime}</span>
+              <span>{prog.title}</span>
+              <span>{prog.host}</span>
             </div>
           ))}
         </div>
