@@ -1,48 +1,50 @@
-
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { User, Session } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
+
+interface FavoriteItem {
+  id: string;
+  title: string;
+  host: string;
+  image: string;
+  type: 'program' | 'track';
+}
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
   loading: boolean;
-  favorites: any[];
-  toggleFavorite: (item: any) => Promise<void>;
-  isFavorite: (id: string) => boolean;
+  favorites: FavoriteItem[];
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  refreshFavorites: () => Promise<void>;
+  toggleFavorite: (item: FavoriteItem) => void;
+  isFavorite: (id: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [favorites, setFavorites] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
+  // Carregar usuário e favoritos
   useEffect(() => {
+    // Verificar sessão atual
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) fetchFavorites(session.user.id);
+      if (session?.user) {
+        loadFavorites(session.user.id);
+      }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
+    // Escutar mudanças na autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      
       if (session?.user) {
-        fetchFavorites(session.user.id);
+        loadFavorites(session.user.id);
       } else {
-        setFavorites([]);
-      }
-      
-      if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setSession(null);
         setFavorites([]);
       }
       setLoading(false);
@@ -51,109 +53,150 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchFavorites = async (userId: string) => {
+  // Carregar favoritos do usuário
+  const loadFavorites = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('favorites')
+        .from('user_favorites')
         .select('*')
         .eq('user_id', userId);
+
+      if (error) throw error;
       
-      if (error) {
-        if (error.code === 'PGRST103') {
-          console.warn("Supabase: 'favorites' table not found. Please run the migration SQL.");
-        } else {
-          console.error("Error fetching favorites:", error.message);
-        }
-        return;
+      if (data) {
+        const formattedFavorites: FavoriteItem[] = data.map(fav => ({
+          id: fav.item_id,
+          title: fav.title,
+          host: fav.host,
+          image: fav.image_url,
+          type: fav.item_type
+        }));
+        setFavorites(formattedFavorites);
       }
-      setFavorites(data || []);
-    } catch (e: any) {
-      console.error("Unexpected error fetching favorites:", e.message || String(e));
+    } catch (err) {
+      console.error('Erro ao carregar favoritos:', err);
     }
   };
 
-  const refreshFavorites = async () => {
-    if (user) await fetchFavorites(user.id);
+  // Função de Login
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) return { error };
+
+      return { error: null };
+    } catch (err: any) {
+      return { error: err };
+    }
   };
 
-  const toggleFavorite = async (item: any) => {
+  // Função de Cadastro
+  const signUp = async (email: string, password: string, name: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
+        },
+      });
+
+      if (error) return { error };
+
+      // Se o cadastro foi bem-sucedido e o usuário foi criado
+      if (data.user) {
+        // Criar perfil do usuário na tabela profiles (se existir)
+        try {
+          await supabase.from('profiles').insert([
+            {
+              id: data.user.id,
+              full_name: name,
+              email: email,
+              created_at: new Date().toISOString(),
+            },
+          ]);
+        } catch (profileError) {
+          console.log('Perfil não criado (tabela pode não existir):', profileError);
+        }
+      }
+
+      return { error: null };
+    } catch (err: any) {
+      return { error: err };
+    }
+  };
+
+  // Função de Logout
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setFavorites([]);
+  };
+
+  // Toggle Favorito
+  const toggleFavorite = async (item: FavoriteItem) => {
     if (!user) return;
 
-    const itemIdString = String(item.id || item.item_id);
-    const existing = favorites.find(f => String(f.item_id) === itemIdString);
-    
-    try {
-      if (existing) {
-        const { error } = await supabase
-          .from('favorites')
+    const isFav = favorites.some(f => f.id === item.id);
+
+    if (isFav) {
+      // Remover favorito
+      try {
+        await supabase
+          .from('user_favorites')
           .delete()
-          .eq('id', existing.id);
-          
-        if (error) {
-          if (error.code === 'PGRST103') alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
-          console.error("Error removing favorite:", error.message);
-        } else {
-          setFavorites(prev => prev.filter(f => f.id !== existing.id));
-        }
-      } else {
-        const newItem = {
-          user_id: user.id,
-          item_id: itemIdString,
-          item_type: item.type || 'track',
-          title: item.title,
-          subtitle: item.host || item.author || item.subtitle || '',
-          image: item.image,
-        };
-        
-        const { data, error } = await supabase
-          .from('favorites')
-          .insert([newItem])
-          .select();
-          
-        if (error) {
-          if (error.code === 'PGRST103') alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
-          console.error("Error adding favorite:", error.message);
-        } else if (data && data.length > 0) {
-          setFavorites(prev => [...prev, data[0]]);
-        }
+          .eq('user_id', user.id)
+          .eq('item_id', item.id);
+
+        setFavorites(prev => prev.filter(f => f.id !== item.id));
+      } catch (err) {
+        console.error('Erro ao remover favorito:', err);
       }
-    } catch (err: any) {
-      console.error("Toggle favorite failed:", err.message);
+    } else {
+      // Adicionar favorito
+      try {
+        await supabase.from('user_favorites').insert([
+          {
+            user_id: user.id,
+            item_id: item.id,
+            item_type: item.type,
+            title: item.title,
+            host: item.host,
+            image_url: item.image,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+        setFavorites(prev => [...prev, item]);
+      } catch (err) {
+        console.error('Erro ao adicionar favorito:', err);
+      }
     }
   };
 
+  // Verificar se é favorito
   const isFavorite = (id: string) => {
-    const searchId = String(id);
-    return favorites.some(f => String(f.item_id) === searchId);
+    return favorites.some(f => f.id === id);
   };
 
-  const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (e: any) {
-      console.error("Sign out error:", e.message);
-    } finally {
-      setUser(null);
-      setSession(null);
-      setFavorites([]);
-      window.location.hash = '#/login';
-    }
+  const value: AuthContextType = {
+    user,
+    loading,
+    favorites,
+    signIn,
+    signUp,
+    signOut,
+    toggleFavorite,
+    isFavorite,
   };
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      loading, 
-      favorites, 
-      toggleFavorite, 
-      isFavorite, 
-      signOut,
-      refreshFavorites 
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
