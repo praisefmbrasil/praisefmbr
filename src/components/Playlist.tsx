@@ -1,6 +1,7 @@
 import React from "react";
-import { useAuth, FavoriteItem } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 import { Heart } from "lucide-react";
+import { FavoriteItem } from "../types";
 
 export interface Track {
   id: string;
