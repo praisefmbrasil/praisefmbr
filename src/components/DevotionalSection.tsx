@@ -1,55 +1,31 @@
-import React from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { Heart } from "lucide-react";
-import { FavoriteItem } from "../types";
-
-export interface Devotional {
-  id: string;
-  title: string;
-  subtitle?: string;
-  image?: string;
-}
+// src/components/DevotionalSection.tsx
+import React from 'react';
+import type { FavoriteItem } from '../types';
 
 interface DevotionalSectionProps {
-  devotionals: Devotional[];
+  items: FavoriteItem[];
 }
 
-const DevotionalSection: React.FC<DevotionalSectionProps> = ({ devotionals }) => {
-  const { toggleFavorite, isFavorite } = useAuth();
-
+const DevotionalSection: React.FC<DevotionalSectionProps> = ({ items }) => {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-12">
-      <h2 className="text-3xl font-bold mb-6">Devocionais</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {devotionals.map((dev) => {
-          const favItem: FavoriteItem = {
-            id: dev.id,
-            type: "devotional",
-            title: dev.title,
-            subtitle: dev.subtitle,
-            image: dev.image,
-          };
-
-          const favorite = isFavorite(favItem);
-
-          return (
-            <div key={dev.id} className="bg-white dark:bg-[#111] p-4 rounded shadow hover:shadow-lg transition">
-              {dev.image && (
-                <img src={dev.image} alt={dev.title} className="w-full h-40 object-cover rounded mb-4" />
-              )}
-              <h3 className="text-xl font-semibold">{dev.title}</h3>
-              {dev.subtitle && <p className="text-gray-500 text-sm">{dev.subtitle}</p>}
-
-              <button
-                className={`mt-4 flex items-center gap-2 ${favorite ? "text-red-500" : "text-[#ff6600]"}`}
-                onClick={() => toggleFavorite(favItem)}
-              >
-                <Heart fill={favorite ? "currentColor" : "none"} />
-                {favorite ? "Remover dos favoritos" : "Favoritar"}
-              </button>
+    <section className="devotional-section">
+      <h2 className="section-title">Devocionais</h2>
+      <div className="devotional-cards">
+        {items.map((item) => (
+          <div key={item.id} className="devotional-card">
+            {/* Garante que image nunca será undefined */}
+            <img
+              src={item.image ?? '/placeholder-image.png'}
+              alt={item.title}
+              className="devotional-image"
+            />
+            <div className="devotional-info">
+              <h3 className="devotional-title">{item.title}</h3>
+              {item.subtitle && <p className="devotional-subtitle">{item.subtitle}</p>}
+              {item.host && <p className="devotional-host">{item.host}</p>}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </section>
   );
