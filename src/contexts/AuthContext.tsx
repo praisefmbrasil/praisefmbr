@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "../lib/supabaseClient";
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 export interface User {
   id: string;
@@ -13,6 +14,11 @@ export interface FavoriteItem {
   title: string;
   subtitle?: string;
   image?: string;
+}
+
+// ✅ Tipo para o banco de dados (com user_id)
+interface FavoriteDB extends FavoriteItem {
+  user_id: string;
 }
 
 export interface AuthContextType {
@@ -38,22 +44,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) {
-        setUser({ id: data.session.user.id, email: data.session.user.email });
-        fetchFavorites(data.session.user.id);
+    // ✅ Removido getSession() duplicado - listener já dispara com estado inicial
+    
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        if (session?.user) {
+          const userData: User = { 
+            id: session.user.id, 
+            email: session.user.email 
+          };
+          setUser(userData);
+          fetchFavorites(session.user.id);
+        } else {
+          setUser(null);
+          setFavorites([]);
+        }
       }
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({ id: session.user.id, email: session.user.email });
-        fetchFavorites(session.user.id);
-      } else {
-        setUser(null);
-        setFavorites([]);
-      }
-    });
+    );
 
     return () => {
       listener?.subscription.unsubscribe();
@@ -61,47 +68,92 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const fetchFavorites = async (userId: string) => {
-    const { data, error } = await supabase
-      .from<FavoriteItem>("favorites")
-      .select("*")
-      .eq("user_id", userId);
+    try {
+      // ✅ Tipagem correta para a query
+      const { data, error } = await supabase
+        .from<FavoriteDB>("favorites")
+        .select("*")
+        .eq("user_id", userId);
 
-    if (!error && data) setFavorites(data);
-  };
-
-  const isFavorite = (item: FavoriteItem) => {
-    return favorites.some(f => f.id === item.id);
-  };
-
-  const toggleFavorite = async (item: FavoriteItem) => {
-    if (!user) return;
-
-    if (isFavorite(item)) {
-      await supabase.from("favorites").delete().eq("user_id", user.id).eq("id", item.id);
-      setFavorites(prev => prev.filter(f => f.id !== item.id));
-    } else {
-      await supabase.from("favorites").insert([{ ...item, user_id: user.id }]);
-      setFavorites(prev => [...prev, item]);
+      if (error) throw error;
+      
+      // ✅ Remover user_id antes de salvar no estado
+      const cleanedFavorites: FavoriteItem[] = (data || []).map(({ user_id, ...item }) => item);
+      setFavorites(cleanedFavorites);
+    } catch (err) {
+      console.error("Erro ao buscar favoritos:", err);
+      setFavorites([]);
     }
   };
 
-  const signUp = async (email: string, password: string) => {
+  const isFavorite = (item: FavoriteItem): boolean => {
+    return favorites.some(f => f.id === item.id);
+  };
+
+  const toggleFavorite = async (item: FavoriteItem): Promise<void> => {
+    if (!user) return;
+    
+    const wasFavorite = isFavorite(item);
+    const optimisticUpdate = wasFavorite 
+      ? favorites.filter(f => f.id !== item.id) 
+      : [...favorites, item];
+
+    // Atualização otimista
+    setFavorites(optimisticUpdate);
+
+    try {
+      if (wasFavorite) {
+        const { error } = await supabase
+          .from("favorites")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("id", item.id);
+        
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("favorites")
+          .insert([{ ...item, user_id: user.id } as FavoriteDB]);
+        
+        if (error) throw error;
+      }
+    } catch (err) {
+      console.error("Erro ao atualizar favorito:", err);
+      // Reverter atualização otimista
+      setFavorites(wasFavorite ? [...favorites, item] : favorites.filter(f => f.id !== item.id));
+      throw err;
+    }
+  };
+
+  const signUp = async (
+    email: string, 
+    password: string
+  ): Promise<{ user: User | null; error: string | null }> => {
     const { data, error } = await supabase.auth.signUp({ email, password });
+    
     if (error) return { user: null, error: error.message };
-    const u = data.user ? { id: data.user.id, email: data.user.email } : null;
-    setUser(u);
-    return { user: u, error: null };
+    
+    return { 
+      user: data.user ? { id: data.user.id, email: data.user.email } : null, 
+      error: null 
+    };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (
+    email: string, 
+    password: string
+  ): Promise<{ user: User | null; error: string | null }> => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
     if (error) return { user: null, error: error.message };
-    const u = data.user ? { id: data.user.id, email: data.user.email } : null;
-    setUser(u);
-    return { user: u, error: null };
+    
+    return { 
+      user: data.user ? { id: data.user.id, email: data.user.email } : null, 
+      error: null 
+    };
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<void> => {
     await supabase.auth.signOut();
     setUser(null);
     setFavorites([]);
