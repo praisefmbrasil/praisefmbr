@@ -1,9 +1,20 @@
-export type FavoriteItemType = "program" | "track" | "devotional" | "artist";
+// src/types.ts
 
-export interface FavoriteItem {
+export interface Program {
   id: string;
-  type: FavoriteItemType;
   title: string;
-  subtitle?: string;
-  image?: string;
+  host: string;
+  startTime: string;
+  endTime: string;
+  description: string;
+  image: string;
+}
+
+export interface Podcast {
+  id: string;
+  title: string;
+  category: string;
+  duration: string;
+  author: string;
+  image: string;
 }
