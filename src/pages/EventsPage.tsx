@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Ticket, Loader2, Search, Bell, BellRing, X, Check, Music, Info, ArrowRight, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import EventCard from '../components/EventCard';
 
 const BANDSINTOWN_APP_ID = 'praise_fm_bra_2026';

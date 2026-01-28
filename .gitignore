@@ -50,3 +50,11 @@ Thumbs.db
 # Outros
 coverage/
 *.log
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.*.local
+
+# Dependências
+node_modules/

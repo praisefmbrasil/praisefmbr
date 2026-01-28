@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { User, Mail, Camera, Save, Loader2, ArrowLeft, ShieldCheck, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

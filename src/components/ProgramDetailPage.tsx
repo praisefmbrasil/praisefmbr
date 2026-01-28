@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, ArrowLeft, Calendar, Music, Loader2 } from 'lucide-react';
 import { Program } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { usePlayer } from "../contexts/LivePlayerContext";
 
 interface PlayedTrack {
