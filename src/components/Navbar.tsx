@@ -1,24 +1,52 @@
-interface NavbarProps {
-  activeTab?: string;
-  theme?: "dark" | "light";
-  onToggleTheme?: () => void;
-}
+// src/components/Navbar.tsx
+import React, { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const Navbar: React.FC<NavbarProps> = ({
-  activeTab,
-  theme = "dark",
-  onToggleTheme,
-}) => {
+const Navbar: React.FC = () => {
+  // Aba ativa
+  const [activeTab, setActiveTab] = useState<'home' | 'programs' | 'favorites'>('home');
+  
+  // Tema claro/escuro
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // Alternar tema
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
   return (
-    <header className="bg-black border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between">
-        <span className="font-bold">Praise FM</span>
-
-        {onToggleTheme && (
-          <button onClick={onToggleTheme}>Toggle</button>
-        )}
+    <nav className={`navbar ${theme}`}>
+      <div className="navbar-left">
+        <Link 
+          to="/" 
+          className={activeTab === 'home' ? 'active' : ''}
+          onClick={() => setActiveTab('home')}
+        >
+          Home
+        </Link>
+        <Link 
+          to="/programs" 
+          className={activeTab === 'programs' ? 'active' : ''}
+          onClick={() => setActiveTab('programs')}
+        >
+          Programação
+        </Link>
+        <Link 
+          to="/favorites" 
+          className={activeTab === 'favorites' ? 'active' : ''}
+          onClick={() => setActiveTab('favorites')}
+        >
+          Favoritos
+        </Link>
       </div>
-    </header>
+
+      <div className="navbar-right">
+        <button onClick={toggleTheme} className="theme-toggle">
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
+      </div>
+    </nav>
   );
 };
 
