@@ -1,4 +1,3 @@
-// src/components/DevotionalSection.tsx
 import React from 'react';
 import type { FavoriteItem } from '../types';
 
@@ -11,9 +10,8 @@ const DevotionalSection: React.FC<DevotionalSectionProps> = ({ items }) => {
     <section className="devotional-section">
       <h2 className="section-title">Devocionais</h2>
       <div className="devotional-cards">
-        {items.map((item) => (
+        {items.map((item: FavoriteItem) => (
           <div key={item.id} className="devotional-card">
-            {/* Garante que image nunca será undefined */}
             <img
               src={item.image ?? '/placeholder-image.png'}
               alt={item.title}
