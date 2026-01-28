@@ -4,7 +4,7 @@ import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 export interface User {
   id: string;
-  email: string | null;
+  email: string | null; // ✅ Agora aceita null (não undefined)
   full_name?: string | null;
 }
 
@@ -16,7 +16,6 @@ export interface FavoriteItem {
   image?: string;
 }
 
-// ✅ Tipo para o banco de dados (com user_id)
 interface FavoriteDB extends FavoriteItem {
   user_id: string;
 }
@@ -44,14 +43,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
   useEffect(() => {
-    // ✅ Removido getSession() duplicado - listener já dispara com estado inicial
-    
+    // ✅ REMOVIDO: getSession() duplicado (não é necessário)
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
         if (session?.user) {
+          // ✅ CORREÇÃO PRINCIPAL: Converte undefined -> null
           const userData: User = { 
             id: session.user.id, 
-            email: session.user.email 
+            email: session.user.email ?? null // ✨ undefined -> null
           };
           setUser(userData);
           fetchFavorites(session.user.id);
@@ -69,7 +68,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchFavorites = async (userId: string) => {
     try {
-      // ✅ Tipagem correta para a query
       const { data, error } = await supabase
         .from<FavoriteDB>("favorites")
         .select("*")
@@ -77,7 +75,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (error) throw error;
       
-      // ✅ Remover user_id antes de salvar no estado
       const cleanedFavorites: FavoriteItem[] = (data || []).map(({ user_id, ...item }) => item);
       setFavorites(cleanedFavorites);
     } catch (err) {
@@ -98,7 +95,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       ? favorites.filter(f => f.id !== item.id) 
       : [...favorites, item];
 
-    // Atualização otimista
     setFavorites(optimisticUpdate);
 
     try {
@@ -119,7 +115,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } catch (err) {
       console.error("Erro ao atualizar favorito:", err);
-      // Reverter atualização otimista
       setFavorites(wasFavorite ? [...favorites, item] : favorites.filter(f => f.id !== item.id));
       throw err;
     }
@@ -133,8 +128,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     if (error) return { user: null, error: error.message };
     
+    // ✅ CORREÇÃO: Converte undefined -> null
     return { 
-      user: data.user ? { id: data.user.id, email: data.user.email } : null, 
+      user: data.user ? { 
+        id: data.user.id, 
+        email: data.user.email ?? null // ✨ undefined -> null
+      } : null, 
       error: null 
     };
   };
@@ -147,8 +146,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     if (error) return { user: null, error: error.message };
     
+    // ✅ CORREÇÃO: Converte undefined -> null
     return { 
-      user: data.user ? { id: data.user.id, email: data.user.email } : null, 
+      user: data.user ? { 
+        id: data.user.id, 
+        email: data.user.email ?? null // ✨ undefined -> null
+      } : null, 
       error: null 
     };
   };
