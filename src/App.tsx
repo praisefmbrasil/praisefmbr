@@ -3,20 +3,18 @@ import { useRef } from "react";
 
 import AppHomePage from "./pages/AppHomePage";
 import LivePlayerBar from "./components/LivePlayerBar";
-import { LivePlayerProvider, useLivePlayer } from "./contexts/LivePlayerContext";
+import {
+  LivePlayerProvider,
+  useLivePlayer,
+} from "./contexts/LivePlayerContext";
 
 function AppLayout() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const {
-    isPlaying,
-    togglePlayback,
-    currentProgram, // agora vem do context corretamente
-  } = useLivePlayer();
+  const { isPlaying, playPause, currentProgram } = useLivePlayer();
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
-      {/* Conteúdo principal */}
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<AppHomePage />} />
@@ -24,15 +22,13 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {/* Player fixo estilo BBC */}
       <LivePlayerBar
         isPlaying={isPlaying}
-        onTogglePlayback={togglePlayback}
+        onTogglePlayback={playPause}
         audioRef={audioRef}
         program={currentProgram}
       />
 
-      {/* Elemento de áudio real */}
       <audio
         ref={audioRef}
         src="https://stream.zeno.fm/hvwifp8ezc6tv"
