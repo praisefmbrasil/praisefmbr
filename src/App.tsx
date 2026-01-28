@@ -3,7 +3,6 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider } from './contexts/AuthContext';
 
-// Layout
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import LivePlayerBar from './components/LivePlayerBar';
@@ -25,7 +24,6 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import CookiesPolicyPage from './pages/CookiesPolicyPage';
 
-// Player state (simplificado)
 const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
 
 const AppShell: React.FC = () => {
@@ -46,11 +44,9 @@ const AppShell: React.FC = () => {
   const togglePlayback = () => {
     if (!audioRef.current) return;
 
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => {});
-    }
+    isPlaying
+      ? audioRef.current.pause()
+      : audioRef.current.play().catch(() => {});
 
     setIsPlaying(p => !p);
   };
@@ -82,7 +78,6 @@ const AppShell: React.FC = () => {
 
       <Footer />
 
-      {/* Player global BBC-style */}
       <LivePlayerBar
         isPlaying={isPlaying}
         onTogglePlayback={togglePlayback}
