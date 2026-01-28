@@ -4,7 +4,7 @@ import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
 export interface User {
   id: string;
-  email: string | null; // ✅ Agora aceita null (não undefined)
+  email: string | null;
   full_name?: string | null;
 }
 
@@ -43,14 +43,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
   useEffect(() => {
-    // ✅ REMOVIDO: getSession() duplicado (não é necessário)
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
         if (session?.user) {
-          // ✅ CORREÇÃO PRINCIPAL: Converte undefined -> null
           const userData: User = { 
             id: session.user.id, 
-            email: session.user.email ?? null // ✨ undefined -> null
+            email: session.user.email ?? null
           };
           setUser(userData);
           fetchFavorites(session.user.id);
@@ -69,7 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const fetchFavorites = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from<FavoriteDB>("favorites")
+        .from<FavoriteDB, unknown>("favorites")
         .select("*")
         .eq("user_id", userId);
 
@@ -108,7 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from("favorites")
+          .from<FavoriteDB, unknown>("favorites")
           .insert([{ ...item, user_id: user.id } as FavoriteDB]);
         
         if (error) throw error;
@@ -128,11 +126,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     if (error) return { user: null, error: error.message };
     
-    // ✅ CORREÇÃO: Converte undefined -> null
     return { 
       user: data.user ? { 
         id: data.user.id, 
-        email: data.user.email ?? null // ✨ undefined -> null
+        email: data.user.email ?? null
       } : null, 
       error: null 
     };
@@ -146,11 +143,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     
     if (error) return { user: null, error: error.message };
     
-    // ✅ CORREÇÃO: Converte undefined -> null
     return { 
       user: data.user ? { 
         id: data.user.id, 
-        email: data.user.email ?? null // ✨ undefined -> null
+        email: data.user.email ?? null
       } : null, 
       error: null 
     };
