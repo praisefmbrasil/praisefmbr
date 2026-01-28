@@ -1,22 +1,3 @@
-@keyframes music-bar {
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
-}
-
-.animate-music-bar {
-  animation: music-bar 1s ease-in-out infinite;
-  transform-origin: bottom;
-}
-
-@keyframes bounce-sideways {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(5px); }
-}
-
-.animate-bounce-sideways {
-  animation: bounce-sideways 2s infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
