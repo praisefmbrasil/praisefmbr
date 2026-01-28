@@ -1,82 +1,97 @@
-import React, { createContext, useContext, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  User,
+} from "firebase/auth";
 
-export interface FavoriteItem {
-  id: string;
-  type: "program" | "track" | "devotional" | "artist";
-  title: string;
-  subtitle?: string;
-  image?: string;
-}
+import { app } from "../lib/firebase"; // ajuste o caminho se necessário
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+// =======================
+// TYPES
+// =======================
 
 interface AuthContextType {
   user: User | null;
-
-  // Auth
+  signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
-  signOut: () => void;
-
-  // Favorites
-  favorites: FavoriteItem[];
-  toggleFavorite: (item: FavoriteItem) => void;
-  isFavorite: (id: string) => boolean;
+  signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// =======================
+// CONTEXT
+// =======================
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+const auth = getAuth(app);
+
+// =======================
+// PROVIDER
+// =======================
+
+export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
-  const signUp = async (email: string, _password: string) => {
-    // mock auth (pronto pra Firebase depois)
-    setUser({
-      id: crypto.randomUUID(),
-      name: email.split("@")[0],
-      email,
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
     });
+
+    return () => unsubscribe();
+  }, []);
+
+  // =======================
+  // AUTH METHODS
+  // =======================
+
+  const signIn = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signOut = () => {
-    setUser(null);
-    setFavorites([]);
+  const signUp = async (email: string, password: string) => {
+    await createUserWithEmailAndPassword(auth, email, password);
   };
 
-  const toggleFavorite = (item: FavoriteItem) => {
-    setFavorites((prev) =>
-      prev.some((f) => f.id === item.id)
-        ? prev.filter((f) => f.id !== item.id)
-        : [...prev, item]
-    );
-  };
-
-  const isFavorite = (id: string) => {
-    return favorites.some((f) => f.id === id);
+  const signOut = async () => {
+    await firebaseSignOut(auth);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        signIn,
         signUp,
         signOut,
-        favorites,
-        toggleFavorite,
-        isFavorite,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
-};
+// =======================
+// HOOK
+// =======================
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
