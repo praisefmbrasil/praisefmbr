@@ -2,7 +2,7 @@ import React from "react";
 import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import { AuthProvider } from "./contexts/AuthContext";
-import { LivePlayerContext, LiveProgram } from "./contexts/LivePlayerContext";
+import { LivePlayerProvider } from "./contexts/LivePlayerContext";
 
 // Layout
 import Navbar from "./components/Navbar";
@@ -10,7 +10,7 @@ import Footer from "./components/Footer";
 import LivePlayerBar from "./components/LivePlayerBar";
 
 // Pages
-import HomePage from "./pages/HomePage";
+import AppHomePage from "./pages/AppHomePage";
 import NewReleasesPage from "./pages/NewReleasesPage";
 import PresentersPage from "./pages/PresentersPage";
 import EventsPage from "./pages/EventsPage";
@@ -24,91 +24,54 @@ import FeedbackPage from "./pages/FeedbackPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import TermsOfUsePage from "./pages/TermsOfUsePage";
 import CookiesPolicyPage from "./pages/CookiesPolicyPage";
-
-// Stream
-const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv";
+import ProgramDetailPage from "./pages/ProgramDetailPage";
 
 const AppShell: React.FC = () => {
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [program, setProgram] = React.useState<LiveProgram | null>(null);
-
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
-
-  // Inicializa o player
-  React.useEffect(() => {
-    audioRef.current = new Audio(STREAM_URL);
-    audioRef.current.crossOrigin = "anonymous";
-    audioRef.current.volume = 0.9;
-
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
-
-  const togglePlayback = async () => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      try {
-        await audioRef.current.play();
-      } catch {
-        // autoplay bloqueado — ok
-      }
-    }
-
-    setIsPlaying(prev => !prev);
-  };
-
   return (
-    <LivePlayerContext.Provider value={{ program }}>
-      <div className="min-h-screen bg-black text-white flex flex-col">
-        <Navbar />
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      {/* Navbar NÃO recebe props */}
+      <Navbar />
 
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/new-releases" element={<NewReleasesPage />} />
-            <Route path="/presenters" element={<PresentersPage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/devotional" element={<DevotionalPage />} />
-            <Route path="/help" element={<HelpCenterPage />} />
-            <Route path="/feedback" element={<FeedbackPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsOfUsePage />} />
-            <Route path="/cookies" element={<CookiesPolicyPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/my-sounds" element={<MySoundsPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<AppHomePage />} />
+          <Route path="/new-releases" element={<NewReleasesPage />} />
+          <Route path="/presenters" element={<PresentersPage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/devotional" element={<DevotionalPage />} />
+          <Route path="/program/:id" element={<ProgramDetailPage />} />
 
-        <Footer />
+          <Route path="/help" element={<HelpCenterPage />} />
+          <Route path="/feedback" element={<FeedbackPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfUsePage />} />
+          <Route path="/cookies" element={<CookiesPolicyPage />} />
 
-        {/* Player global */}
-        <LivePlayerBar
-          isPlaying={isPlaying}
-          onTogglePlayback={togglePlayback}
-          audioRef={audioRef}
-          program={program}
-        />
-      </div>
-    </LivePlayerContext.Provider>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/my-sounds" element={<MySoundsPage />} />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+
+      <Footer />
+
+      {/* Player global — NÃO recebe props */}
+      <LivePlayerBar />
+    </div>
   );
 };
 
-const App: React.FC = () => {
+export default function App() {
   return (
     <AuthProvider>
-      <HashRouter>
-        <AppShell />
-      </HashRouter>
+      <LivePlayerProvider>
+        <HashRouter>
+          <AppShell />
+        </HashRouter>
+      </LivePlayerProvider>
     </AuthProvider>
   );
-};
-
-export default App;
+}
