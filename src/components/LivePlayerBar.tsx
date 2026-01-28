@@ -1,38 +1,46 @@
-import React from "react";
-import { useLivePlayer } from "../contexts/LivePlayerContext";
+import { RefObject } from "react";
+import { LiveProgram } from "../contexts/LivePlayerContext";
 
-interface LivePlayerBarProps {
+export interface LivePlayerBarProps {
   isPlaying: boolean;
   onTogglePlayback: () => void;
-  audioRef: React.RefObject<HTMLAudioElement | null>;
+  audioRef: RefObject<HTMLAudioElement | null>;
+  program: LiveProgram | null;
 }
 
-const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
+export default function LivePlayerBar({
   isPlaying,
   onTogglePlayback,
-}) => {
-  const { currentProgram } = useLivePlayer();
-
+  audioRef,
+  program,
+}: LivePlayerBarProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-6 py-4 flex items-center justify-between">
+    <div className="bg-neutral-900 border-t border-neutral-800 px-4 py-3 flex items-center justify-between">
       <div>
-        <p className="text-xs uppercase text-gray-400">On Air</p>
         <p className="text-sm font-semibold">
-          {currentProgram?.title ?? "Praise FM Brasil"}
+          {program?.title ?? "Praise FM"}
         </p>
-        <p className="text-xs text-gray-500">
-          {currentProgram?.host ?? "24/7 Gospel Music"}
+        <p className="text-xs text-neutral-400">
+          {program?.host ?? "Live Radio"}
         </p>
       </div>
 
       <button
-        onClick={onTogglePlayback}
-        className="bg-[#ff6600] text-black px-6 py-2 text-xs uppercase tracking-widest font-bold"
+        onClick={() => {
+          if (!audioRef.current) return;
+
+          if (isPlaying) {
+            audioRef.current.pause();
+          } else {
+            audioRef.current.play();
+          }
+
+          onTogglePlayback();
+        }}
+        className="bg-white text-black px-4 py-1 rounded-full text-sm font-semibold"
       >
         {isPlaying ? "Pause" : "Play"}
       </button>
     </div>
   );
-};
-
-export default LivePlayerBar;
+}
