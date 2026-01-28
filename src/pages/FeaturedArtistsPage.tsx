@@ -11,49 +11,48 @@ interface Artist {
   hits: string[];
 }
 
-// ✅ Artistas em Destaque - Praise FM Brasil
 const FEATURED_ARTISTS: Artist[] = [
   { 
-    id: 'art_br_1', 
-    name: 'Gabriela Rocha', 
-    genre: 'Worship / Adoração', 
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp', 
-    hits: ['Me Atraiu', 'Lugar Secreto', 'Creio Em Ti'] 
-  },
-  { 
-    id: 'art_br_2', 
+    id: 'art_1', 
     name: 'Fernandinho', 
-    genre: 'Pop Gospel / Rock', 
+    genre: 'Louvor e Adoração', 
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp', 
-    hits: ['Faz Chover', 'Galileu', 'Uma Nova História'] 
+    hits: ['Faz Chover', 'Galileu', 'Yeshua'] 
   },
   { 
-    id: 'art_br_3', 
+    id: 'art_2', 
+    name: 'Gabriela Rocha', 
+    genre: 'Adoração Contemporânea', 
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp', 
+    hits: ['Lugar Secreto', 'A Ele a Glória', 'Caminho no Deserto'] 
+  },
+  { 
+    id: 'art_3', 
+    name: 'Isaias Saad', 
+    genre: 'Worship Brasil', 
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp', 
+    hits: ['Ousado Amor', 'Enche-me', 'Bondade de Deus'] 
+  },
+  { 
+    id: 'art_4', 
     name: 'Aline Barros', 
-    genre: 'Adoração / Infantil', 
+    genre: 'Gospel Pop', 
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp', 
     hits: ['Ressuscita-me', 'Sonda-me, Usa-me', 'Vitória no Deserto'] 
   },
   { 
-    id: 'art_br_4', 
-    name: 'Isaias Saad', 
-    genre: 'Worship / Adoração', 
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp', 
-    hits: ['Oousado Amor', 'Enche-me', 'Bondade de Deus'] 
+    id: 'art_5', 
+    name: 'Brandon Lake', 
+    genre: 'Contemporary Worship', 
+    image: 'https://res.cloudinary.com/dtecypmsh/image/upload/v1767583738/BRANDON_LAKE_nf7pyj.jpg', 
+    hits: ['Gratitude', 'Trust In God', 'Praise'] 
   },
   { 
-    id: 'art_br_5', 
-    name: 'Morada', 
-    genre: 'Worship / Alternativo', 
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Morada_example.webp', 
-    hits: ['É Tudo Sobre Você', 'Só Tu És Santo', 'Para Que Entre o Rei'] 
-  },
-  { 
-    id: 'art_br_6', 
-    name: 'Casa Worship', 
+    id: 'art_6', 
+    name: 'Elevation Worship', 
     genre: 'Modern Worship', 
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Casa_Worship_example.webp', 
-    hits: ['A Casa É Sua', 'Eu Te Vejo Em Tudo', 'Era Eu'] 
+    image: 'https://res.cloudinary.com/dtecypmsh/image/upload/v1767998578/ELEVATION_WORSHIP_olxxoe.webp', 
+    hits: ['LION', 'Trust In God', 'More Than Able'] 
   }
 ];
 
@@ -87,23 +86,22 @@ const FeaturedArtistsPage: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300 font-sans">
-      {/* Editorial Header - Adaptado para Praise FM Brasil */}
       <div className="bg-black text-white py-16 md:py-24 border-b border-white/10 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#ff6600]/10 to-transparent pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="flex items-center space-x-3 text-[#ff6600] mb-6">
             <Star className="w-5 h-5 fill-current" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.4em]">O Som da Praise FM Brasil</span>
+            <span className="text-[10px] font-medium uppercase tracking-[0.4em]">O Pulso da Praise FM Brasil</span>
           </div>
-          <h1 className="text-5xl md:text-8xl font-medium uppercase tracking-tighter leading-[0.85] mb-8">Artistas em<br />Destaque</h1>
+          <h1 className="text-5xl md:text-8xl font-medium uppercase tracking-tighter leading-[0.85] mb-8">Artistas<br />em Destaque</h1>
           <p className="text-lg md:text-xl text-gray-400 max-w-2xl font-normal uppercase tracking-tight leading-tight">
-            As vozes que definem uma geração de fé. Sessões exclusivas e mergulhos profundos nos artistas por trás dos maiores hinos de adoração do Brasil.
+            Os sons que definem uma geração de fé. Sessões exclusivas e mergulhos profundos nos artistas por trás dos maiores hinos de adoração do mundo.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-2xl dark:text-white uppercase font-medium tracking-tight">Na Programação Atual</h2>
+        <h2 className="bbc-section-title text-2xl dark:text-white uppercase font-medium">Rotação Atual</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/5 mt-8">
           {FEATURED_ARTISTS.map((artist) => {
@@ -132,10 +130,9 @@ const FeaturedArtistsPage: React.FC = () => {
                     {artist.name}
                   </h3>
                   
-                  {/* Top 3 Songs Selection */}
                   <div className="mt-6 h-0 group-hover:h-auto overflow-hidden transition-all duration-700 opacity-0 group-hover:opacity-100">
                     <p className="text-gray-400 text-[9px] font-medium uppercase tracking-widest mb-4 flex items-center">
-                      <Music className="w-3 h-3 mr-2 text-[#ff6600]" /> Principais Sucessos
+                      <Music className="w-3 h-3 mr-2 text-[#ff6600]" /> Principais Faixas
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {artist.hits.slice(0, 3).map((hit, i) => (
@@ -167,16 +164,15 @@ const FeaturedArtistsPage: React.FC = () => {
           })}
         </div>
 
-        {/* Submissions Section - Adaptado */}
         <div className="mt-24 bg-gray-50 dark:bg-[#111] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between border border-gray-100 dark:border-white/5 transition-colors">
            <div className="flex flex-col md:flex-row items-center md:space-x-10 text-center md:text-left mb-10 md:mb-0">
               <div className="w-20 h-20 bg-black dark:bg-white rounded-full flex items-center justify-center text-white dark:text-black shadow-xl mb-6 md:mb-0 transition-colors">
                 <Users className="w-10 h-10" />
               </div>
               <div className="max-w-md">
-                <h4 className="text-3xl font-medium uppercase tracking-tighter dark:text-white leading-none mb-4">Envie sua Música</h4>
+                <h4 className="text-3xl font-medium uppercase tracking-tighter dark:text-white leading-none mb-4">Envio de Artistas</h4>
                 <p className="text-gray-500 text-sm font-normal uppercase tracking-tight leading-relaxed">
-                  Nós apoiamos a nova geração. Se você cria música que inspira, queremos ouvir sua história e seu som para nossa programação.
+                  Nós apoiamos a próxima geração. Se você cria música que inspira, queremos ouvir seu som para possível inclusão em nossa grade.
                 </p>
               </div>
            </div>
@@ -184,7 +180,7 @@ const FeaturedArtistsPage: React.FC = () => {
              onClick={() => navigate('/feedback?type=music')}
              className="bg-[#ff6600] text-white px-10 py-6 text-[10px] font-medium uppercase tracking-[0.4em] hover:bg-black transition-all shadow-xl active:scale-95 whitespace-nowrap flex items-center space-x-3"
            >
-             <span>Enviar sua Faixa</span>
+             <span>Envie sua Música</span>
              <ArrowRight className="w-4 h-4" />
            </button>
         </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Radio, Play, Music, Mic2, MapPin, Calendar, ArrowRight, Video, Pause, Loader2, X } from 'lucide-react';
 
@@ -14,39 +15,39 @@ interface LiveSession {
 const LIVE_SESSIONS: LiveSession[] = [
   {
     id: 'ls1',
-    artist: 'Gabriela Rocha',
-    location: 'Estúdio Praise - São Paulo, SP',
-    date: '15 Out, 2025',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp',
-    songs: ['Me Atraiu', 'Lugar Secreto', 'Creio Em Ti'],
-    description: 'Uma tarde acústica capturada em nosso estúdio principal. Gabriela traz seus maiores sucessos em uma adoração íntima e profunda.'
+    artist: 'Brandon Lake',
+    location: 'Studio A - Chicago, IL',
+    date: 'Oct 15, 2025',
+    image: 'https://res.cloudinary.com/dtecypmsh/image/upload/v1767583738/BRANDON_LAKE_nf7pyj.jpg',
+    songs: ['Gratitude', 'Praise', 'Trust In God'],
+    description: 'An acoustic afternoon captured in our main studio. Brandon strips down his biggest hits for an intimate worship experience.'
   },
   {
     id: 'ls2',
-    artist: 'Isaias Saad',
-    location: 'Teatro Bradesco - SP',
-    date: '28 Set, 2025',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp',
-    songs: ['Oousado Amor', 'Bondade de Deus', 'Enche-me'],
-    description: 'Capturado durante a gravação ao vivo em São Paulo. A energia e os momentos espontâneos são únicos nesta sessão exclusiva.'
+    artist: 'Elevation Worship',
+    location: 'Worship Night Live - Miami',
+    date: 'Sep 28, 2025',
+    image: 'https://res.cloudinary.com/dtecypmsh/image/upload/v1767998578/ELEVATION_WORSHIP_olxxoe.webp',
+    songs: ['More Than Able', 'LION', 'What I See'],
+    description: 'Captured during the sold-out Miami leg of their tour. The energy and spontaneous moments are unlike anything recorded in a studio.'
   },
   {
     id: 'ls3',
-    artist: 'Morada',
+    artist: 'Maverick City Music',
     location: 'The Warehouse Sessions',
-    date: '12 Ago, 2025',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Morada_example.webp',
-    songs: ['É Tudo Sobre Você', 'Só Tu És Santo', 'Para Que Entre o Rei'],
-    description: 'Uma sessão crua e sem edições com a banda completa. Transformamos um antigo armazém industrial em um santuário por uma noite.'
+    date: 'Aug 12, 2025',
+    image: 'https://res.cloudinary.com/dtecypmsh/image/upload/v1767998578/MAVERICK_CITY_MUSIC_bboqfi.webp',
+    songs: ['Jireh', 'Promises', 'Man Of Your Word'],
+    description: 'A raw, unedited session featuring the full choir. We turned an old industrial warehouse into a sanctuary for one night.'
   },
   {
     id: 'ls4',
-    artist: 'Aline Barros',
-    location: 'Sala São Paulo',
-    date: '05 Jul, 2025',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp',
-    songs: ['Ressuscita-me', 'Sonda-me, Usa-me', 'Vitória no Deserto'],
-    description: 'Aline Barros se une a uma orquestra de 40 peças para uma releitura cinematográfica de seus clássicos. Épico e emocionante.'
+    artist: 'Lauren Daigle',
+    location: 'Orchestra Hall - Nashville',
+    date: 'July 05, 2025',
+    image: 'https://res.cloudinary.com/dtecypmsh/image/upload/v1767998578/LAUREN_DAIGLE_xe9ops.webp',
+    songs: ['You Say', 'Rescue', 'Hold On To Me'],
+    description: 'Lauren joins a 60-piece orchestra for a cinematic reimagining of her most beloved tracks. Epic and moving.'
   }
 ];
 
@@ -75,6 +76,7 @@ const LiveRecordingsPage: React.FC = () => {
   const playTrack = async (artist: string, song: string) => {
     if (!audioRef.current) return;
 
+    // Se já estiver tocando a mesma música, pausa
     if (currentSongName === song && isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
@@ -85,6 +87,7 @@ const LiveRecordingsPage: React.FC = () => {
     setCurrentSongName(song);
 
     try {
+      // Busca a preview de 30 segundos no iTunes Search API
       const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist + ' ' + song)}&media=music&entity=song&limit=1`);
       const data = await response.json();
 
@@ -92,17 +95,17 @@ const LiveRecordingsPage: React.FC = () => {
         const url = data.results[0].previewUrl;
         audioRef.current.src = url;
         audioRef.current.play().catch(e => {
-          console.error("Erro no Playback", e);
+          console.error("Playback error", e);
           setIsPlaying(false);
         });
         setIsPlaying(true);
       } else {
-        alert("Desculpe, não há prévia disponível para esta faixa específica.");
+        alert("Sorry, no live preview available for this specific track.");
         setIsPlaying(false);
         setCurrentSongName(null);
       }
     } catch (error) {
-      console.error("Erro ao buscar áudio:", error);
+      console.error("Error fetching audio preview:", error);
       setIsPlaying(false);
     } finally {
       setIsLoadingAudio(false);
@@ -122,7 +125,7 @@ const LiveRecordingsPage: React.FC = () => {
   return (
     <div className="bg-[#050505] min-h-screen text-white transition-colors duration-500 font-sans">
       
-      {/* Header Cinematográfico */}
+      {/* Cinematic Header */}
       <div className="relative h-[80vh] flex items-center justify-center overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center opacity-30 grayscale scale-110 blur-sm"></div>
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent"></div>
@@ -130,18 +133,18 @@ const LiveRecordingsPage: React.FC = () => {
         <div className="relative z-10 text-center max-w-4xl px-4">
           <div className="inline-flex items-center space-x-3 bg-white/5 border border-white/10 px-6 py-2 rounded-full mb-10 backdrop-blur-xl">
             <Mic2 className="w-4 h-4 text-[#ff6600]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Sessões Exclusivas Praise FM</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em]">Exclusive Broadcast Sessions</span>
           </div>
-          <h1 className="text-7xl md:text-9xl font-medium uppercase tracking-tighter leading-[0.85] mb-8">Live<br />Sessions</h1>
+          <h1 className="text-7xl md:text-9xl font-medium uppercase tracking-tighter leading-[0.85] mb-8">Live<br />Recordings</h1>
           <p className="text-xl md:text-2xl text-gray-400 font-normal uppercase tracking-tight max-w-2xl mx-auto leading-tight">
-            Capturando a frequência do céu. Sem filtros, sem edições, gravado ao vivo para a <span className="text-white">Praise FM Brasil</span>.
+            Capturing the raw frequency of heaven. Unfiltered, unedited, and recorded live for <span className="text-white">Praise FM USA</span>.
           </p>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-24">
         
-        {/* Grid Principal */}
+        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {LIVE_SESSIONS.map((session) => (
             <div 
@@ -160,7 +163,7 @@ const LiveRecordingsPage: React.FC = () => {
                 <div className="absolute top-8 left-8">
                   <div className="flex items-center space-x-2 bg-black/80 backdrop-blur-md px-3 py-1.5 border border-white/10">
                     <Calendar className="w-3 h-3 text-[#ff6600]" />
-                    <span className="text-[9px] font-regular uppercase tracking-widest">{session.date}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest">{session.date}</span>
                   </div>
                 </div>
 
@@ -189,34 +192,34 @@ const LiveRecordingsPage: React.FC = () => {
                       </div>
                     ))}
                   </div>
-                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{session.songs.length} Faixas Gravadas</span>
+                  <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{session.songs.length} Tracks Recorded</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Banner de Destaque */}
+        {/* Feature Banner */}
         <div className="mt-40 bg-gradient-to-br from-[#111] to-[#0a0a0a] border border-white/5 p-12 md:p-24 relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-[#ff6600]/5 blur-[120px] group-hover:bg-[#ff6600]/10 transition-colors"></div>
           <div className="max-w-3xl relative z-10">
             <Radio className="w-12 h-12 text-[#ff6600] mb-10" />
-            <h3 className="text-4xl md:text-6xl font-medium uppercase tracking-tighter leading-tight mb-8">O Som do<br />Tabernáculo</h3>
+            <h3 className="text-4xl md:text-6xl font-medium uppercase tracking-tighter leading-tight mb-8">The Tabernacle<br />Broadcasts</h3>
             <p className="text-gray-400 text-xl font-normal leading-relaxed mb-12 uppercase tracking-tight">
-              Todo domingo, às 22h, abrimos nossos arquivos para uma jornada de 2 horas pelas nossas melhores gravações ao vivo. Experimente a música como ela deve ser ouvida: ao vivo e na Presença.
+              Every Sunday night at 10PM, we open the archives for a 2-hour journey through our finest live recordings. Experience the music as it was meant to be heard: live and in the presence.
             </p>
             <button 
               onClick={() => window.location.hash = '#/schedule'}
               className="flex items-center space-x-4 group/btn"
             >
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] border-b-2 border-[#ff6600] pb-1 group-hover/btn:text-[#ff6600] transition-colors">Ver Grade da Rádio</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] border-b-2 border-[#ff6600] pb-1 group-hover/btn:text-[#ff6600] transition-colors">View Radio Schedule</span>
               <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-2 transition-transform" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Overlay de Detalhes */}
+      {/* Detail Overlay */}
       {selectedSession && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl animate-in fade-in zoom-in-95 duration-500 overflow-y-auto">
            <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-16 relative my-auto">
@@ -243,7 +246,7 @@ const LiveRecordingsPage: React.FC = () => {
                            <Play className="w-20 h-20 fill-current mb-6 text-white hover:text-[#ff6600] transition-colors" />
                          )}
                          <span className="text-[10px] font-black uppercase tracking-[0.5em] animate-pulse text-white">
-                           { (isPlaying && selectedSession.songs.includes(currentSongName || "")) ? `Ouvindo: ${currentSongName}` : 'Ouvir Prévia' }
+                           { (isPlaying && selectedSession.songs.includes(currentSongName || "")) ? `Playing: ${currentSongName}` : 'Preview Session' }
                          </span>
                       </div>
                    </div>
@@ -257,7 +260,7 @@ const LiveRecordingsPage: React.FC = () => {
               <div className="w-full lg:w-2/5 flex flex-col">
                  <div className="flex items-center space-x-3 mb-10">
                     <Video className="w-5 h-5 text-[#ff6600]" />
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.4em]">Faixas Gravadas</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.4em]">Recorded Tracks</h4>
                  </div>
                  <div className="space-y-4">
                     {selectedSession.songs.map((song, i) => {
@@ -283,7 +286,7 @@ const LiveRecordingsPage: React.FC = () => {
                  </div>
                  <div className="mt-auto pt-10">
                     <button className="w-full bg-[#ff6600] py-6 text-[11px] font-black uppercase tracking-[0.4em] flex items-center justify-center space-x-4 hover:bg-white hover:text-black transition-all shadow-xl">
-                       <span>Download da Sessão</span>
+                       <span>Download Full Session</span>
                        <ArrowRight className="w-4 h-4" />
                     </button>
                  </div>
