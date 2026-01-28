@@ -6,7 +6,7 @@ export type PlayerItemType =
   | "devotional"
   | "artist";
 
-export interface LivePlayerItem {
+export interface PlayerItem {
   id: string;
   title: string;
   subtitle?: string;
@@ -16,11 +16,11 @@ export interface LivePlayerItem {
 
 interface LivePlayerContextType {
   isPlaying: boolean;
-  currentItem: LivePlayerItem | null;
+  currentItem: PlayerItem | null;
   audioRef: React.RefObject<HTMLAudioElement>;
 
-  play: (item: LivePlayerItem) => void;
-  togglePlayback: () => void;
+  togglePlay: () => void;
+  playTrack: (item: PlayerItem) => void;
 }
 
 const LivePlayerContext = createContext<LivePlayerContextType | undefined>(
@@ -34,15 +34,9 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const audioRef = useRef<HTMLAudioElement>(new Audio(STREAM_URL));
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentItem, setCurrentItem] = useState<LivePlayerItem | null>(null);
+  const [currentItem, setCurrentItem] = useState<PlayerItem | null>(null);
 
-  const play = (item: LivePlayerItem) => {
-    setCurrentItem(item);
-    audioRef.current.play().catch(() => {});
-    setIsPlaying(true);
-  };
-
-  const togglePlayback = () => {
+  const togglePlay = () => {
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -51,14 +45,23 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsPlaying((p) => !p);
   };
 
+  const playTrack = (item: PlayerItem) => {
+    setCurrentItem(item);
+
+    audioRef.current
+      .play()
+      .then(() => setIsPlaying(true))
+      .catch(() => {});
+  };
+
   return (
     <LivePlayerContext.Provider
       value={{
         isPlaying,
         currentItem,
         audioRef,
-        play,
-        togglePlayback,
+        togglePlay,
+        playTrack,
       }}
     >
       {children}
@@ -68,6 +71,8 @@ export const LivePlayerProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const usePlayer = () => {
   const ctx = useContext(LivePlayerContext);
-  if (!ctx) throw new Error("usePlayer must be used within LivePlayerProvider");
+  if (!ctx) {
+    throw new Error("usePlayer must be used inside LivePlayerProvider");
+  }
   return ctx;
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Volume2, ArrowLeft, Calendar, Music, Loader2 } from 'lucide-react';
 import { Program } from '../types';
 import { supabase } from '../lib/supabase';
-import { usePlayer } from '../contexts/LivePlayerContext';
+import { usePlayer } from "../contexts/LivePlayerContext";
 
 interface PlayedTrack {
   artist: string;
