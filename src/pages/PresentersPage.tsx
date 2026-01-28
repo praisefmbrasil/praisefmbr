@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Users, ArrowRight } from "lucide-react";
-import { SCHEDULES } from "../constants";
+import { programs } from '../constants';
 
 interface Program {
   id: string;
