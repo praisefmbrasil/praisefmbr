@@ -12,7 +12,6 @@ import LivePlayerBar from "./components/LivePlayerBar";
 import HomePage from "./pages/AppHomePage";
 import NewReleasesPage from "./pages/NewReleasesPage";
 import PresentersPage from "./pages/PresentersPage";
-import SchedulePage from "./pages/SchedulePage";
 import EventsPage from "./pages/EventsPage";
 import DevotionalPage from "./pages/DevotionalPage";
 import LoginPage from "./pages/LoginPage";
@@ -63,7 +62,6 @@ const AppShell: React.FC = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/new-releases" element={<NewReleasesPage />} />
           <Route path="/presenters" element={<PresentersPage />} />
-          <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/devotional" element={<DevotionalPage />} />
           <Route path="/help" element={<HelpCenterPage />} />
