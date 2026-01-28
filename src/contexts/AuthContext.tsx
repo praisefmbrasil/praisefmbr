@@ -1,71 +1,93 @@
 // src/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../lib/supabase"; // arquivo com a instância do Supabase
-import { User } from "@supabase/supabase-js";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
+
+export interface User {
+  id: string;
+  email: string;
+}
+
+export type FavoriteItem = {
+  id: string;
+  type: "program" | "track" | "devotional" | "artist";
+  title: string;
+  image?: string;
+  subtitle?: string;
+};
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
+  favorites: FavoriteItem[];
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  isFavorite: (item: FavoriteItem) => boolean;
+  toggleFavorite: (item: FavoriteItem) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
+  // Inicializa usuário logado
   useEffect(() => {
-    const session = supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-      setLoading(false);
+    const session = supabase.auth.session();
+    if (session?.user) {
+      setUser({ id: session.user.id, email: session.user.email! });
+    }
+
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser({ id: session.user.id, email: session.user.email! });
+      } else {
+        setUser(null);
+        setFavorites([]);
+      }
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
+    return () => listener?.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string) => {
-    setLoading(true);
     const { error } = await supabase.auth.signUp({ email, password });
-    setLoading(false);
     if (error) throw error;
   };
 
   const signIn = async (email: string, password: string) => {
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    const { error } = await supabase.auth.signIn({ email, password });
     if (error) throw error;
   };
 
   const signOut = async () => {
-    setLoading(true);
     const { error } = await supabase.auth.signOut();
-    setUser(null);
-    setLoading(false);
     if (error) throw error;
   };
 
+  const isFavorite = (item: FavoriteItem) => {
+    return favorites.some(f => f.id === item.id && f.type === item.type);
+  };
+
+  const toggleFavorite = (item: FavoriteItem) => {
+    if (isFavorite(item)) {
+      setFavorites(prev => prev.filter(f => !(f.id === item.id && f.type === item.type)));
+    } else {
+      setFavorites(prev => [...prev, item]);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user, favorites, signUp, signIn, signOut, isFavorite, toggleFavorite }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
