@@ -1,90 +1,60 @@
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
-/* =========================
-   Types
-========================= */
-
-export type MediaType =
-  | "program"
-  | "track"
-  | "devotional"
-  | "artist";
+export type LiveProgramType = "program" | "track" | "devotional" | "artist";
 
 export interface LiveProgram {
   id: string;
   title: string;
   host?: string;
   image?: string;
-  type: MediaType;
+  type: LiveProgramType;
 }
 
-/* =========================
-   Context Type
-========================= */
-
-interface LivePlayerContextType {
+export interface LivePlayerContextType {
   isPlaying: boolean;
   currentProgram: LiveProgram | null;
-  play: (program?: LiveProgram) => void;
-  pause: () => void;
-  setCurrentProgram: (program: LiveProgram | null) => void;
+  playPause: () => void;
 }
-
-/* =========================
-   Context
-========================= */
 
 const LivePlayerContext = createContext<LivePlayerContextType | undefined>(
   undefined
 );
 
-/* =========================
-   Provider
-========================= */
-
-export const LivePlayerProvider: React.FC<{
+export function LivePlayerProvider({
+  children,
+}: {
   children: React.ReactNode;
-}> = ({ children }) => {
+}) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentProgram, setCurrentProgram] =
-    useState<LiveProgram | null>(null);
 
-  const play = (program?: LiveProgram) => {
-    if (program) {
-      setCurrentProgram(program);
-    }
-    setIsPlaying(true);
-  };
+  const [currentProgram] = useState<LiveProgram | null>({
+    id: "live",
+    title: "Praise FM Live",
+    host: "On Air",
+    type: "program",
+  });
 
-  const pause = () => {
-    setIsPlaying(false);
-  };
+  function playPause() {
+    setIsPlaying((prev) => !prev);
+  }
 
   return (
     <LivePlayerContext.Provider
       value={{
         isPlaying,
         currentProgram,
-        play,
-        pause,
-        setCurrentProgram,
+        playPause,
       }}
     >
       {children}
     </LivePlayerContext.Provider>
   );
-};
+}
 
-/* =========================
-   Hook
-========================= */
-
-export const useLivePlayer = () => {
+export function useLivePlayer() {
   const context = useContext(LivePlayerContext);
   if (!context) {
-    throw new Error(
-      "useLivePlayer must be used within a LivePlayerProvider"
-    );
+    throw new Error("useLivePlayer must be used within LivePlayerProvider");
   }
   return context;
-};
+}
