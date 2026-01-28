@@ -1,8 +1,7 @@
 {
-  "title": "Praise FM Brasil | Rádio Gospel 24h",
-  "description": "Programação gospel 24 horas, mensagens de fé e o melhor da música cristã nacional e internacional com locutores como Rodrigo Veras, Lucas Martins, Samuel Andrade, Ana Paula e mais.",
-  "url": "https://praisefmbr.vercel.app",
-  "image": "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp",
-  "twitterHandle": "@praisefmbrasil",
-  "keywords": "rádio gospel, louvor, adoração, Praise FM Brasil, música cristã, Rodrigo Veras, Samuel Andrade, Lucas Martins, Ana Paula, Bruno Almeida, Rafael Costa, Felipe Santos"
+  "name": "Praise FM BRA - SAVE 3",
+  "description": "A melhor plataforma de rádio inspirada na excelência, com programação 24/7, música worship e podcasts devocionais para o Brasil.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

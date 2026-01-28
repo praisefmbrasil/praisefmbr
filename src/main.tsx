@@ -1,15 +1,12 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import App from './App'; // Importação do export default do App.tsx
-import './index.css';
+import App from './App';
 
-// Registro do PWA
-// Se houver erro de tipos no VS Code, certifique-se que o vite-plugin-pwa está no package.json
-import { registerSW } from 'virtual:pwa-register';
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error("Root element not found");
 
-registerSW({ immediate: true });
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
