@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { AuthProvider } from './contexts/AuthContext'; // ✅ Novo
+import { AuthProvider } from './contexts/AuthContext'; // ✅ Adicionado
 
 const rootElement = document.getElementById('root');
 
@@ -14,7 +14,7 @@ const root = ReactDOM.createRoot(rootElement);
 
 root.render(
   <React.StrictMode>
-    <AuthProvider> {/* ✅ Novo */}
+    <AuthProvider> {/* ✅ Adicionado */}
       <App />
     </AuthProvider>
   </React.StrictMode>
