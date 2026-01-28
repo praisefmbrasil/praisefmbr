@@ -1,5 +1,6 @@
 // src/types.ts
 
+// Tipos para Programas de Rádio
 export interface Program {
   id: string;
   title: string;
@@ -10,6 +11,7 @@ export interface Program {
   image: string;
 }
 
+// Tipos para Podcasts
 export interface Podcast {
   id: string;
   title: string;
@@ -17,4 +19,20 @@ export interface Podcast {
   duration: string;
   author: string;
   image: string;
+}
+
+// Tipos para Favoritos
+export type FavoriteItemType = 
+  | "program"
+  | "track"
+  | "devotional"
+  | "artist";
+
+export interface FavoriteItem {
+  id: string;
+  title: string;
+  subtitle?: string;
+  host?: string;
+  image: string;
+  type: FavoriteItemType;
 }
