@@ -1,8 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 
-interface FavoriteItem {
+/* =========================
+   TYPES
+========================= */
+
+export interface FavoriteItem {
   id: string;
   title: string;
   host: string;
@@ -10,92 +19,130 @@ interface FavoriteItem {
   type: 'program' | 'track';
 }
 
+interface FavoriteRow {
+  item_id: string;
+  title: string;
+  host: string;
+  image_url: string;
+  item_type: 'program' | 'track';
+}
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   favorites: FavoriteItem[];
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
+  signUp: (
+    email: string,
+    password: string,
+    name: string
+  ) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  toggleFavorite: (item: FavoriteItem) => void;
+  toggleFavorite: (item: FavoriteItem) => Promise<void>;
   isFavorite: (id: string) => boolean;
 }
 
+/* =========================
+   CONTEXT
+========================= */
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+/* =========================
+   PROVIDER
+========================= */
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
-  // Carregar usuário e favoritos
+  /* =========================
+     AUTH SESSION
+  ========================= */
+
   useEffect(() => {
-    // Verificar sessão atual
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        loadFavorites(session.user.id);
-      }
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setUser(data.session?.user ?? null);
       setLoading(false);
     });
 
-    // Escutar mudanças na autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+
       if (session?.user) {
         loadFavorites(session.user.id);
       } else {
         setFavorites([]);
       }
+
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Carregar favoritos do usuário
+  /* =========================
+     FAVORITES
+  ========================= */
+
   const loadFavorites = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('user_favorites')
+        .from<FavoriteRow>('user_favorites')
         .select('*')
         .eq('user_id', userId);
 
       if (error) throw error;
-      
+
       if (data) {
-        const formattedFavorites: FavoriteItem[] = data.map(fav => ({
+        const formatted: FavoriteItem[] = data.map((fav) => ({
           id: fav.item_id,
           title: fav.title,
           host: fav.host,
           image: fav.image_url,
-          type: fav.item_type
+          type: fav.item_type,
         }));
-        setFavorites(formattedFavorites);
+
+        setFavorites(formatted);
       }
     } catch (err) {
       console.error('Erro ao carregar favoritos:', err);
     }
   };
 
-  // Função de Login
+  /* =========================
+     AUTH ACTIONS
+  ========================= */
+
   const signIn = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) return { error };
-
-      return { error: null };
-    } catch (err: any) {
+      return { error };
+    } catch (err) {
       return { error: err };
     }
   };
 
-  // Função de Cadastro
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    name: string
+  ) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -109,58 +156,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) return { error };
 
-      // Se o cadastro foi bem-sucedido e o usuário foi criado
       if (data.user) {
-        // Criar perfil do usuário na tabela profiles (se existir)
-        try {
-          await supabase.from('profiles').insert([
-            {
-              id: data.user.id,
-              full_name: name,
-              email: email,
-              created_at: new Date().toISOString(),
-            },
-          ]);
-        } catch (profileError) {
-          console.log('Perfil não criado (tabela pode não existir):', profileError);
-        }
+        await supabase.from('profiles').insert([
+          {
+            id: data.user.id,
+            full_name: name,
+            email,
+            created_at: new Date().toISOString(),
+          },
+        ]);
       }
 
       return { error: null };
-    } catch (err: any) {
+    } catch (err) {
       return { error: err };
     }
   };
 
-  // Função de Logout
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setFavorites([]);
   };
 
-  // Toggle Favorito
+  /* =========================
+     FAVORITE TOGGLE
+  ========================= */
+
   const toggleFavorite = async (item: FavoriteItem) => {
     if (!user) return;
 
-    const isFav = favorites.some(f => f.id === item.id);
+    const exists = favorites.some((f) => f.id === item.id);
 
-    if (isFav) {
-      // Remover favorito
-      try {
+    try {
+      if (exists) {
         await supabase
           .from('user_favorites')
           .delete()
           .eq('user_id', user.id)
           .eq('item_id', item.id);
 
-        setFavorites(prev => prev.filter(f => f.id !== item.id));
-      } catch (err) {
-        console.error('Erro ao remover favorito:', err);
-      }
-    } else {
-      // Adicionar favorito
-      try {
+        setFavorites((prev) =>
+          prev.filter((f) => f.id !== item.id)
+        );
+      } else {
         await supabase.from('user_favorites').insert([
           {
             user_id: user.id,
@@ -173,17 +212,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           },
         ]);
 
-        setFavorites(prev => [...prev, item]);
-      } catch (err) {
-        console.error('Erro ao adicionar favorito:', err);
+        setFavorites((prev) => [...prev, item]);
       }
+    } catch (err) {
+      console.error('Erro ao alternar favorito:', err);
     }
   };
 
-  // Verificar se é favorito
-  const isFavorite = (id: string) => {
-    return favorites.some(f => f.id === id);
-  };
+  const isFavorite = (id: string) =>
+    favorites.some((f) => f.id === id);
+
+  /* =========================
+     PROVIDER VALUE
+  ========================= */
 
   const value: AuthContextType = {
     user,
@@ -196,13 +237,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isFavorite,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
+
+/* =========================
+   HOOK
+========================= */
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+  if (!context) {
+    throw new Error(
+      'useAuth must be used within an AuthProvider'
+    );
   }
   return context;
 };
