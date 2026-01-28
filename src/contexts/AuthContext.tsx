@@ -98,7 +98,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       if (wasFavorite) {
         const { error } = await supabase
-          .from("favorites")
+          .from<FavoriteDB, unknown>("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("id", item.id);
