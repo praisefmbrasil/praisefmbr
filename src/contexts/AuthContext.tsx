@@ -16,9 +16,19 @@ export interface FavoriteItem {
   image?: string;
 }
 
+// ✅ Tipo específico para operações de banco
 interface FavoriteDB extends FavoriteItem {
   user_id: string;
 }
+
+// ✅ Função auxiliar para criar objetos compatíveis com o banco
+const createFavoriteDB = (
+  item: FavoriteItem, 
+  userId: string
+): FavoriteDB => ({
+  ...item,
+  user_id: userId
+});
 
 export interface AuthContextType {
   user: User | null;
@@ -105,9 +115,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (error) throw error;
       } else {
+        // ✅ CORREÇÃO: Uso da função auxiliar em vez de 'as FavoriteDB'
         const { error } = await supabase
           .from<FavoriteDB, unknown>("favorites")
-          .insert([{ ...item, user_id: user.id } as FavoriteDB]);
+          .insert([createFavoriteDB(item, user.id)]);
         
         if (error) throw error;
       }
