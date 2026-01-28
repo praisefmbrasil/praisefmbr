@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Program, FavoriteItem } from '../types';
 import { programs } from '../constants';
-import { Music, Loader2 } from 'lucide-react';
 
 interface HeroProps {
   favoriteItems: FavoriteItem[];
