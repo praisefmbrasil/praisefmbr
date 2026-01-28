@@ -1,60 +1,103 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import { AuthProvider } from './contexts/AuthContext';
 
-/* Layout */
-import Header from './components/Header';
+// Layout
+import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import LivePlayerBar from './components/LivePlayerBar';
 
-/* Pages */
+// Pages
 import HomePage from './pages/HomePage';
-import ListenLivePage from './pages/ListenLivePage';
-import SchedulePage from './pages/SchedulePage';
-import PresentersPage from './pages/PresentersPage';
-import ProgramsPage from './pages/ProgramsPage';
-import ProgramDetailPage from './pages/ProgramDetailPage';
 import NewReleasesPage from './pages/NewReleasesPage';
-import FavoritesPage from './pages/FavoritesPage';
+import PresentersPage from './pages/PresentersPage';
+import SchedulePage from './pages/SchedulePage';
+import EventsPage from './pages/EventsPage';
+import DevotionalPage from './pages/DevotionalPage';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import SignUpPage from './pages/SignUpPage';
+import ProfilePage from './pages/ProfilePage';
+import MySoundsPage from './pages/MySoundsPage';
+import HelpCenterPage from './pages/HelpCenterPage';
+import FeedbackPage from './pages/FeedbackPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfUsePage from './pages/TermsOfUsePage';
+import CookiesPolicyPage from './pages/CookiesPolicyPage';
 
-/* =========================
-   APP
-========================= */
+// Player state (simplificado)
+const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
 
-const App: React.FC = () => {
+const AppShell: React.FC = () => {
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+
+  React.useEffect(() => {
+    audioRef.current = new Audio(STREAM_URL);
+    audioRef.current.crossOrigin = 'anonymous';
+    audioRef.current.volume = 0.8;
+
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  const togglePlayback = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
+
+    setIsPlaying(p => !p);
+  };
+
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      <Navbar />
 
-          {/* Header fixo (BBC-style) */}
-          <Header />
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/new-releases" element={<NewReleasesPage />} />
+          <Route path="/presenters" element={<PresentersPage />} />
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/devotional" element={<DevotionalPage />} />
+          <Route path="/help" element={<HelpCenterPage />} />
+          <Route path="/feedback" element={<FeedbackPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfUsePage />} />
+          <Route path="/cookies" element={<CookiesPolicyPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/my-sounds" element={<MySoundsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
 
-          {/* Conteúdo principal */}
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/listen" element={<ListenLivePage />} />
-              <Route path="/schedule" element={<SchedulePage />} />
-              <Route path="/presenters" element={<PresentersPage />} />
-              <Route path="/programs" element={<ProgramsPage />} />
-              <Route path="/program/:id" element={<ProgramDetailPage />} />
-              <Route path="/new-releases" element={<NewReleasesPage />} />
-              <Route path="/favorites" element={<FavoritesPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-            </Routes>
-          </main>
+      <Footer />
 
-          {/* Footer editorial */}
-          <Footer />
-
-        </div>
-      </AuthProvider>
-    </BrowserRouter>
+      {/* Player global BBC-style */}
+      <LivePlayerBar
+        isPlaying={isPlaying}
+        onTogglePlayback={togglePlayback}
+        audioRef={audioRef}
+      />
+    </div>
   );
 };
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <HashRouter>
+        <AppShell />
+      </HashRouter>
+    </AuthProvider>
+  );
+}
