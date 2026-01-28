@@ -1,30 +1,31 @@
-import React from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import React from "react";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from "./contexts/AuthContext";
 
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import LivePlayerBar from './components/LivePlayerBar';
+// Layout
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import LivePlayerBar from "./components/LivePlayerBar";
 
 // Pages
-import HomePage from './pages/HomePage';
-import NewReleasesPage from './pages/NewReleasesPage';
-import PresentersPage from './pages/PresentersPage';
-import SchedulePage from './pages/SchedulePage';
-import EventsPage from './pages/EventsPage';
-import DevotionalPage from './pages/DevotionalPage';
-import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/SignUpPage';
-import ProfilePage from './pages/ProfilePage';
-import MySoundsPage from './pages/MySoundsPage';
-import HelpCenterPage from './pages/HelpCenterPage';
-import FeedbackPage from './pages/FeedbackPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import TermsOfUsePage from './pages/TermsOfUsePage';
-import CookiesPolicyPage from './pages/CookiesPolicyPage';
+import HomePage from "./pages/AppHomePage";
+import NewReleasesPage from "./pages/NewReleasesPage";
+import PresentersPage from "./pages/PresentersPage";
+import SchedulePage from "./pages/SchedulePage";
+import EventsPage from "./pages/EventsPage";
+import DevotionalPage from "./pages/DevotionalPage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import ProfilePage from "./pages/ProfilePage";
+import MySoundsPage from "./pages/MySoundsPage";
+import HelpCenterPage from "./pages/HelpCenterPage";
+import FeedbackPage from "./pages/FeedbackPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import TermsOfUsePage from "./pages/TermsOfUsePage";
+import CookiesPolicyPage from "./pages/CookiesPolicyPage";
 
-const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
+const STREAM_URL = "https://stream.zeno.fm/olisuxy9v3vtv";
 
 const AppShell: React.FC = () => {
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -32,7 +33,7 @@ const AppShell: React.FC = () => {
 
   React.useEffect(() => {
     audioRef.current = new Audio(STREAM_URL);
-    audioRef.current.crossOrigin = 'anonymous';
+    audioRef.current.crossOrigin = "anonymous";
     audioRef.current.volume = 0.8;
 
     return () => {
@@ -44,9 +45,11 @@ const AppShell: React.FC = () => {
   const togglePlayback = () => {
     if (!audioRef.current) return;
 
-    isPlaying
-      ? audioRef.current.pause()
-      : audioRef.current.play().catch(() => {});
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
 
     setIsPlaying(p => !p);
   };
@@ -55,7 +58,7 @@ const AppShell: React.FC = () => {
     <div className="min-h-screen bg-black text-white flex flex-col">
       <Navbar />
 
-      <main className="flex-grow">
+      <main className="flex-grow pb-24">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/new-releases" element={<NewReleasesPage />} />
