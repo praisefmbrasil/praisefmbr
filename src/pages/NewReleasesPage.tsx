@@ -1,38 +1,48 @@
-import React from 'react';
 import { ArrowLeft, PlayCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface NewReleasesPageProps {
-  onBack: () => void; // ✅ Adicionado para resolver Erro 2741
-}
+const NewReleasesPage: React.FC = () => {
+  const navigate = useNavigate();
 
-const NewReleasesPage: React.FC<NewReleasesPageProps> = ({ onBack }) => {
-  // Exemplo de dados (Pode vir de um arquivo mock ou API)
   const releases = [
     { id: '1', title: 'Graça Abundante', artist: 'Praise Music', year: '2026' },
     { id: '2', title: 'Coração Contrito', artist: 'Samuel Andrade', year: '2025' },
   ];
 
   return (
-    <div className="min-h-screen bg-black p-8">
+    <div className="min-h-screen bg-black px-6 lg:px-12 pt-10 text-white">
       <div className="max-w-7xl mx-auto">
-        <header className="flex items-center justify-between mb-12">
-          <div>
-            <button onClick={onBack} className="text-orange-500 flex items-center mb-4 hover:underline">
-              <ArrowLeft className="mr-2" size={20} /> Voltar
-            </button>
-            <h1 className="text-4xl font-black uppercase tracking-tighter">Lançamentos <span className="text-orange-500">Brasil</span></h1>
-          </div>
-        </header>
+        <div className="mb-10">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-sm text-gray-400 hover:text-orange-500 flex items-center mb-3"
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Back
+          </button>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {releases.map((item) => (
-            <div key={item.id} className="bg-gray-900 p-4 rounded-xl border border-gray-800 hover:border-orange-500/50 transition">
-              <div className="aspect-square bg-gray-800 rounded-lg mb-4 flex items-center justify-center">
-                 <PlayCircle size={48} className="text-orange-500 opacity-50" />
+          <h1 className="text-5xl font-black tracking-tight">
+            New Releases
+          </h1>
+          <p className="text-gray-400 mt-2 max-w-xl">
+            Discover the latest Christian music releases from Brazil and around the world.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+          {releases.map(item => (
+            <div key={item.id} className="group cursor-pointer">
+              <div className="relative aspect-square bg-gray-900 rounded-lg overflow-hidden">
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition bg-black/50">
+                  <PlayCircle size={54} className="text-orange-500" />
+                </div>
               </div>
-              <h3 className="font-bold text-lg">{item.title}</h3>
-              <p className="text-gray-400 text-sm">{item.artist}</p>
-              <p className="text-orange-500 text-xs mt-2 font-bold uppercase">{item.year}</p>
+
+              <h3 className="mt-3 font-semibold">{item.title}</h3>
+              <p className="text-sm text-gray-400">{item.artist}</p>
+              <p className="text-xs text-orange-500 font-bold mt-1">
+                {item.year}
+              </p>
             </div>
           ))}
         </div>

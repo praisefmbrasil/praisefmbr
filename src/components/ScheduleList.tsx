@@ -1,5 +1,3 @@
-// src/components/ScheduleList.tsx
-
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Play, ArrowLeft, MapPin, Calendar as CalendarIcon } from 'lucide-react';
 import { SCHEDULES } from '../constants';
@@ -10,13 +8,9 @@ interface ScheduleListProps {
   onBack?: () => void;
 }
 
-// ✅ Ajustado para fuso horário de Brasília/São Paulo
-const getSaoPauloDate = (baseDate: Date = new Date()) => {
-  return new Date(baseDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+const getChicagoDate = (baseDate: Date = new Date()) => {
+  return new Date(baseDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
 };
-
-// ✅ Ajustado para Formato 24h (ex: 18:00 em vez de 06:00 PM)
-const format24h = (time24: string) => time24;
 
 const ProgramProgressRing: React.FC<{ program: Program; isActive: boolean; nowMinutes: number }> = ({ program, isActive, nowMinutes }) => {
   const progress = useMemo(() => {
@@ -25,15 +19,14 @@ const ProgramProgressRing: React.FC<{ program: Program; isActive: boolean; nowMi
     const [eH, eM] = program.endTime.split(':').map(Number);
     const start = sH * 60 + sM;
     let end = eH * 60 + eM;
-    // Ajuste para programas que cruzam a meia-noite
     if (end === 0 || end <= start) end = 24 * 60;
     const elapsed = nowMinutes - start;
     const duration = end - start;
     return Math.min(Math.max(elapsed / duration, 0), 1);
   }, [program, isActive, nowMinutes]);
 
-  const size = 120;
-  const strokeWidth = 3;
+  const size = 120; // Reduzido de 160
+  const strokeWidth = 3; // Reduzido de 4
   const center = size / 2;
   const radius = center - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
@@ -76,22 +69,22 @@ const ProgramProgressRing: React.FC<{ program: Program; isActive: boolean; nowMi
 };
 
 const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) => {
-  const [now, setNow] = useState(getSaoPauloDate());
+  const [now, setNow] = useState(getChicagoDate());
   const listContainerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    const timer = setInterval(() => setNow(getSaoPauloDate()), 30000);
+    const timer = setInterval(() => setNow(getChicagoDate()), 30000);
     return () => clearInterval(timer);
   }, []);
 
   const currentSchedule = useMemo(() => {
-    const dayIndex = now.getDay(); // 0 = Dom, 1 = Seg, etc.
+    const dayIndex = now.getDay();
     return SCHEDULES[dayIndex] || SCHEDULES[1];
   }, [now]);
 
   const sections = useMemo(() => {
     const groups: Record<string, Program[]> = {
-      'MADRUGADA': [], 'MANHÃ': [], 'TARDE': [], 'NOITE': [], 'FIM DE NOITE': []
+      'MADRUGADA': [], 'MANHÃ': [], 'TARDE': [], 'NOITE': [], 'FINAL DO DIA': []
     };
     currentSchedule.forEach(prog => {
       const h = parseInt(prog.startTime.split(':')[0]);
@@ -99,7 +92,7 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
       else if (h >= 6 && h < 12) groups['MANHÃ'].push(prog);
       else if (h >= 12 && h < 18) groups['TARDE'].push(prog);
       else if (h >= 18 && h < 22) groups['NOITE'].push(prog);
-      else groups['FIM DE NOITE'].push(prog);
+      else groups['FINAL DO DIA'].push(prog);
     });
     return groups;
   }, [currentSchedule]);
@@ -116,59 +109,36 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
+  // Efeito para scroll automático para o item ao vivo
   useEffect(() => {
-    const scrollInterval = setTimeout(() => {
-      const liveElement = document.querySelector('[data-live="true"]');
-      if (liveElement) {
-        liveElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 300);
-    return () => clearTimeout(scrollInterval);
-  }, []);
+    const activeElement = document.querySelector('[data-live="true"]');
+    if (activeElement) {
+      setTimeout(() => {
+        activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 500);
+    }
+  }, [currentSchedule]);
 
   return (
     <section ref={listContainerRef} className="bg-white dark:bg-[#000] min-h-screen font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 py-20">
+      <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
         {onBack && (
-          <button onClick={onBack} className="flex items-center text-gray-400 hover:text-[#ff6600] transition-colors mb-6 text-xs font-normal uppercase tracking-widest">
-            <ArrowLeft className="w-4 h-4 mr-2" /> VOLTAR PARA O INÍCIO
+          <button onClick={onBack} className="flex items-center text-gray-400 hover:text-[#ff6600] transition-colors mb-6 text-[10px] font-normal uppercase tracking-widest">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </button>
         )}
         
-        <div className="flex flex-col md:flex-row md:items-baseline md:space-x-4 mb-12 border-b-4 border-black dark:border-white pb-6">
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none">Programação</h1>
-          <p className="text-gray-400 font-normal uppercase tracking-wide text-sm mt-4 md:mt-0">
+        <div className="flex flex-col md:flex-row md:items-baseline md:space-x-4 mb-10 border-b border-black dark:border-white pb-6">
+          <h1 className="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Grade de Programação</h1>
+          <p className="text-gray-400 font-normal uppercase tracking-[0.2em] text-[11px] mt-4 md:mt-0">
             Hoje • {now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
         </div>
 
-        <div className="sticky top-16 z-[40] bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-gray-100 dark:border-white/5 py-4 mb-16 -mx-4 px-4 sm:mx-0 sm:px-0">
-          <div className="flex items-center space-x-6 text-[11px] font-semibold uppercase tracking-wide overflow-x-auto no-scrollbar">
-            <span className="text-gray-400 flex-shrink-0">PULAR PARA:</span>
-            <div className="flex items-center space-x-6 whitespace-nowrap">
-              {(Object.keys(sections) as string[]).map((title) => (
-                <React.Fragment key={title}>
-                   <a 
-                    href={`#${title}`} 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      document.getElementById(title)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }}
-                    className="text-[#ff6600] hover:text-black dark:hover:text-white transition-colors"
-                  >
-                    {title}
-                  </a>
-                  {title !== 'FIM DE NOITE' && <span className="text-gray-200 dark:text-gray-800">|</span>}
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {(Object.entries(sections) as [string, Program[]][]).map(([title, items]) => (
           items.length > 0 && (
-            <div key={title} id={title} className="mb-20 scroll-mt-32">
-              <h3 className="text-xl font-semibold dark:text-white mb-8 uppercase tracking-tight">
+            <div key={title} id={title} className="mb-16 scroll-mt-32">
+              <h3 className="bbc-section-title text-lg dark:text-white mb-8 uppercase font-medium">
                 {title}
               </h3>
               
@@ -180,14 +150,14 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
                       key={prog.id}
                       data-live={active}
                       onClick={() => onNavigateToProgram(prog)}
-                      className={`relative flex flex-col md:flex-row items-start p-6 transition-all cursor-pointer group rounded-sm ${active ? 'bg-gray-50 dark:bg-white/5 border-l-8 border-[#ff6600] shadow-lg' : 'border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5'}`}
+                      className={`relative flex flex-col md:flex-row items-start p-6 md:p-8 transition-all cursor-pointer group rounded-sm ${active ? 'bg-gray-50 dark:bg-white/5 border-l-[10px] border-[#ff6600] shadow-sm' : 'border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5'}`}
                     >
-                      <div className="w-32 flex-shrink-0 flex flex-col mb-6 md:mb-0 pt-1">
-                        <span className={`text-2xl font-bold tracking-tight ${active ? 'text-[#ff6600]' : 'text-gray-300 dark:text-gray-700 group-hover:text-black dark:group-hover:text-white'}`}>
-                          {format24h(prog.startTime)}
+                      <div className="w-32 md:w-40 flex-shrink-0 flex flex-col mb-6 md:mb-0 pt-1">
+                        <span className={`text-3xl md:text-4xl font-medium tracking-tighter ${active ? 'text-[#ff6600]' : 'text-gray-300 dark:text-gray-700 group-hover:text-black dark:group-hover:text-white'}`}>
+                          {prog.startTime}
                         </span>
                         {active && (
-                          <div className="mt-3 inline-flex items-center justify-center bg-[#ff6600] text-white text-[10px] font-bold px-3 py-1 uppercase tracking-wider w-24">
+                          <div className="mt-3 inline-flex items-center justify-center bg-[#ff6600] text-white text-[9px] font-medium px-3 py-1 uppercase tracking-widest w-24">
                             NO AR
                           </div>
                         )}
@@ -202,19 +172,19 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
                       </div>
 
                       <div className="flex-grow min-w-0 pt-1">
-                        <h4 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-[#ff6600] leading-tight tracking-tight mb-2 transition-all duration-300">
+                        <h4 className="text-2xl md:text-4xl font-medium text-gray-900 dark:text-white group-hover:text-[#ff6600] leading-tight tracking-tighter mb-2 truncate uppercase transition-all duration-300">
                           {prog.title}
                         </h4>
-                        <p className="text-gray-500 dark:text-gray-400 font-normal text-base mb-4 tracking-tight">
+                        <p className="text-gray-500 dark:text-gray-400 font-normal text-base md:text-lg mb-4 uppercase tracking-tight">
                           com {prog.host}
                         </p>
-                        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 leading-relaxed font-normal max-w-2xl">
+                        <p className="text-gray-600 dark:text-gray-300 text-sm md:text-base line-clamp-2 leading-relaxed font-normal max-w-2xl tracking-tight">
                           {prog.description}
                         </p>
                         {active && (
                           <div className="mt-6 flex items-center space-x-3">
                              <div className="h-1 w-10 bg-[#ff6600] animate-pulse"></div>
-                             <span className="text-[10px] font-semibold text-[#ff6600] uppercase tracking-wider">Ouvindo agora ao vivo</span>
+                             <span className="text-[9px] font-normal text-[#ff6600] uppercase tracking-[0.4em]">Ouvindo agora ao vivo</span>
                           </div>
                         )}
                       </div>
