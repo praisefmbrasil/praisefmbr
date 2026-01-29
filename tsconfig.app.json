@@ -1,18 +1,27 @@
 {
   "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "skipLibCheck": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+    "skipLibCheck": true, // Adicione isto para ignorar erros em node_modules
+
+    /* Tipos críticos para o Vite e Node */
+    "types": ["vite/client", "node"], 
+
+    /* Strictness */
     "strict": true,
-    "types": ["vite/client"]
+    "noUnusedLocals": false, // Mude para false temporariamente para não travar o build na Vercel
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
   },
   "include": ["src"]
 }
