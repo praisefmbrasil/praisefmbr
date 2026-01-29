@@ -1,11 +1,10 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useArtists } from '../hooks/useArtists'; // ✅ Corrigido: caminho correto
+import { useArtists } from '../hooks/useArtists'; // ✅ Verifique se o arquivo existe
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
-// ✅ Definição do tipo Artist (se não existir em outro lugar)
 interface Artist {
   id: string;
   name: string;
@@ -40,7 +39,7 @@ const FeaturedArtistsPage: React.FC = () => {
           <p className="text-gray-600">{error.message}</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            className="mt-4 bg-blue-600 text-white px-4-2 rounded hover:bg-blue-700 transition"
           >
             Tentar novamente
           </button>
@@ -80,7 +79,7 @@ const FeaturedArtistsPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {artists.map((artist: Artist) => ( // ✅ Corrigido: definir tipo do artista
+            {artists.map((artist: Artist) => (
               <div 
                 key={artist.id} 
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
@@ -119,7 +118,8 @@ const FeaturedArtistsPage: React.FC = () => {
                   </h3>
                   <p className="text-gray-600 mb-4">{artist.genre}</p>
                   <p className="text-gray-500 text-sm">
-                    {artist.biography?.substring(0, 100)}{artist.biography?.length > 100 ? '...' : ''}
+                    {artist.biography?.substring(0, 100)}
+                    {artist.biography && artist.biography.length > 100 ? '...' : ''}
                   </p>
                 </div>
               </div>
