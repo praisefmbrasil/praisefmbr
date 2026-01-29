@@ -1,42 +1,71 @@
-import { Program } from './types';
+// constants.ts
+import type { Program } from './types';
 
 export const programs: Program[] = [
   {
-    id: 'morning-show',
-    title: 'Morning Show',
-    host: 'Ricardo Oliveira',
+    id: 'madrugada-cristo',
+    title: 'Madrugada com Cristo',
+    host: 'Samuel Andrade',
+    startTime: '00:00',
+    endTime: '06:00',
+    description: 'Momentos de oração profunda e louvores que preparam o seu espírito para o novo dia.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp'
+  },
+  {
+    id: 'manha-cristo',
+    title: 'Manhã com Cristo',
+    host: 'Lucas Martins',
     startTime: '06:00',
-    endTime: '09:00',
-    description: 'Comece o seu dia com a melhor seleção de louvores, notícias e uma palavra de esperança para abençoar sua manhã.',
-    image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80'
-  },
-  {
-    id: 'conexao-praise',
-    title: 'Conexão Praise',
-    host: 'Sarah Lima',
-    startTime: '09:00',
     endTime: '12:00',
-    description: 'A trilha sonora perfeita para o seu trabalho, com participações ao vivo e os lançamentos da música gospel.',
-    image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80'
+    description: 'As principais novidades da música cristã e reflexões que edificam sua manhã.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp'
   },
   {
-    id: 'grace-time',
-    title: 'Grace Time',
-    host: 'Pastor Andre',
+    id: 'tarde-gospel',
+    title: 'Tarde Gospel',
+    host: 'Rafael Costa',
     startTime: '12:00',
-    endTime: '14:00',
-    description: 'Um momento de reflexão profunda e adoração no seu horário de almoço.',
-    image: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&q=80'
+    endTime: '15:00',
+    description: 'Interatividade e alegria com os maiores sucessos do mundo gospel atual.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp'
+  },
+  {
+    id: 'praise-nova-geracao',
+    title: 'Praise FM Nova Geração',
+    host: 'Ana Paula',
+    startTime: '15:00',
+    endTime: '18:00',
+    description: 'Apresentando a nova geração de artistas e os lançamentos mais frescos do worship.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp'
+  },
+  {
+    id: 'carona-praise',
+    title: 'De Carona com a Praise FM',
+    host: 'Bruno Almeida',
+    startTime: '18:00',
+    endTime: '21:00',
+    description: 'Sua melhor companhia no trânsito, com hits e histórias inspiradoras.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp'
+  },
+  {
+    id: 'praise-classicos',
+    title: 'Praise FM Brasil Clássicos',
+    host: 'Rodrigo Veras',
+    startTime: '21:00',
+    endTime: '00:00',
+    description: 'Um resgate dos hinos inesquecíveis que marcaram gerações de cristãos.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp'
   }
 ];
 
-// O SCHEDULES organiza a grade por dia da semana (0 = Domingo)
+// O SCHEDULES organiza a grade por dia da semana (0 = Domingo, 1 = Segunda...)
+// Aqui você pode personalizar dias específicos se desejar
 export const SCHEDULES: Record<number, Program[]> = {
-  0: [programs[0], programs[1], programs[2]],
-  1: [programs[0], programs[1], programs[2]],
-  2: [programs[0], programs[1], programs[2]],
-  3: [programs[0], programs[1], programs[2]],
-  4: [programs[0], programs[1], programs[2]],
-  5: [programs[0], programs[1], programs[2]],
-  6: [programs[0], programs[1], programs[2]],
+  0: programs, // Domingo
+  1: programs, // Segunda
+  2: programs, // Terça
+  3: programs, // Quarta
+  4: programs, // Quinta
+  5: programs, // Sexta
+  6: programs, // Sábado
 };
