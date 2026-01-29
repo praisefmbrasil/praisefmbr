@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
-// Páginas (criaremos estas depois)
+// Páginas
 import Home from './pages/Home';
 import ProgramsPage from './pages/ProgramsPage';
 import DevotionalPage from './pages/DevotionalPage';
@@ -50,6 +50,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
+// Hook para usar AuthContext no ProtectedRoute
+import { useAuth } from './contexts/AuthContext';
+
 const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,7 +61,6 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <div className="min-h-screen bg-white dark:bg-black transition-colors duration-300">
-          {/* ✅ Header com as props necessárias */}
           <Header 
             onNavigate={navigate} 
             currentPage={location.pathname} 
@@ -70,7 +72,7 @@ const App: React.FC = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               
-              {/* Rotas protegidas - requer autenticação */}
+              {/* Rotas protegidas */}
               <Route 
                 path="/" 
                 element={
