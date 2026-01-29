@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Scale, ShieldCheck, FileText, ArrowLeft, ChevronRight, Globe, AlertTriangle } from 'lucide-react';
+import { Scale, ArrowLeft, ChevronRight, Globe, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SECTIONS = [
