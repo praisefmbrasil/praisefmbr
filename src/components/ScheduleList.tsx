@@ -1,18 +1,18 @@
-// src/components/ScheduleList.tsx
-import { useMemo, useState, useEffect, useRef, type FC } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { Play, ArrowLeft, MapPin, Calendar as CalendarIcon } from 'lucide-react';
 import { SCHEDULES } from '../constants';
-import type { Program } from '../types';
+import { Program } from '../types';
 
 interface ScheduleListProps {
   onNavigateToProgram: (program: Program) => void;
   onBack?: () => void;
 }
 
-const getSaoPauloDate = (baseDate: Date = new Date()) =>
-  new Date(baseDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+const getChicagoDate = (baseDate: Date = new Date()) => {
+  return new Date(baseDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+};
 
-const ProgramProgressRing: FC<{ program: Program; isActive: boolean; nowMinutes: number }> = ({ program, isActive, nowMinutes }) => {
+const ProgramProgressRing: React.FC<{ program: Program; isActive: boolean; nowMinutes: number }> = ({ program, isActive, nowMinutes }) => {
   const progress = useMemo(() => {
     if (!isActive) return 0;
     const [sH, sM] = program.startTime.split(':').map(Number);
@@ -25,8 +25,8 @@ const ProgramProgressRing: FC<{ program: Program; isActive: boolean; nowMinutes:
     return Math.min(Math.max(elapsed / duration, 0), 1);
   }, [program, isActive, nowMinutes]);
 
-  const size = 120;
-  const strokeWidth = 3;
+  const size = 120; // Reduzido de 160
+  const strokeWidth = 3; // Reduzido de 4
   const center = size / 2;
   const radius = center - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
@@ -40,18 +40,24 @@ const ProgramProgressRing: FC<{ program: Program; isActive: boolean; nowMinutes:
           alt="" 
           className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
         />
-        <svg width={size - 24} height={size - 24} className="absolute inset-0 -rotate-90 pointer-events-none">
+        <svg 
+          width={size - 24} 
+          height={size - 24} 
+          className="absolute inset-0 -rotate-90 pointer-events-none"
+        >
           <circle 
             cx={(size - 24) / 2} cy={(size - 24) / 2} r={(size - 24) / 2 - strokeWidth / 2} 
-            stroke="#dbdbdb" strokeWidth={strokeWidth} fill="transparent" 
+            stroke="#dbdbdb" strokeWidth={strokeWidth} 
+            fill="transparent" 
             className="dark:stroke-white/10"
           />
           {isActive && (
             <circle 
               cx={(size - 24) / 2} cy={(size - 24) / 2} r={(size - 24) / 2 - strokeWidth / 2} 
-              stroke="#ff6600" strokeWidth={strokeWidth} fill="transparent" 
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
+              stroke="#ff6600" strokeWidth={strokeWidth} 
+              fill="transparent" 
+              strokeDasharray={2 * Math.PI * ((size - 24) / 2 - strokeWidth / 2)}
+              strokeDashoffset={2 * Math.PI * ((size - 24) / 2 - strokeWidth / 2) - progress * 2 * Math.PI * ((size - 24) / 2 - strokeWidth / 2)}
               strokeLinecap="butt"
               className="transition-all duration-1000"
             />
@@ -62,12 +68,12 @@ const ProgramProgressRing: FC<{ program: Program; isActive: boolean; nowMinutes:
   );
 };
 
-const ScheduleList: FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) => {
-  const [now, setNow] = useState(getSaoPauloDate());
+const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) => {
+  const [now, setNow] = useState(getChicagoDate());
   const listContainerRef = useRef<HTMLDivElement>(null);
-
+  
   useEffect(() => {
-    const timer = setInterval(() => setNow(getSaoPauloDate()), 30000);
+    const timer = setInterval(() => setNow(getChicagoDate()), 30000);
     return () => clearInterval(timer);
   }, []);
 
@@ -77,7 +83,9 @@ const ScheduleList: FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) =>
   }, [now]);
 
   const sections = useMemo(() => {
-    const groups: Record<string, Program[]> = { 'MADRUGADA': [], 'MANHÃ': [], 'TARDE': [], 'NOITE': [], 'FINAL DO DIA': [] };
+    const groups: Record<string, Program[]> = {
+      'MADRUGADA': [], 'MANHÃ': [], 'TARDE': [], 'NOITE': [], 'FINAL DO DIA': []
+    };
     currentSchedule.forEach(prog => {
       const h = parseInt(prog.startTime.split(':')[0]);
       if (h >= 0 && h < 6) groups['MADRUGADA'].push(prog);
@@ -89,20 +97,26 @@ const ScheduleList: FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) =>
     return groups;
   }, [currentSchedule]);
 
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const isLiveNow = (startStr: string, endStr: string) => {
     const [sH, sM] = startStr.split(':').map(Number);
     const [eH, eM] = endStr.split(':').map(Number);
     const start = sH * 60 + sM;
     let end = eH * 60 + eM;
     if (end === 0 || end <= start) end = 24 * 60;
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
     return nowMinutes >= start && nowMinutes < end;
   };
 
-  // Scroll automático
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // Efeito para scroll automático para o item ao vivo
   useEffect(() => {
     const activeElement = document.querySelector('[data-live="true"]');
-    if (activeElement) setTimeout(() => activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 500);
+    if (activeElement) {
+      setTimeout(() => {
+        activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 500);
+    }
   }, [currentSchedule]);
 
   return (
@@ -113,6 +127,7 @@ const ScheduleList: FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) =>
             <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
           </button>
         )}
+        
         <div className="flex flex-col md:flex-row md:items-baseline md:space-x-4 mb-10 border-b border-black dark:border-white pb-6">
           <h1 className="text-4xl md:text-5xl font-medium text-gray-900 dark:text-white uppercase tracking-tighter leading-none">Grade de Programação</h1>
           <p className="text-gray-400 font-normal uppercase tracking-[0.2em] text-[11px] mt-4 md:mt-0">
@@ -123,9 +138,12 @@ const ScheduleList: FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) =>
         {(Object.entries(sections) as [string, Program[]][]).map(([title, items]) => (
           items.length > 0 && (
             <div key={title} id={title} className="mb-16 scroll-mt-32">
-              <h3 className="bbc-section-title text-lg dark:text-white mb-8 uppercase font-medium">{title}</h3>
+              <h3 className="bbc-section-title text-lg dark:text-white mb-8 uppercase font-medium">
+                {title}
+              </h3>
+              
               <div className="space-y-8">
-                {items.map((prog: Program) => {
+                {items.map((prog) => {
                   const active = isLiveNow(prog.startTime, prog.endTime);
                   return (
                     <div 
@@ -146,7 +164,11 @@ const ScheduleList: FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) =>
                       </div>
 
                       <div className="md:mx-8">
-                        <ProgramProgressRing program={prog} isActive={active} nowMinutes={nowMinutes} />
+                        <ProgramProgressRing 
+                          program={prog} 
+                          isActive={active} 
+                          nowMinutes={nowMinutes} 
+                        />
                       </div>
 
                       <div className="flex-grow min-w-0 pt-1">
@@ -161,8 +183,8 @@ const ScheduleList: FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) =>
                         </p>
                         {active && (
                           <div className="mt-6 flex items-center space-x-3">
-                            <div className="h-1 w-10 bg-[#ff6600] animate-pulse"></div>
-                            <span className="text-[9px] font-normal text-[#ff6600] uppercase tracking-[0.4em]">Ouvindo agora ao vivo</span>
+                             <div className="h-1 w-10 bg-[#ff6600] animate-pulse"></div>
+                             <span className="text-[9px] font-normal text-[#ff6600] uppercase tracking-[0.4em]">Ouvindo agora ao vivo</span>
                           </div>
                         )}
                       </div>

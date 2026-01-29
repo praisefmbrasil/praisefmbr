@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SCHEDULES } from '../constants';
-import type { Program } from '../types';
+import { Program } from '../types';
 import { Play } from 'lucide-react';
 
 const getChicagoTime = () => {
