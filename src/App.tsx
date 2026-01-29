@@ -50,9 +50,6 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return <>{children}</>;
 };
 
-// Hook para usar AuthContext no ProtectedRoute
-import { useAuth } from './contexts/AuthContext';
-
 const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
