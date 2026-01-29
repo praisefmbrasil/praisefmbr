@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Music, Settings, Send, CheckCircle2, ArrowLeft, Headphones, Mic2, Loader2, AlertCircle } from 'lucide-react';
+import { MessageSquare, Music, Settings, Send, CheckCircle2, ArrowLeft, Mic2, Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 
 type FeedbackType = 'general' | 'music' | 'technical' | 'shoutout';

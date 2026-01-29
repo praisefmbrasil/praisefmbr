@@ -1,6 +1,5 @@
 import React from 'react';
 import { Book } from 'lucide-react';
-import DailyVerse from '../components/DailyVerse';
 
 const DevotionalPage: React.FC = () => {
   return (
@@ -17,7 +16,6 @@ const DevotionalPage: React.FC = () => {
         </div>
       </div>
 
-      <DailyVerse />
     </div>
   );
 };
