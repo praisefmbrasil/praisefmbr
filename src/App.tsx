@@ -187,7 +187,6 @@ const AppContent: React.FC = () => {
        isPlaying={isPlaying}
        onTogglePlayback={togglePlayback}
        program={currentProgram}
-       liveMetadata={liveMetadata ?? null}
        queue={queue}
        audioRef={audioRef}
        />
