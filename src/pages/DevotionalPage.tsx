@@ -1,60 +1,100 @@
-// src/components/DevotionalSection.tsx
-import React from "react";
-import { Heart } from "lucide-react";
-import { useAuth, FavoriteItem } from "../contexts/AuthContext";
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import type { FavoriteItem } from '../types';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
-export interface Devotional {
-  id: string;
-  title: string;
-  subtitle?: string;
-  image?: string;
-}
+const DevotionalPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toggleFavorite, isFavorite } = useAuth(); // ✅ Removido 'favorites' (não usado)
 
-interface DevotionalSectionProps {
-  devotionals: Devotional[];
-}
+  const devotionalItems: FavoriteItem[] = [
+    {
+      id: '1',
+      type: 'devotional',
+      title: 'Deus é Fiel',
+      subtitle: 'Confie no Senhor de todo o seu coração',
+      image: '/devotional1.jpg'
+    },
+    {
+      id: '2',
+      type: 'devotional', 
+      title: 'Paz em Cristo',
+      subtitle: 'Deixo-vos a paz, a minha paz vos dou',
+      image: '/devotional2.jpg'
+    }
+  ];
 
-const DevotionalSection: React.FC<DevotionalSectionProps> = ({ devotionals }) => {
-  const { toggleFavorite, isFavorite } = useAuth();
+  const handleToggleFavorite = (item: FavoriteItem) => {
+    toggleFavorite(item);
+  };
+
+  const isItemFavorite = (item: FavoriteItem): boolean => {
+    return isFavorite(item.id);
+  };
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-12">
-      <h2 className="text-3xl font-bold mb-6 dark:text-white">Devocionais</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {devotionals.map((item) => {
-          const favItem: FavoriteItem = { ...item, type: "devotional" };
-          const favorite = isFavorite(favItem);
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* ✅ CORREÇÃO: currentPage em vez de currentPath */}
+      <Header 
+        onNavigate={navigate} 
+        currentPage={location.pathname} // ✅ Corrigido
+      />
+      
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Devocionais Diários
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Momentos de reflexão e conexão com Deus através de mensagens inspiradoras
+          </p>
+        </div>
 
-          return (
-            <div 
-              key={item.id} 
-              className="bg-white dark:bg-[#111] p-4 rounded shadow hover:shadow-lg transition"
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {devotionalItems.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => navigate(`/devocional/${item.id}`)}
             >
-              {item.image && (
-                <img 
-                  src={item.image} 
-                  alt={item.title} 
-                  className="w-full h-40 object-cover rounded mb-4" 
+              <div className="relative">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-48 object-cover"
                 />
-              )}
-              <h3 className="text-xl font-semibold dark:text-white">{item.title}</h3>
-              {item.subtitle && (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">{item.subtitle}</p>
-              )}
-
-              <button
-                className="mt-4 flex items-center gap-2 text-[#ff6600] hover:opacity-80 transition"
-                onClick={() => toggleFavorite(favItem)}
-              >
-                <Heart className={favorite ? "fill-[#ff6600]" : ""} />
-                {favorite ? "Remover dos favoritos" : "Favoritar"}
-              </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleToggleFavorite(item);
+                  }}
+                  className={`absolute top-4 right-4 p-2 rounded-full ${
+                    isItemFavorite(item)
+                      ? 'bg-yellow-400 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {isItemFavorite(item) ? '★' : '☆'}
+                </button>
+              </div>
+              
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-gray-600">{item.subtitle}</p>
+              </div>
             </div>
-          );
-        })}
-      </div>
-    </section>
+          ))}
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 };
 
-export default DevotionalSection;
+export default DevotionalPage;
