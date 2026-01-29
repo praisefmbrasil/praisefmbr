@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
-// Importação de Componentes
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Footer from './components/Footer';
@@ -12,51 +11,47 @@ import ProgramDetail from './components/ProgramDetail';
 import Playlist from './components/Playlist';
 import ScheduleList from './components/ScheduleList';
 
-// Importação de Páginas
 import DevotionalPage from './pages/DevotionalPage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
-import MySoundsPage from './pages/MySoundsPage';
 import ProfilePage from './pages/ProfilePage';
-import FeaturedArtistsPage from './pages/FeaturedArtistsPage';
 import PresentersPage from './pages/PresentersPage';
-import NewReleasesPage from './pages/NewReleasesPage';
-import LiveRecordingsPage from './pages/LiveRecordingsPage';
-import HelpCenterPage from './pages/HelpCenterPage';
-import FeedbackPage from './pages/FeedbackPage';
 import EventsPage from './pages/EventsPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import TermsOfUsePage from './pages/TermsOfUsePage';
-import CookiesPolicyPage from './pages/CookiesPolicyPage';
 
 import { SCHEDULES } from './constants';
 import type { Program } from './types';
 
 const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
-const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/olisuxy9v3vtv';
 
-const BLOCKED_METADATA_KEYWORDS = [
-  'praise fm', 'praisefm', 'commercial', 'spot', 'promo', 'ident', 'sweeper',
-  'intro', 'outro', 'announcement', 'station id', 'jingle', 'teaser'
-];
-
+/* =======================
+   TIME — BRASIL REAL
+======================= */
 const getBrazilTime = () => {
   const now = new Date();
-  const options: Intl.DateTimeFormatOptions = {
+
+  const parts = new Intl.DateTimeFormat('pt-BR', {
     timeZone: 'America/Sao_Paulo',
-    hour12: false, hour: 'numeric', minute: 'numeric'
+    hour: '2-digit',
+    minute: '2-digit',
+    weekday: 'short'
+  }).formatToParts(now);
+
+  const hour = Number(parts.find(p => p.type === 'hour')?.value);
+  const minute = Number(parts.find(p => p.type === 'minute')?.value);
+
+  const weekdayMap: Record<string, number> = {
+    dom: 0, seg: 1, ter: 2, qua: 3, qui: 4, sex: 5, sáb: 6
   };
-  const [h, m] = new Intl.DateTimeFormat('pt-BR', options).format(now).split(':').map(Number);
-  return { day: now.getDay(), total: h * 60 + m };
+
+  const dayLabel = parts.find(p => p.type === 'weekday')?.value.slice(0,3).toLowerCase();
+  const day = weekdayMap[dayLabel ?? 'seg'];
+
+  return { day, totalMinutes: hour * 60 + minute };
 };
 
-interface LiveMetadata {
-  artist: string;
-  title: string;
-  playedAt?: Date;
-  isMusic?: boolean;
-}
-
+/* =======================
+   UTILS
+======================= */
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
@@ -65,47 +60,44 @@ const ScrollToTop = () => {
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-black"></div>;
+  if (loading) return <div className="min-h-screen bg-black" />;
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
-// COMPONENTE PRINCIPAL DE CONTEÚDO
+/* =======================
+   APP CONTENT
+======================= */
 const AppContent: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [isPlaying, setIsPlaying] = useState(false);
-  const [liveMetadata, setLiveMetadata] = useState<LiveMetadata | null>(null);
-  const [trackHistory, setTrackHistory] = useState<LiveMetadata[]>([]);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'dark');
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
-  
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    () => (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'dark'
+  );
+  const [clock, setClock] = useState(getBrazilTime());
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
 
-  // Lógica de Programação "No Ar"
-  const { currentProgram, queue } = useMemo(() => {
-    const { day, total } = getBrazilTime();
-    const schedule = SCHEDULES[day] || SCHEDULES[1];
-    
-    const currentIndex = schedule.findIndex(p => {
-      const [sH, sM] = p.startTime.split(':').map(Number);
-      const [eH, eM] = p.endTime.split(':').map(Number);
-      const start = sH * 60 + sM;
-      let end = eH * 60 + eM;
-      if (end === 0 || end <= start) end = 1440; // 24h
-      return total >= start && total < end;
-    });
-    
-    return { 
-      currentProgram: currentIndex !== -1 ? schedule[currentIndex] : schedule[0],
-      queue: schedule.slice(currentIndex + 1, currentIndex + 5)
-    };
-  }, [location.pathname]); // Atualiza ao mudar de página ou a cada re-render
+  /* ⏱️ CLOCK LOOP */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setClock(getBrazilTime());
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
-  // Inicialização do Áudio
+  /* 🌙 THEME REAL */
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('praise-theme', theme);
+  }, [theme]);
+
+  /* 🎧 AUDIO */
   useEffect(() => {
     audioRef.current = new Audio(STREAM_URL);
-    audioRef.current.crossOrigin = "anonymous";
+    audioRef.current.crossOrigin = 'anonymous';
     return () => {
       audioRef.current?.pause();
       audioRef.current = null;
@@ -114,31 +106,49 @@ const AppContent: React.FC = () => {
 
   const togglePlayback = () => {
     if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
+    if (isPlaying) audioRef.current.pause();
+    else {
       audioRef.current.src = STREAM_URL;
       audioRef.current.play().catch(console.error);
     }
-    setIsPlaying(!isPlaying);
+    setIsPlaying(p => !p);
   };
+
+  /* 📻 PROGRAMAÇÃO */
+  const { currentProgram, queue } = useMemo(() => {
+    const schedule = SCHEDULES[clock.day] || SCHEDULES[1];
+
+    const index = schedule.findIndex(p => {
+      const [sH, sM] = p.startTime.split(':').map(Number);
+      const [eH, eM] = p.endTime.split(':').map(Number);
+      const start = sH * 60 + sM;
+      let end = eH * 60 + eM;
+      if (end <= start) end += 1440;
+      return clock.totalMinutes >= start && clock.totalMinutes < end;
+    });
+
+    return {
+      currentProgram: index >= 0 ? schedule[index] : schedule[0],
+      queue: schedule.slice(index + 1, index + 5)
+    };
+  }, [clock]);
 
   const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
 
   return (
-    <div className={`min-h-screen flex flex-col pb-[120px] transition-colors duration-300 ${theme === 'dark' ? 'dark bg-black' : 'bg-white'}`}>
-      <Navbar 
-        activeTab={activeTab} 
+    <div className="min-h-screen flex flex-col pb-[120px] bg-white dark:bg-black transition-colors">
+      <Navbar
+        activeTab={activeTab}
         theme={theme}
-        onToggleTheme={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
+        onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
       />
-      
+
       <main className="flex-grow">
         {selectedProgram ? (
-          <ProgramDetail 
-            program={selectedProgram} 
-            onBack={() => setSelectedProgram(null)} 
-            onViewSchedule={() => { setSelectedProgram(null); navigate('/schedule'); }} 
+          <ProgramDetail
+            program={selectedProgram}
+            onBack={() => setSelectedProgram(null)}
+            onViewSchedule={() => { setSelectedProgram(null); navigate('/schedule'); }}
             onListenClick={togglePlayback}
             isPlaying={isPlaying}
           />
@@ -146,8 +156,12 @@ const AppContent: React.FC = () => {
           <Routes>
             <Route path="/" element={
               <>
-                <Hero onListenClick={togglePlayback} isPlaying={isPlaying} onNavigateToProgram={setSelectedProgram} />
-                <RecentlyPlayed tracks={trackHistory} />
+                <Hero
+                  onListenClick={togglePlayback}
+                  isPlaying={isPlaying}
+                  onNavigateToProgram={setSelectedProgram}
+                />
+                <RecentlyPlayed tracks={[]} />
               </>
             } />
             <Route path="/music" element={<Playlist />} />
@@ -164,13 +178,12 @@ const AppContent: React.FC = () => {
       </main>
 
       <Footer />
-      
+
       {currentProgram && (
-        <LivePlayerBar 
-          isPlaying={isPlaying} 
-          onTogglePlayback={togglePlayback} 
-          program={currentProgram} 
-          liveMetadata={liveMetadata}
+        <LivePlayerBar
+          isPlaying={isPlaying}
+          onTogglePlayback={togglePlayback}
+          program={currentProgram}
           queue={queue}
           audioRef={audioRef}
         />
@@ -179,7 +192,9 @@ const AppContent: React.FC = () => {
   );
 };
 
-// COMPONENTE ROOT (Onde o Router DEVE ficar)
+/* =======================
+   ROOT
+======================= */
 export default function App() {
   return (
     <AuthProvider>
