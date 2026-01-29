@@ -157,10 +157,13 @@ const AppContent: React.FC = () => {
             <Route path="/" element={
               <>
                 <Hero
-                  onListenClick={togglePlayback}
-                  isPlaying={isPlaying}
-                  onNavigateToProgram={setSelectedProgram}
-                />
+             program={currentProgram}
+             currentMinutes={clock.totalMinutes}
+            onListenClick={togglePlayback}
+            isPlaying={isPlaying}
+            onNavigateToProgram={setSelectedProgram}
+           />
+
                 <RecentlyPlayed tracks={[]} />
               </>
             } />
