@@ -1,9 +1,9 @@
-import { createContext, useContext, useState, useEffect } from "react";
-import type { ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { supabase } from "../lib/supabaseClient";
 import type { Session, AuthChangeEvent } from "@supabase/supabase-js";
-import type { FavoriteItem, FavoriteDB, User } from "../types";
+import type { FavoriteItem, User } from "../types";
 
+// Contexto
 export interface AuthContextType {
   user: User | null;
   favorites: FavoriteItem[];
@@ -17,7 +17,8 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const useAuth = () => useContext(AuthContext);
 
-const createFavoriteDB = (item: FavoriteItem, userId: string): FavoriteDB => ({
+// Função auxiliar para criar o registro de favorito
+const createFavoriteRecord = (item: FavoriteItem, userId: string) => ({
   ...item,
   user_id: userId,
 });
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
+  // Observa alterações de auth
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
@@ -43,17 +45,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
     );
-
     return () => listener?.subscription.unsubscribe();
   }, []);
 
   const fetchFavorites = async (userId: string) => {
     try {
-      // ✅ Supabase agora exige dois generics: <Table, SelectType>
-      const { data, error } = await supabase.from<FavoriteDB, FavoriteDB>("favorites").select("*").eq("user_id", userId);
+      const { data, error } = await supabase
+        .from("favorites") // tipo minimal
+        .select("*")
+        .eq("user_id", userId);
+
       if (error) throw error;
-      const cleanedFavorites: FavoriteItem[] = (data || []).map(({ user_id, ...item }) => item);
-      setFavorites(cleanedFavorites);
+
+      // Filtra user_id
+      const cleaned: FavoriteItem[] = (data || []).map((d: any) => {
+        const { user_id, ...rest } = d;
+        return rest;
+      });
+      setFavorites(cleaned);
     } catch (err) {
       console.error("Erro ao buscar favoritos:", err);
       setFavorites([]);
@@ -66,19 +75,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!user) return;
 
     const wasFavorite = isFavorite(item);
-    const optimisticUpdate = wasFavorite ? favorites.filter(f => f.id !== item.id) : [...favorites, item];
-    setFavorites(optimisticUpdate);
+    const optimistic = wasFavorite ? favorites.filter(f => f.id !== item.id) : [...favorites, item];
+    setFavorites(optimistic);
 
     try {
       if (wasFavorite) {
-        const { error } = await supabase.from<FavoriteDB, FavoriteDB>("favorites")
+        const { error } = await supabase
+          .from("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("id", item.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from<FavoriteDB, FavoriteDB>("favorites")
-          .insert([createFavoriteDB(item, user.id)]);
+        const { error } = await supabase
+          .from("favorites")
+          .insert([createFavoriteRecord(item, user.id)]);
         if (error) throw error;
       }
     } catch (err) {
@@ -91,19 +102,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signUp = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return { user: null, error: error.message };
-    return {
-      user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null,
-      error: null,
-    };
+    return { user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null, error: null };
   };
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { user: null, error: error.message };
-    return {
-      user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null,
-      error: null,
-    };
+    return { user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null, error: null };
   };
 
   const signOut = async () => {
@@ -114,15 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        favorites,
-        isFavorite,
-        toggleFavorite,
-        signUp,
-        signIn,
-        signOut,
-      }}
+      value={{ user, favorites, isFavorite, toggleFavorite, signUp, signIn, signOut }}
     >
       {children}
     </AuthContext.Provider>
