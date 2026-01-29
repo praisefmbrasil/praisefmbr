@@ -1,19 +1,227 @@
-import type { Program, FavoriteItem } from './types';
+// src/constants.ts
+import type { Program } from './types';
 
-// Programas da rádio
-export const programs: Program[] = [
-  { id: '1', title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', image: '/images/Samuel_Andrade.webp' },
-  { id: '2', title: 'Praise FM Worship Brasil', host: '', startTime: '06:00', endTime: '07:00', image: '/images/Praise_FM_Worship.webp' },
-  { id: '3', title: 'Manhã com Cristo', host: 'Lucas Martins', startTime: '07:00', endTime: '12:00', image: '/images/Lucas_Martins.webp' },
-  { id: '4', title: 'Tarde Gospel', host: 'Rafael Costa', startTime: '13:00', endTime: '16:00', image: '/images/Rafael_Costa.webp' },
-  { id: '5', title: 'Praise FM Live Show', host: '', startTime: '20:00', endTime: '21:00', image: '/images/Praise_Fm_Live_Show.webp' },
-  // Adicione os outros programas conforme sua programação
+// Programação de Segunda a Sábado
+const weekdayPrograms: Program[] = [
+  {
+    id: 'madrugada-com-cristo',
+    title: 'MADRUGADA COM CRISTO',
+    host: 'Samuel Andrade',
+    startTime: '00:00',
+    endTime: '06:00',
+    description: 'Momento de oração e música cristã para iniciar a madrugada com Cristo.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp',
+  },
+  {
+    id: 'praise-fm-worship-1',
+    title: 'PRAISE FM WORSHIP BRASIL',
+    host: '',
+    startTime: '06:00',
+    endTime: '07:00',
+    description: 'Sessão de adoração com músicas selecionadas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
+  },
+  {
+    id: 'manha-com-cristo',
+    title: 'MANHÃ COM CRISTO',
+    host: 'Lucas Martins',
+    startTime: '07:00',
+    endTime: '12:00',
+    description: 'Programa matinal com música, palavra e reflexão.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp',
+  },
+  {
+    id: 'praise-fm-worship-2',
+    title: 'PRAISE FM WORSHIP BRASIL',
+    host: '',
+    startTime: '12:00',
+    endTime: '13:00',
+    description: 'Sessão de adoração com músicas selecionadas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
+  },
+  {
+    id: 'tarde-gospel',
+    title: 'TARDE GOSPEL',
+    host: 'Rafael Costa',
+    startTime: '13:00',
+    endTime: '16:00',
+    description: 'Programa vespertino com músicas gospel e mensagens inspiradoras.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp',
+  },
+  {
+    id: 'praise-fm-non-stop',
+    title: 'PRAISE FM NON STOP',
+    host: '',
+    startTime: '16:00',
+    endTime: '17:00',
+    description: 'Músicas cristãs sem interrupção.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp',
+  },
+  {
+    id: 'praise-fm-nova-geracao',
+    title: 'PRAISE FM NOVA GERAÇÃO',
+    host: 'Ana Paula',
+    startTime: '17:00',
+    endTime: '18:00',
+    description: 'Programa voltado para jovens com música e mensagens atuais.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp',
+  },
+  {
+    id: 'de-carona-com-a-praise-fm',
+    title: 'DE CARONA COM A PRAISE FM',
+    host: 'Bruno Almeida',
+    startTime: '18:00',
+    endTime: '20:00',
+    description: 'Programação divertida e inspiradora para o final do dia.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp',
+  },
+  {
+    id: 'praise-fm-live-show',
+    title: 'PRAISE FM LIVE SHOW',
+    host: '',
+    startTime: '20:00',
+    endTime: '21:00',
+    description: 'Show ao vivo com apresentações especiais. Apenas às quartas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_Fm_Live_Show_blfy7o.webp',
+  },
+  {
+    id: 'praise-fm-brasil-classicos',
+    title: 'PRAISE FM BRASIL CLÁSSICOS',
+    host: 'Rodrigo Veras',
+    startTime: '21:00',
+    endTime: '22:00',
+    description: 'Os clássicos da música cristã que marcaram gerações.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp',
+  },
+  {
+    id: 'praise-fm-worship-3',
+    title: 'PRAISE FM WORSHIP BRASIL',
+    host: '',
+    startTime: '22:00',
+    endTime: '00:00',
+    description: 'Sessão de adoração com músicas selecionadas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
+  },
 ];
 
-// Favoritos / Devocionais
-export const favoriteItems: FavoriteItem[] = [
-  { id: '1', title: 'Devocional Matinal', type: 'devotional', image: '/images/devotional-placeholder.png' },
-  { id: '2', title: 'Top Gospel Hits', type: 'track', image: '/images/favorite-placeholder.png' },
-  { id: '3', title: 'Pregação da Palavra', type: 'devotional', image: '/images/Pregacao_da_Palavra.webp' },
-  // Adicione outros favoritos
+// Programação de Domingo
+const sundayPrograms: Program[] = [
+  {
+    id: 'madrugada-com-cristo',
+    title: 'MADRUGADA COM CRISTO',
+    host: 'Samuel Andrade',
+    startTime: '00:00',
+    endTime: '06:00',
+    description: 'Momento de oração e música cristã para iniciar a madrugada com Cristo.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp',
+  },
+  {
+    id: 'praise-fm-worship-1',
+    title: 'PRAISE FM WORSHIP BRASIL',
+    host: '',
+    startTime: '06:00',
+    endTime: '07:00',
+    description: 'Sessão de adoração com músicas selecionadas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
+  },
+  {
+    id: 'domingo-com-cristo',
+    title: 'DOMINGO COM CRISTO',
+    host: 'Felipe Santos',
+    startTime: '07:00',
+    endTime: '12:00',
+    description: 'Programa matinal dominical com música, palavra e reflexão.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp',
+  },
+  {
+    id: 'praise-fm-worship-2',
+    title: 'PRAISE FM WORSHIP BRASIL',
+    host: '',
+    startTime: '12:00',
+    endTime: '13:00',
+    description: 'Sessão de adoração com músicas selecionadas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
+  },
+  {
+    id: 'tarde-gospel',
+    title: 'TARDE GOSPEL',
+    host: 'Rafael Costa',
+    startTime: '13:00',
+    endTime: '16:00',
+    description: 'Programa vespertino com músicas gospel e mensagens inspiradoras.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp',
+  },
+  {
+    id: 'praise-fm-non-stop',
+    title: 'PRAISE FM NON STOP',
+    host: '',
+    startTime: '16:00',
+    endTime: '17:00',
+    description: 'Músicas cristãs sem interrupção.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp',
+  },
+  {
+    id: 'praise-fm-nova-geracao',
+    title: 'PRAISE FM NOVA GERAÇÃO',
+    host: 'Ana Paula',
+    startTime: '17:00',
+    endTime: '18:00',
+    description: 'Programa voltado para jovens com música e mensagens atuais.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp',
+  },
+  {
+    id: 'praise-fm-worship-3',
+    title: 'PRAISE FM WORSHIP BRASIL',
+    host: '',
+    startTime: '18:00',
+    endTime: '20:00',
+    description: 'Sessão de adoração com músicas selecionadas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
+  },
+  {
+    id: 'praise-fm-pop',
+    title: 'PRAISE FM POP',
+    host: 'Thiago Moreira',
+    startTime: '20:00',
+    endTime: '21:00',
+    description: 'Músicas pop cristãs. Segunda, terça, quinta, sexta, sábado e domingo.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp',
+  },
+  {
+    id: 'praise-fm-brasil-classicos',
+    title: 'PRAISE FM BRASIL CLÁSSICOS',
+    host: 'Rodrigo Veras',
+    startTime: '21:00',
+    endTime: '22:00',
+    description: 'Os clássicos da música cristã que marcaram gerações.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp',
+  },
+  {
+    id: 'pregacao-da-palavra',
+    title: 'PREGAÇÃO DA PALAVRA',
+    host: '',
+    startTime: '22:00',
+    endTime: '23:00',
+    description: 'Momento de pregação e reflexão da Palavra de Deus.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp',
+  },
+  {
+    id: 'praise-fm-worship-4',
+    title: 'PRAISE FM WORSHIP BRASIL',
+    host: '',
+    startTime: '23:00',
+    endTime: '00:00',
+    description: 'Sessão de adoração com músicas selecionadas.',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
+  },
 ];
+
+export const SCHEDULES: Record<number, Program[]> = {
+  0: sundayPrograms, // Domingo
+  1: weekdayPrograms, // Segunda
+  2: weekdayPrograms, // Terça
+  3: weekdayPrograms, // Quarta
+  4: weekdayPrograms, // Quinta
+  5: weekdayPrograms, // Sexta
+  6: weekdayPrograms, // Sábado
+};
