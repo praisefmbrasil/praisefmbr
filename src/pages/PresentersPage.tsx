@@ -1,19 +1,7 @@
-import { useNavigate } from "react-router-dom";
+// src/pages/PresentersPage.tsx
 
-// ✅ Tipo mínimo definido localmente
-interface Program {
-  id: string;
-  title: string;
-}
-
-// ✅ Dados dos apresentadores (com URLs corrigidas - sem espaços extras)
-const PRESENTERS_DATA: Array<{
-  name: string;
-  image: string;
-  bio: string;
-  programTitle: string;
-  programId: string;
-}> = [
+// ✅ Dados dos apresentadores
+const PRESENTERS_DATA = [
   {
     name: "Samuel Andrade",
     image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp",
@@ -59,15 +47,16 @@ const PRESENTERS_DATA: Array<{
 ];
 
 export default function PresentersPage() {
-  const navigate = useNavigate();
+  const navigateToProgram = (programId: string) => {
+    window.location.href = `/program/${programId}`;
+  };
 
   return (
     <div className="bg-white dark:bg-black min-h-screen transition-colors">
-      {/* HEADER — BBC STYLE */}
+      {/* HEADER */}
       <header className="bg-black text-white py-24 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-3 text-[#ff6600] mb-6">
-            {/* ✅ Substituído Users por emoji nativo */}
             <span className="text-xl">🎙️</span>
             <span className="text-[10px] uppercase tracking-[0.4em]">
               As vozes da Praise FM Brasil
@@ -119,10 +108,9 @@ export default function PresentersPage() {
               </p>
 
               <button
-                onClick={() => navigate(`/program/${presenter.programId}`)}
+                onClick={() => navigateToProgram(presenter.programId)}
                 className="mt-auto bg-[#ff6600] text-white py-4 text-[10px] uppercase tracking-[0.25em] flex items-center justify-center gap-2 hover:bg-black transition-colors"
               >
-                {/* ✅ Substituído ArrowRight por seta de texto */}
                 Ver programa →
               </button>
             </div>
