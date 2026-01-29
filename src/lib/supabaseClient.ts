@@ -1,20 +1,14 @@
 // src/lib/supabaseClient.ts
 import { createClient } from '@supabase/supabase-js';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
-// Variáveis de ambiente do Vite
-const SUPABASE_URL: string | undefined = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY: string | undefined = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = 'https://ofgbifslafyuuilltwek.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_VpvkBirkYSrIBfDIUfLPXw_ZhcTvtRh';
 
-// Validação de segurança
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error(
-    '❌ Variáveis de ambiente do Supabase não configuradas!\nVerifique seu arquivo .env na raiz do projeto.'
-  );
+  throw new Error('❌ Credenciais do Supabase não configuradas!');
 }
 
-// Criação do cliente Supabase
-export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
