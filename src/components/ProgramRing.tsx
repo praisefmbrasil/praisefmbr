@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ProgramRingProps {
   title: string;
   image: string;
