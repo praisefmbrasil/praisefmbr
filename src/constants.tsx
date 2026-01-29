@@ -1,4 +1,5 @@
 // src/constants.ts
+
 export const WEEKDAY_SCHEDULE = [
   {
     id: "1",
@@ -213,7 +214,17 @@ export const SUNDAY_SCHEDULE = [
   }
 ];
 
-// Logotipos oficiais
+// ADICIONADO: Objeto SCHEDULES que os componentes tentam importar
+export const SCHEDULES: Record<number, any[]> = {
+  0: SUNDAY_SCHEDULE,   // Domingo
+  1: WEEKDAY_SCHEDULE,  // Segunda
+  2: WEEKDAY_SCHEDULE,  // Terça
+  3: WEEKDAY_SCHEDULE,  // Quarta
+  4: WEEKDAY_SCHEDULE,  // Quinta
+  5: WEEKDAY_SCHEDULE,  // Sexta
+  6: WEEKDAY_SCHEDULE   // Sábado
+};
+
 export const LOGOS = {
   header: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206553/LOGO_HEADER_uygoqx.webp",
   full: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp"

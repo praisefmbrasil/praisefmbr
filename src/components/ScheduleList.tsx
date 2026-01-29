@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Play, ArrowLeft, MapPin, Calendar as CalendarIcon } from 'lucide-react';
+import { Play } from 'lucide-react';
 import { SCHEDULES } from '../constants';
-import { Program } from '../types';
+import TYPE PROGRAMom '../types';
 
 interface ScheduleListProps {
   onNavigateToProgram: (program: Program) => void;
