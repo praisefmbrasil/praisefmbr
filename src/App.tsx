@@ -182,14 +182,15 @@ const AppContent: React.FC = () => {
 
       <Footer />
 
-      {currentProgram && (
-        <LivePlayerBar
-          isPlaying={isPlaying}
-          onTogglePlayback={togglePlayback}
-          program={currentProgram}
-          queue={queue}
-          audioRef={audioRef}
-        />
+       {currentProgram && (
+       <LivePlayerBar
+       isPlaying={isPlaying}
+       onTogglePlayback={togglePlayback}
+       program={currentProgram}
+       liveMetadata={liveMetadata ?? null}
+       queue={queue}
+       audioRef={audioRef}
+       />
       )}
     </div>
   );
