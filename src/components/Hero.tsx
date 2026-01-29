@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
 import { SCHEDULES } from '../constants';
-import { Program } from '../types';
+import type { Program } from '../types';
 
-// Função de tempo ajustada para o fuso do Brasil
+// Função para obter o horário atual de Brasília
 const getBrazilInfo = () => {
   const now = new Date();
   const options: Intl.DateTimeFormatOptions = {
@@ -32,6 +32,7 @@ const Hero: React.FC<HeroProps> = ({
   const [tick, setTick] = useState(0);
   const [showDetails, setShowDetails] = useState(true);
 
+  // Sincronização da grade a cada 30 segundos
   useEffect(() => {
     const interval = setInterval(() => setTick((t) => t + 1), 30000);
     return () => clearInterval(interval);
@@ -69,6 +70,7 @@ const Hero: React.FC<HeroProps> = ({
 
   if (!currentProgram) return null;
 
+  // Parâmetros do Círculo de Progresso (BBC Sounds Style)
   const circleSize = 192;
   const strokeWidth = 3;
   const center = circleSize / 2;
@@ -81,7 +83,7 @@ const Hero: React.FC<HeroProps> = ({
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-12 lg:gap-20">
           
-          {/* Avatar Circular com Progresso (BBC Sounds Reference) */}
+          {/* Imagem do Programa com Círculo de Progresso */}
           <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => onNavigateToProgram(currentProgram)}>
             <div className="relative rounded-full overflow-hidden" style={{ width: circleSize, height: circleSize }}>
               <img 
@@ -97,34 +99,29 @@ const Hero: React.FC<HeroProps> = ({
                 <circle cx={center} cy={center} r={radius} stroke="#ff6600" strokeWidth={strokeWidth} fill="transparent" strokeDasharray={circumference} strokeDashoffset={offset} />
               </svg>
             </div>
-            {/* Badge de Posição (Estilo BBC) */}
+            {/* Badge de Destaque da BBC */}
             <div className="absolute bottom-2 right-2 w-10 h-10 bg-black rounded-full flex items-center justify-center border border-white/20">
-              <span className="text-white text-xl font-normal">1</span>
+              <span className="text-white text-xl font-normal tracking-tighter italic">P</span>
             </div>
           </div>
 
-          {/* Área Principal: Título e Play */}
+          {/* Conteúdo Principal (Peso máximo 500) */}
           <div className="flex-grow pt-4 text-center md:text-left">
             <div className="text-[10px] font-normal text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-[0.4em]">
-              <span className="text-[#ff6600]">Live</span> — <span>{currentProgram.startTime} - {currentProgram.endTime}</span>
+              <span className="text-[#ff6600]">Ao Vivo</span> — <span>{currentProgram.startTime} - {currentProgram.endTime}</span>
             </div>
             
-            <h2 
-              className="text-5xl md:text-7xl font-medium text-gray-900 dark:text-white tracking-tighter mb-4 leading-[0.9] hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" 
-              onClick={() => onNavigateToProgram(currentProgram)}
-            >
+            <h2 className="text-5xl md:text-7xl font-medium text-gray-900 dark:text-white tracking-tighter mb-4 leading-none hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
               {currentProgram.title}
               <ChevronRight className="w-8 h-8 ml-2 text-[#ff6600] opacity-50" />
             </h2>
             
             <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-normal mb-10 leading-relaxed max-w-2xl tracking-tight">
-              Com {currentProgram.host}. {currentProgram.description.split('.')[0]}.
+              Apresentado por {currentProgram.host}. {currentProgram.description?.split('.')[0]}.
             </p>
 
-            <button 
-              onClick={onListenClick}
-              className="bg-[#ff6600] text-white px-14 py-5 flex items-center justify-center space-x-4 hover:bg-black transition-all active:scale-95 mx-auto md:mx-0 rounded-sm"
-            >
+            {/* Botão de Play Laranja (BBC Style) */}
+            <button onClick={onListenClick} className="bg-[#ff6600] text-white px-14 py-5 flex items-center justify-center space-x-4 hover:bg-black transition-all active:scale-95 mx-auto md:mx-0 rounded-sm">
               {isPlaying ? <Pause className="fill-current w-5 h-5" /> : <Play className="fill-current w-5 h-5" />}
               <span className="text-lg font-medium tracking-tight uppercase">
                 {isPlaying ? 'Pausar' : 'Ouvir Agora'}
@@ -133,30 +130,23 @@ const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Up Next Section */}
+        {/* Seção Próximos Programas (Design Limpo) */}
         {showDetails && (
           <div className="mt-24 pt-10 border-t border-gray-100 dark:border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h3 className="text-[10px] font-normal text-gray-400 uppercase tracking-[0.5em] mb-12">Up Next</h3>
+            <h3 className="text-[10px] font-normal text-gray-400 uppercase tracking-[0.5em] mb-12">A Seguir</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12">
               {upNextPrograms.map((prog) => (
-                <div 
-                  key={prog.id} 
-                  className="flex items-start space-x-6 group cursor-pointer"
-                  onClick={() => onNavigateToProgram(prog)}
-                >
+                <div key={prog.id} className="flex items-start space-x-6 group cursor-pointer" onClick={() => onNavigateToProgram(prog)}>
                   <div className="w-24 h-24 flex-shrink-0 bg-gray-100 dark:bg-white/5 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500">
                     <img src={prog.image} alt={prog.title} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex flex-col">
                     <div className="text-[9px] font-normal mb-2 uppercase tracking-widest text-gray-400">
-                      <span className="text-[#ff6600]">A Seguir</span> • {prog.startTime}
+                      <span className="text-[#ff6600]">Próximo</span> • {prog.startTime}
                     </div>
                     <h4 className="text-2xl font-normal text-gray-900 dark:text-white tracking-tight group-hover:text-[#ff6600] transition-colors leading-tight">
                       {prog.title}
                     </h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-normal tracking-wide">
-                      {prog.host}
-                    </p>
                   </div>
                 </div>
               ))}
@@ -164,20 +154,13 @@ const Hero: React.FC<HeroProps> = ({
           </div>
         )}
 
-        {/* Hero Footer */}
+        {/* Rodapé do Hero */}
         <div className="mt-16 pt-6 flex flex-col md:flex-row justify-between items-center border-t border-gray-100 dark:border-white/5 gap-4">
           <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em] font-normal">
-            Produced by Praise FM Brasil for Global Radio
+            Produced by Praise FM Brasil
           </p>
-          <button 
-            onClick={() => setShowDetails(!showDetails)}
-            className="flex items-center text-[10px] font-medium text-gray-400 hover:text-[#ff6600] transition-colors uppercase tracking-[0.3em]"
-          >
-            {showDetails ? (
-              <>Show less <ChevronUp className="w-3 h-3 ml-2 text-[#ff6600]" /></>
-            ) : (
-              <>Show more <ChevronDown className="w-3 h-3 ml-2 text-[#ff6600]" /></>
-            )}
+          <button onClick={() => setShowDetails(!showDetails)} className="flex items-center text-[10px] font-medium text-gray-400 hover:text-[#ff6600] transition-colors uppercase tracking-[0.3em]">
+            {showDetails ? <>Show less <ChevronUp className="w-3 h-3 ml-2" /></> : <>Show more <ChevronDown className="w-3 h-3 ml-2" /></>}
           </button>
         </div>
       </div>
