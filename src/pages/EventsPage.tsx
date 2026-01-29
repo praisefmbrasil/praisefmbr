@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Ticket, Loader2, Search, Bell, BellRing, X, Check, Music, Info, ArrowRight, AlertCircle } from 'lucide-react';
+import { Ticket, Loader2, Search, Bell, BellRing, X, Check, Music, Info, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
