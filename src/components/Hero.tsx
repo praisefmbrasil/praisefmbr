@@ -1,26 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Play, Pause, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react';
+import { Play, Pause, ChevronRight, Zap, ArrowRight } from 'lucide-react';
 import { SCHEDULES } from '../constants';
-import type { Program } from '../types';
+import { Program } from '../types';
+import { useNavigate } from 'react-router-dom';
 
-// Função para obter o horário atual de Brasília
-const getBrazilInfo = () => {
+// ✅ Usa fuso de São Paulo
+const getSaoPauloInfo = () => {
   const now = new Date();
-  const options: Intl.DateTimeFormatOptions = {
-    timeZone: 'America/Sao_Paulo',
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: false
-  };
-  const brazilTime = new Intl.DateTimeFormat('pt-BR', options).format(now);
-  const [h, m] = brazilTime.split(':').map(Number);
-  const day = now.getDay();
+  const saoPauloString = now.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  const saoPauloDate = new Date(saoPauloString);
+  const h = saoPauloDate.getHours();
+  const m = saoPauloDate.getMinutes();
+  const day = saoPauloDate.getDay();
   return { day, totalMinutes: h * 60 + m };
 };
+
+// ✅ Formato 24h (sem AM/PM)
+const formatTimeBR = (time24: string) => time24;
 
 interface HeroProps {
   onListenClick: () => void;
   isPlaying: boolean;
+  // liveMetadata removido (não usado no mock)
   onNavigateToProgram: (program: Program) => void;
 }
 
@@ -31,141 +32,216 @@ const Hero: React.FC<HeroProps> = ({
 }) => {
   const [tick, setTick] = useState(0);
   const [showDetails, setShowDetails] = useState(true);
+  const navigate = useNavigate();
 
-  // Sincronização da grade a cada 30 segundos
   useEffect(() => {
     const interval = setInterval(() => setTick((t) => t + 1), 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const info = useMemo(() => getBrazilInfo(), [tick]);
+  const saoPaulo = useMemo(() => getSaoPauloInfo(), [tick]);
 
   const { currentProgram, upNextPrograms } = useMemo(() => {
-    const schedule = SCHEDULES[info.day] || SCHEDULES[1];
+    const schedule = SCHEDULES[saoPaulo.day] || SCHEDULES[0]; // fallback para domingo
+    
     const currentIndex = schedule.findIndex((p) => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
-      const start = sH * 60 + sM;
+      let start = sH * 60 + sM;
       let end = eH * 60 + eM;
-      if (end === 0 || end <= start) end = 24 * 60;
-      return info.totalMinutes >= start && info.totalMinutes < end;
+      if (end <= start) end += 24 * 60;
+      return saoPaulo.totalMinutes >= start && saoPaulo.totalMinutes < end;
     });
 
     const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0];
     const next = schedule.slice(currentIndex + 1, currentIndex + 3);
+    
     return { currentProgram: current, upNextPrograms: next };
-  }, [info]);
+  }, [saoPaulo]);
 
   const progress = useMemo(() => {
     if (!currentProgram) return 0;
     const [sH, sM] = currentProgram.startTime.split(':').map(Number);
     const [eH, eM] = currentProgram.endTime.split(':').map(Number);
-    const start = sH * 60 + sM;
+    let start = sH * 60 + sM;
     let end = eH * 60 + eM;
-    if (end === 0 || end <= start) end = 24 * 60;
-    const elapsed = info.totalMinutes - start;
+    if (end <= start) end += 24 * 60;
+    const elapsed = saoPaulo.totalMinutes - start;
     const duration = end - start;
     return Math.min(Math.max(elapsed / duration, 0), 1);
-  }, [currentProgram, info.totalMinutes]);
+  }, [currentProgram, saoPaulo.totalMinutes]);
 
   if (!currentProgram) return null;
 
-  // Parâmetros do Círculo de Progresso (BBC Sounds Style)
-  const circleSize = 192;
-  const strokeWidth = 3;
+  const circleSize = 192;    
+  const strokeWidth = 4;
   const center = circleSize / 2;
   const radius = center - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - progress * circumference;
 
   return (
-    <section className="bg-white dark:bg-[#000000] py-12 transition-colors duration-300 font-sans antialiased">
+    <section className="bg-white dark:bg-[#000000] py-10 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-12 lg:gap-20">
+        <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
           
-          {/* Imagem do Programa com Círculo de Progresso */}
+          {/* LEFT SIDE: CIRCULAR IMAGE */}
           <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => onNavigateToProgram(currentProgram)}>
             <div className="relative rounded-full overflow-hidden" style={{ width: circleSize, height: circleSize }}>
               <img 
                 src={currentProgram.image} 
                 alt={currentProgram.title} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                className="w-full h-full object-cover" 
               />
               <svg 
                 width={circleSize} height={circleSize} 
                 className="absolute inset-0 -rotate-90 pointer-events-none"
               >
-                <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth={strokeWidth} fill="transparent" className="text-gray-100 dark:text-white/10" />
-                <circle cx={center} cy={center} r={radius} stroke="#ff6600" strokeWidth={strokeWidth} fill="transparent" strokeDasharray={circumference} strokeDashoffset={offset} />
+                <circle cx={center} cy={center} r={radius} stroke="#dbdbdb" strokeWidth={strokeWidth} fill="transparent" className="dark:stroke-white/10" />
+                <circle cx={center} cy={center} r={radius} stroke="#ff6600" strokeWidth={strokeWidth} fill="transparent" strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="butt" />
               </svg>
             </div>
-            {/* Badge de Destaque da BBC */}
-            <div className="absolute bottom-2 right-2 w-10 h-10 bg-black rounded-full flex items-center justify-center border border-white/20">
-              <span className="text-white text-xl font-normal tracking-tighter italic">P</span>
+            <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white dark:border-black shadow-lg">
+              <span className="text-white text-2xl font-bold">1</span>
             </div>
           </div>
 
-          {/* Conteúdo Principal (Peso máximo 500) */}
+          {/* RIGHT SIDE: TEXT AND PLAY BUTTON */}
           <div className="flex-grow pt-4 text-center md:text-left">
-            <div className="text-[10px] font-normal text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-[0.4em]">
-              <span className="text-[#ff6600]">Ao Vivo</span> — <span>{currentProgram.startTime} - {currentProgram.endTime}</span>
+            <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
+              <span>{formatTimeBR(currentProgram.startTime)} - {formatTimeBR(currentProgram.endTime)}</span>
             </div>
             
-            <h2 className="text-5xl md:text-7xl font-medium text-gray-900 dark:text-white tracking-tighter mb-4 leading-none hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
-              {currentProgram.title}
-              <ChevronRight className="w-8 h-8 ml-2 text-[#ff6600] opacity-50" />
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
+              {currentProgram.title} com {currentProgram.host}
+              <ChevronRight className="w-6 h-6 ml-1 text-[#ff6600]" />
             </h2>
             
-            <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-normal mb-10 leading-relaxed max-w-2xl tracking-tight">
-              Apresentado por {currentProgram.host}. {currentProgram.description?.split('.')[0]}.
+            <p className="text-lg text-gray-600 dark:text-gray-400 font-normal mb-6">
+              {currentProgram.description}
             </p>
 
-            {/* Botão de Play Laranja (BBC Style) */}
-            <button onClick={onListenClick} className="bg-[#ff6600] text-white px-14 py-5 flex items-center justify-center space-x-4 hover:bg-black transition-all active:scale-95 mx-auto md:mx-0 rounded-sm">
+            <button 
+              onClick={onListenClick}
+              className="bg-[#ff6600] text-white px-10 py-3.5 flex items-center justify-center space-x-3 hover:bg-[#e65c00] transition-all active:scale-95 mx-auto md:mx-0 rounded-sm shadow-md"
+            >
               {isPlaying ? <Pause className="fill-current w-5 h-5" /> : <Play className="fill-current w-5 h-5" />}
-              <span className="text-lg font-medium tracking-tight uppercase">
+              <span className="text-lg font-bold tracking-tight">
                 {isPlaying ? 'Pausar' : 'Ouvir Agora'}
               </span>
             </button>
           </div>
         </div>
 
-        {/* Seção Próximos Programas (Design Limpo) */}
         {showDetails && (
-          <div className="mt-24 pt-10 border-t border-gray-100 dark:border-white/5 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h3 className="text-[10px] font-normal text-gray-400 uppercase tracking-[0.5em] mb-12">A Seguir</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12">
-              {upNextPrograms.map((prog) => (
-                <div key={prog.id} className="flex items-start space-x-6 group cursor-pointer" onClick={() => onNavigateToProgram(prog)}>
-                  <div className="w-24 h-24 flex-shrink-0 bg-gray-100 dark:bg-white/5 overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-500">
-                    <img src={prog.image} alt={prog.title} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex flex-col">
-                    <div className="text-[9px] font-normal mb-2 uppercase tracking-widest text-gray-400">
-                      <span className="text-[#ff6600]">Próximo</span> • {prog.startTime}
+          <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+            {/* UP NEXT SECTION */}
+            <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {upNextPrograms.map((prog) => (
+                  <div 
+                    key={prog.id} 
+                    className="flex items-start space-x-5 group cursor-pointer"
+                    onClick={() => onNavigateToProgram(prog)}
+                  >
+                    <div className="w-24 h-24 flex-shrink-0 bg-gray-100 overflow-hidden">
+                      <img 
+                        src={prog.image} 
+                        alt={prog.title} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      />
                     </div>
-                    <h4 className="text-2xl font-normal text-gray-900 dark:text-white tracking-tight group-hover:text-[#ff6600] transition-colors leading-tight">
-                      {prog.title}
-                    </h4>
+                    <div className="flex flex-col">
+                      <div className="text-[11px] font-normal mb-1">
+                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">PRÓXIMOS</span>
+                        <span className="text-gray-400 font-normal">{formatTimeBR(prog.startTime)} - {formatTimeBR(prog.endTime)}</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-[#ff6600] transition-colors">
+                        {prog.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-snug">
+                        {prog.description}
+                      </p>
+                    </div>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            {/* NEW MUSIC ALERT SECTION */}
+            <div className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50" onClick={() => navigate('/new-releases')}>
+              <div className="flex items-center space-x-6 mb-6 md:mb-0">
+                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center relative">
+                  <Zap className="w-6 h-6 text-[#ff6600] fill-current animate-pulse" />
+                  <div className="absolute inset-0 rounded-full border-2 border-[#ff6600] scale-110 animate-ping opacity-20"></div>
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">Novos Lançamentos</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">Os melhores louvores chegando agora</p>
+                </div>
+              </div>
+              <button 
+                className="flex items-center space-x-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-black dark:text-white group-hover:text-[#ff6600] transition-colors"
+              >
+                <span>Explorar</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+              </button>
             </div>
           </div>
         )}
 
-        {/* Rodapé do Hero */}
-        <div className="mt-16 pt-6 flex flex-col md:flex-row justify-between items-center border-t border-gray-100 dark:border-white/5 gap-4">
-          <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em] font-normal">
-            Produced by Praise FM Brasil
-          </p>
-          <button onClick={() => setShowDetails(!showDetails)} className="flex items-center text-[10px] font-medium text-gray-400 hover:text-[#ff6600] transition-colors uppercase tracking-[0.3em]">
-            {showDetails ? <>Show less <ChevronUp className="w-3 h-3 ml-2" /></> : <>Show more <ChevronDown className="w-3 h-3 ml-2" /></>}
-          </button>
+        {/* SECTION FOOTER */}
+        <div className="mt-12 pt-6">
+           {showDetails && (
+             <>
+               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">
+                 {currentProgram.description.split('.')[0]}.
+               </p>
+               <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-medium tracking-widest mb-4">
+                 Produzido por PRAISE FM BRASIL.
+               </p>
+             </>
+           )}
+           <div className="flex flex-col space-y-3">
+             {showDetails && (
+               <button 
+                 onClick={() => onNavigateToProgram(currentProgram)}
+                 className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit group"
+               >
+                 Site do Programa <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
+               </button>
+             )}
+             <button 
+               onClick={() => setShowDetails(!showDetails)}
+               className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
+             >
+               {showDetails ? <>Mostrar menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></> : <>Mostrar mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" /></>}
+             </button>
+           </div>
         </div>
       </div>
     </section>
   );
 };
+
+const ExternalLinkIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+    <polyline points="15 3 21 3 21 9"></polyline>
+    <line x1="10" y1="14" x2="21" y2="3"></line>
+  </svg>
+);
+
+const ChevronUpIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="18 15 12 9 6 15"></polyline>
+  </svg>
+);
+
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+);
 
 export default Hero;
