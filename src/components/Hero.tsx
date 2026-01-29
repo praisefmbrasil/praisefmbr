@@ -1,5 +1,5 @@
 // src/components/Hero.tsx
-import React, { useMemo, type FC } from 'react';
+import { useMemo, type FC } from 'react';
 import { SCHEDULES } from '../constants';
 import type { Program } from '../types';
 

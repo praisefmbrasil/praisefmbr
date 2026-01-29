@@ -1,5 +1,5 @@
 // src/components/ScheduleList.tsx
-import React, { useMemo, useState, useEffect, useRef, type FC } from 'react';
+import { useMemo, useState, useEffect, useRef, type FC } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { SCHEDULES } from '../constants';
 import type { Program } from '../types';
