@@ -1,32 +1,33 @@
-// Tipos para Programas de Rádio
+// src/types.ts
+
+// Usuário autenticado
+export interface User {
+  id: string;
+  email: string | null;
+  full_name?: string | null;
+}
+
+// Item que pode ser favorito
+export interface FavoriteItem {
+  id: string;
+  type: "program" | "track" | "devotional" | "artist";
+  title: string;
+  subtitle?: string;
+  image?: string;
+}
+
+// Item no banco de dados (com user_id)
+export interface FavoriteDB extends FavoriteItem {
+  user_id: string;
+}
+
+// Programa da grade
 export interface Program {
   id: string;
   title: string;
   host: string;
-  startTime: string;
-  endTime: string;
   description?: string;
-  image?: string;
-}
-
-// Tipos para Podcasts
-export interface Podcast {
-  id: string;
-  title: string;
-  category: string;
-  duration: string;
-  author: string;
-  image?: string;
-}
-
-// Tipos para Favoritos
-export type FavoriteItemType = 'program' | 'track' | 'devotional' | 'artist';
-
-export interface FavoriteItem {
-  id: string;
-  title: string;
-  subtitle?: string;
-  host?: string;
-  image?: string;
-  type: FavoriteItemType;
+  image: string;
+  startTime: string; // "HH:MM"
+  endTime: string;   // "HH:MM"
 }

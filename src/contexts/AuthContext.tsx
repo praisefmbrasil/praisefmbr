@@ -1,34 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import { supabase } from "../lib/supabaseClient";
-import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
-
-export interface User {
-  id: string;
-  email: string | null;
-  full_name?: string | null;
-}
-
-export interface FavoriteItem {
-  id: string;
-  type: "program" | "track" | "devotional" | "artist";
-  title: string;
-  subtitle?: string;
-  image?: string;
-}
-
-// ✅ Tipo específico para operações de banco
-interface FavoriteDB extends FavoriteItem {
-  user_id: string;
-}
-
-// ✅ Função auxiliar para criar objetos compatíveis com o banco
-const createFavoriteDB = (
-  item: FavoriteItem, 
-  userId: string
-): FavoriteDB => ({
-  ...item,
-  user_id: userId
-});
+import type { Session, AuthChangeEvent } from "@supabase/supabase-js";
+import type { FavoriteItem, FavoriteDB, User } from "../types";
 
 export interface AuthContextType {
   user: User | null;
@@ -41,8 +15,12 @@ export interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
-
 export const useAuth = () => useContext(AuthContext);
+
+const createFavoriteDB = (item: FavoriteItem, userId: string): FavoriteDB => ({
+  ...item,
+  user_id: userId,
+});
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -56,10 +34,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
         if (session?.user) {
-          const userData: User = { 
-            id: session.user.id, 
-            email: session.user.email ?? null
-          };
+          const userData: User = { id: session.user.id, email: session.user.email ?? null };
           setUser(userData);
           fetchFavorites(session.user.id);
         } else {
@@ -69,20 +44,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
 
-    return () => {
-      listener?.subscription.unsubscribe();
-    };
+    return () => listener?.subscription.unsubscribe();
   }, []);
 
   const fetchFavorites = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from<FavoriteDB, unknown>("favorites")
-        .select("*")
-        .eq("user_id", userId);
-
+      // ✅ Supabase agora exige dois generics: <Table, SelectType>
+      const { data, error } = await supabase.from<FavoriteDB, FavoriteDB>("favorites").select("*").eq("user_id", userId);
       if (error) throw error;
-      
       const cleanedFavorites: FavoriteItem[] = (data || []).map(({ user_id, ...item }) => item);
       setFavorites(cleanedFavorites);
     } catch (err) {
@@ -91,35 +60,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const isFavorite = (item: FavoriteItem): boolean => {
-    return favorites.some(f => f.id === item.id);
-  };
+  const isFavorite = (item: FavoriteItem) => favorites.some(f => f.id === item.id);
 
-  const toggleFavorite = async (item: FavoriteItem): Promise<void> => {
+  const toggleFavorite = async (item: FavoriteItem) => {
     if (!user) return;
-    
-    const wasFavorite = isFavorite(item);
-    const optimisticUpdate = wasFavorite 
-      ? favorites.filter(f => f.id !== item.id) 
-      : [...favorites, item];
 
+    const wasFavorite = isFavorite(item);
+    const optimisticUpdate = wasFavorite ? favorites.filter(f => f.id !== item.id) : [...favorites, item];
     setFavorites(optimisticUpdate);
 
     try {
       if (wasFavorite) {
-        const { error } = await supabase
-          .from<FavoriteDB, unknown>("favorites")
+        const { error } = await supabase.from<FavoriteDB, FavoriteDB>("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("id", item.id);
-        
         if (error) throw error;
       } else {
-        // ✅ CORREÇÃO: Uso da função auxiliar em vez de 'as FavoriteDB'
-        const { error } = await supabase
-          .from<FavoriteDB, unknown>("favorites")
+        const { error } = await supabase.from<FavoriteDB, FavoriteDB>("favorites")
           .insert([createFavoriteDB(item, user.id)]);
-        
         if (error) throw error;
       }
     } catch (err) {
@@ -129,41 +88,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signUp = async (
-    email: string, 
-    password: string
-  ): Promise<{ user: User | null; error: string | null }> => {
+  const signUp = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
-    
     if (error) return { user: null, error: error.message };
-    
-    return { 
-      user: data.user ? { 
-        id: data.user.id, 
-        email: data.user.email ?? null
-      } : null, 
-      error: null 
+    return {
+      user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null,
+      error: null,
     };
   };
 
-  const signIn = async (
-    email: string, 
-    password: string
-  ): Promise<{ user: User | null; error: string | null }> => {
+  const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
     if (error) return { user: null, error: error.message };
-    
-    return { 
-      user: data.user ? { 
-        id: data.user.id, 
-        email: data.user.email ?? null
-      } : null, 
-      error: null 
+    return {
+      user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null,
+      error: null,
     };
   };
 
-  const signOut = async (): Promise<void> => {
+  const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setFavorites([]);
