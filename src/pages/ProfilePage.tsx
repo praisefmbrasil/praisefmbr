@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { User, Mail, Camera, Save, Loader2, ArrowLeft, ShieldCheck, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,7 +29,7 @@ const ProfilePage: React.FC = () => {
   const fetchProfile = async () => {
     setFetching(true);
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('username, avatar_url')
         .eq('id', user?.id)
@@ -69,7 +70,7 @@ const ProfilePage: React.FC = () => {
 
       if (uploadError) throw uploadError;
 
-      // 2. ✅ CORREÇÃO: Obter URL pública de forma robusta
+      // 2. Obter URL Pública
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
