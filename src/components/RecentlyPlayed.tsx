@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Music } from 'lucide-react';
+import { Music, Clock } from 'lucide-react';
 
 interface Track {
   artist: string;
@@ -20,7 +20,6 @@ const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ tracks }) => {
     .filter(track => track.isMusic !== false)
     .slice(0, 4);
 
-  // Função utilitária local para aplicar Sentence case
   const toSentenceCase = (text: string) => {
     if (!text) return '';
     const trimmed = text.trim();
@@ -42,12 +41,13 @@ const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ tracks }) => {
             if (itunesResponse.ok) {
               const data = await itunesResponse.json();
               if (data.results && data.results.length > 0) {
-                newArtworks[key] = data.results[0].artworkUrl100;
+                // Trocamos artworkUrl100 por uma versão maior (200x200) para melhor qualidade
+                newArtworks[key] = data.results[0].artworkUrl100.replace('100x100', '200x200');
                 changed = true;
               }
             }
           } catch (error) {
-            newArtworks[key] = `https://picsum.photos/seed/${encodeURIComponent(key)}/100/100`;
+            newArtworks[key] = `https://picsum.photos/seed/${encodeURIComponent(key)}/200/200`;
             changed = true;
           }
         }
@@ -59,46 +59,73 @@ const RecentlyPlayed: React.FC<RecentlyPlayedProps> = ({ tracks }) => {
   }, [tracks]);
 
   return (
-    <section className="bg-white dark:bg-[#000] py-12 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-medium text-gray-900 dark:text-white mb-6 tracking-tight uppercase">Tocadas Recentemente</h2>
+    <section className="bg-white dark:bg-[#000] py-16 transition-colors duration-300 antialiased">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-medium text-gray-900 dark:text-white tracking-tighter uppercase">
+            Tocadas Recentemente
+          </h2>
+          <div className="h-[1px] flex-grow mx-6 bg-gray-100 dark:bg-white/5 hidden md:block"></div>
+          <button className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#ff6600] hover:text-black dark:hover:text-white transition-colors">
+            Ver Histórico Completo
+          </button>
+        </div>
         
         <div className="w-full">
-          <div className="grid grid-cols-12 gap-4 pb-2 border-b border-gray-200 dark:border-white/10 text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-widest">
-            <div className="col-span-8 md:col-span-6">Música</div>
-            <div className="col-span-4 md:col-span-6">Artista</div>
+          {/* Header da Tabela */}
+          <div className="grid grid-cols-12 gap-4 pb-3 border-b border-gray-100 dark:border-white/10 text-[10px] font-medium text-gray-400 uppercase tracking-[0.2em]">
+            <div className="col-span-8 md:col-span-7">Título / Álbum</div>
+            <div className="col-span-4 md:col-span-5 text-right md:text-left">Artista</div>
           </div>
 
           <div className="flex flex-col">
             {displayedTracks.length === 0 ? (
-              <div className="py-12 text-center text-gray-400 text-sm border-b border-gray-100 dark:border-white/5 uppercase tracking-tight">
-                A rádio está em modo de música contínua.
+              <div className="py-20 text-center">
+                <Music className="w-8 h-8 text-gray-200 dark:text-white/10 mx-auto mb-4" />
+                <p className="text-gray-400 text-[11px] uppercase tracking-widest font-light">
+                  Carregando trilha sonora...
+                </p>
               </div>
             ) : (
               displayedTracks.map((track, idx) => {
                 const key = `${track.artist}-${track.title}`;
-                const artworkUrl = artworks[key] || track.artwork || `https://picsum.photos/seed/${encodeURIComponent(key)}/100/100`;
+                const artworkUrl = artworks[key] || track.artwork || `https://picsum.photos/seed/${encodeURIComponent(key)}/200/200`;
                 
                 return (
-                  <div key={idx} className="grid grid-cols-12 gap-4 py-4 border-b border-gray-100 dark:border-white/5 items-center hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
-                    <div className="col-span-8 md:col-span-6 flex items-center space-x-4">
-                      <span className="text-[13px] text-gray-400 w-5 font-normal">{idx + 1}.</span>
-                      <div className="w-10 h-10 md:w-11 md:h-11 bg-gray-200 dark:bg-gray-800 flex-shrink-0">
+                  <div key={idx} className="grid grid-cols-12 gap-4 py-5 border-b border-gray-50 dark:border-white/5 items-center group">
+                    {/* Coluna Título */}
+                    <div className="col-span-8 md:col-span-7 flex items-center space-x-6">
+                      <span className="hidden md:block text-[11px] text-gray-300 dark:text-gray-600 font-medium w-4">
+                        {(idx + 1).toString().padStart(2, '0')}
+                      </span>
+                      <div className="relative w-12 h-12 md:w-14 md:h-14 bg-gray-100 dark:bg-white/5 flex-shrink-0 overflow-hidden rounded-sm">
                         <img 
                           src={artworkUrl} 
                           alt="" 
-                          className="w-full h-full object-cover transition-all" 
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                         />
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
                       </div>
-                      <span className="text-sm md:text-[15px] font-normal text-gray-900 dark:text-gray-100 truncate pr-4">
-                        {toSentenceCase(track.title)}
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[15px] md:text-lg font-medium text-gray-900 dark:text-gray-100 truncate tracking-tight">
+                          {toSentenceCase(track.title)}
+                        </span>
+                        <div className="flex items-center space-x-2 text-[10px] text-gray-400 uppercase tracking-widest md:hidden">
+                           <span>{toSentenceCase(track.artist)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Coluna Artista (Desktop) */}
+                    <div className="hidden md:block md:col-span-5">
+                      <span className="text-[15px] text-gray-500 dark:text-gray-400 font-light tracking-wide">
+                        {toSentenceCase(track.artist)}
                       </span>
                     </div>
 
-                    <div className="col-span-4 md:col-span-6">
-                      <span className="text-sm md:text-[15px] text-gray-500 dark:text-gray-400 truncate block font-normal">
-                        {toSentenceCase(track.artist)}
-                      </span>
+                    {/* Coluna Tempo (Opcional - Estilo BBC) */}
+                    <div className="col-span-4 md:hidden flex justify-end">
+                       <Clock className="w-3.5 h-3.5 text-gray-300 dark:text-gray-700" />
                     </div>
                   </div>
                 );
