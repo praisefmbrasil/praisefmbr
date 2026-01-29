@@ -1,9 +1,7 @@
-
-import React from 'react';
-import { FileText, ArrowLeft, ChevronRight, Cookie, Settings, Shield } from 'lucide-react';
+import { ArrowLeft, Cookie, Settings, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const CookiesPolicyPage: React.FC = () => {
+const CookiesPolicyPage = () => {
   const navigate = useNavigate();
 
   return (
