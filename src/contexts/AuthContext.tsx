@@ -1,9 +1,39 @@
+// src/contexts/AuthContext.tsx
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { supabase } from "../lib/supabaseClient";
-import type { Session, AuthChangeEvent } from "@supabase/supabase-js";
-import type { FavoriteItem, User } from "../types";
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
 
-// Contexto
+// =====================
+// TIPOS EXPORTADOS
+// =====================
+export interface User {
+  id: string;
+  email: string | null;
+  full_name?: string | null;
+}
+
+export interface FavoriteItem {
+  id: string;
+  type: "program" | "track" | "devotional" | "artist";
+  title: string;
+  subtitle?: string;
+  image?: string;
+}
+
+// Tipo interno para operações no banco
+interface FavoriteDB extends FavoriteItem {
+  user_id: string;
+}
+
+// Helper para criar objeto compatível com o banco
+const createFavoriteDB = (item: FavoriteItem, userId: string): FavoriteDB => ({
+  ...item,
+  user_id: userId,
+});
+
+// =====================
+// CONTEXTO
+// =====================
 export interface AuthContextType {
   user: User | null;
   favorites: FavoriteItem[];
@@ -17,26 +47,27 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 export const useAuth = () => useContext(AuthContext);
 
-// Função auxiliar para criar o registro de favorito
-const createFavoriteRecord = (item: FavoriteItem, userId: string) => ({
-  ...item,
-  user_id: userId,
-});
-
+// =====================
+// PROVIDER
+// =====================
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
 
-  // Observa alterações de auth
+  // Monitora mudanças de login/logout
   useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event: AuthChangeEvent, session: Session | null) => {
         if (session?.user) {
-          const userData: User = { id: session.user.id, email: session.user.email ?? null };
+          const userData: User = {
+            id: session.user.id,
+            email: session.user.email ?? null,
+            full_name: session.user.user_metadata?.full_name ?? null
+          };
           setUser(userData);
           fetchFavorites(session.user.id);
         } else {
@@ -45,51 +76,59 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       }
     );
-    return () => listener?.subscription.unsubscribe();
+
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, []);
 
+  // Busca favoritos do usuário
   const fetchFavorites = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from("favorites") // tipo minimal
+        .from<FavoriteDB>("favorites")
         .select("*")
         .eq("user_id", userId);
 
       if (error) throw error;
 
-      // Filtra user_id
-      const cleaned: FavoriteItem[] = (data || []).map((d: any) => {
-        const { user_id, ...rest } = d;
-        return rest;
-      });
-      setFavorites(cleaned);
+      const cleanedFavorites: FavoriteItem[] = (data || []).map(({ user_id, ...item }) => item);
+      setFavorites(cleanedFavorites);
     } catch (err) {
       console.error("Erro ao buscar favoritos:", err);
       setFavorites([]);
     }
   };
 
-  const isFavorite = (item: FavoriteItem) => favorites.some(f => f.id === item.id);
+  // Checa se o item já está nos favoritos
+  const isFavorite = (item: FavoriteItem): boolean =>
+    favorites.some(f => f.id === item.id);
 
+  // Alterna favorito
   const toggleFavorite = async (item: FavoriteItem) => {
     if (!user) return;
 
     const wasFavorite = isFavorite(item);
-    const optimistic = wasFavorite ? favorites.filter(f => f.id !== item.id) : [...favorites, item];
-    setFavorites(optimistic);
+    const optimisticUpdate = wasFavorite
+      ? favorites.filter(f => f.id !== item.id)
+      : [...favorites, item];
+
+    setFavorites(optimisticUpdate);
 
     try {
       if (wasFavorite) {
         const { error } = await supabase
-          .from("favorites")
+          .from<FavoriteDB>("favorites")
           .delete()
           .eq("user_id", user.id)
           .eq("id", item.id);
+
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from("favorites")
-          .insert([createFavoriteRecord(item, user.id)]);
+          .from<FavoriteDB>("favorites")
+          .insert([createFavoriteDB(item, user.id)]);
+
         if (error) throw error;
       }
     } catch (err) {
@@ -99,18 +138,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Signup
   const signUp = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return { user: null, error: error.message };
-    return { user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null, error: null };
+    return { 
+      user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null,
+      error: null
+    };
   };
 
+  // Signin
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { user: null, error: error.message };
-    return { user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null, error: null };
+    return {
+      user: data.user ? { id: data.user.id, email: data.user.email ?? null } : null,
+      error: null
+    };
   };
 
+  // Signout
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -119,7 +167,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, favorites, isFavorite, toggleFavorite, signUp, signIn, signOut }}
+      value={{
+        user,
+        favorites,
+        isFavorite,
+        toggleFavorite,
+        signUp,
+        signIn,
+        signOut
+      }}
     >
       {children}
     </AuthContext.Provider>
