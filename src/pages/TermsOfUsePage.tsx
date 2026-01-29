@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { FileText, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const TermsOfUsePage: React.FC = () => {
