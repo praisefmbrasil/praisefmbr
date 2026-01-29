@@ -4,114 +4,114 @@ import { useNavigate } from 'react-router-dom';
 
 interface Programa {
   id: number;
-  title: string;
-  host: string;
-  startTime: string;
-  endTime: string;
-  image: string;
-}
+    title: string;
+      host: string;
+        startTime: string;
+          endTime: string;
+            image: string;
+            }
 
-// Programação oficial baseada nos arquivos enviados [cite: 1, 2, 4]
-const PROGRAMACAO_SEMANA: Programa[] = [
-  { id: 1, title: "MADRUGADA COM CRISTO", host: "Samuel Andrade", startTime: "00:00", endTime: "06:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp" },
-  { id: 2, title: "PRAISE FM WORSHIP BRASIL", host: "Praise FM Brasil", startTime: "06:00", endTime: "07:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp" },
-  { id: 3, title: "MANHÃ COM CRISTO", host: "Lucas Martins", startTime: "07:00", endTime: "12:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp" },
-  { id: 4, title: "PRAISE FM WORSHIP BRASIL", host: "Praise FM Brasil", startTime: "12:00", endTime: "13:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp" },
-  { id: 5, title: "TARDE GOSPEL", host: "Rafael Costa", startTime: "13:00", endTime: "16:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp" },
-  { id: 6, title: "PRAISE FM NON STOP", host: "Praise FM Brasil", startTime: "16:00", endTime: "17:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp" },
-  { id: 7, title: "PRAISE FM NOVA GERAÇÃO", host: "Ana Paula", startTime: "17:00", endTime: "18:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp" },
-  { id: 8, title: "DE CARONA COM A PRAISE FM", host: "Bruno Almeida", startTime: "18:00", endTime: "20:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp" },
-  { id: 9, title: "PRAISE FM BRASIL CLÁSSICOS", host: "Rodrigo Veras", startTime: "21:00", endTime: "22:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp" },
-  { id: 10, title: "PRAISE FM WORSHIP BRASIL", host: "Praise FM Brasil", startTime: "22:00", endTime: "00:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp" }
-];
+            // Programação oficial baseada nos arquivos enviados [cite: 1, 2, 4]
+            const PROGRAMACAO_SEMANA: Programa[] = [
+              { id: 1, title: "MADRUGADA COM CRISTO", host: "Samuel Andrade", startTime: "00:00", endTime: "06:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp" },
+                { id: 2, title: "PRAISE FM WORSHIP BRASIL", host: "Praise FM Brasil", startTime: "06:00", endTime: "07:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp" },
+                  { id: 3, title: "MANHÃ COM CRISTO", host: "Lucas Martins", startTime: "07:00", endTime: "12:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp" },
+                    { id: 4, title: "PRAISE FM WORSHIP BRASIL", host: "Praise FM Brasil", startTime: "12:00", endTime: "13:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp" },
+                      { id: 5, title: "TARDE GOSPEL", host: "Rafael Costa", startTime: "13:00", endTime: "16:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp" },
+                        { id: 6, title: "PRAISE FM NON STOP", host: "Praise FM Brasil", startTime: "16:00", endTime: "17:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp" },
+                          { id: 7, title: "PRAISE FM NOVA GERAÇÃO", host: "Ana Paula", startTime: "17:00", endTime: "18:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp" },
+                            { id: 8, title: "DE CARONA COM A PRAISE FM", host: "Bruno Almeida", startTime: "18:00", endTime: "20:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp" },
+                              { id: 9, title: "PRAISE FM BRASIL CLÁSSICOS", host: "Rodrigo Veras", startTime: "21:00", endTime: "22:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp" },
+                                { id: 10, title: "PRAISE FM WORSHIP BRASIL", host: "Praise FM Brasil", startTime: "22:00", endTime: "00:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp" }
+                                ];
 
-const PROGRAMACAO_DOMINGO: Programa[] = [
-  { id: 11, title: "DOMINGO COM CRISTO", host: "Felipe Santos", startTime: "07:00", endTime: "12:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp" },
-  { id: 12, title: "PREGAÇÃO DA PALAVRA", host: "Ministério", startTime: "22:00", endTime: "23:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp" }
-];
+                                const PROGRAMACAO_DOMINGO: Programa[] = [
+                                  { id: 11, title: "DOMINGO COM CRISTO", host: "Felipe Santos", startTime: "07:00", endTime: "12:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp" },
+                                    { id: 12, title: "PREGAÇÃO DA PALAVRA", host: "Ministério", startTime: "22:00", endTime: "23:00", image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp" }
+                                    ];
 
-const getBrazilTime = () => {
-  const brDate = new Date(new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
-  return { day: brDate.getDay(), totalMinutes: brDate.getHours() * 60 + brDate.getMinutes() };
-};
+                                    const getBrazilTime = () => {
+                                      const brDate = new Date(new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+                                        return { day: brDate.getDay(), totalMinutes: brDate.getHours() * 60 + brDate.getMinutes() };
+                                        };
 
-const NavItem: React.FC<{ icon: React.ReactElement<LucideProps>; label: string; active?: boolean; onClick?: () => void }> = ({ icon, label, active, onClick }) => (
-  <button onClick={onClick} className={`flex flex-col items-center space-y-1 ${active ? 'text-[#ff6600]' : 'text-gray-400'}`}>
-    {React.cloneElement(icon, { size: 22 })}
-    <span className="text-[10px] font-bold uppercase">{label}</span>
-  </button>
-);
+                                        const NavItem: React.FC<{ icon: React.ReactElement<LucideProps>; label: string; active?: boolean; onClick?: () => void }> = ({ icon, label, active, onClick }) => (
+                                          <button onClick={onClick} className={`flex flex-col items-center space-y-1 ${active ? 'text-[#ff6600]' : 'text-gray-400'}`}>
+                                              {React.cloneElement(icon, { size: 22 })}
+                                                  <span className="text-[10px] font-bold uppercase">{label}</span>
+                                                    </button>
+                                                    );
 
-const AppHomePage: React.FC = () => {
-  const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [time, setTime] = useState(getBrazilTime());
+                                                    const AppHomePage: React.FC = () => {
+                                                      const navigate = useNavigate();
+                                                        const [isPlaying, setIsPlaying] = useState(false);
+                                                          const [time, setTime] = useState(getBrazilTime());
 
-  useEffect(() => {
-    const timer = setInterval(() => setTime(getBrazilTime()), 30000);
-    return () => clearInterval(timer);
-  }, []);
+                                                            useEffect(() => {
+                                                                const timer = setInterval(() => setTime(getBrazilTime()), 30000);
+                                                                    return () => clearInterval(timer);
+                                                                      }, []);
 
-  const currentSchedule = time.day === 0 ? [...PROGRAMACAO_DOMINGO, ...PROGRAMACAO_SEMANA] : PROGRAMACAO_SEMANA;
-  const currentProgram = useMemo(() => {
-    return currentSchedule.find(p => {
-      const [sH, sM] = p.startTime.split(':').map(Number);
-      const [eH, eM] = p.endTime.split(':').map(Number);
-      const start = sH * 60 + sM;
-      let end = eH * 60 + eM;
-      if (end === 0 || end <= start) end = 1440;
-      return time.totalMinutes >= start && time.totalMinutes < end;
-    });
-  }, [time, currentSchedule]);
+                                                                        const currentSchedule = time.day === 0 ? [...PROGRAMACAO_DOMINGO, ...PROGRAMACAO_SEMANA] : PROGRAMACAO_SEMANA;
+                                                                          const currentProgram = useMemo(() => {
+                                                                              return currentSchedule.find(p => {
+                                                                                    const [sH, sM] = p.startTime.split(':').map(Number);
+                                                                                          const [eH, eM] = p.endTime.split(':').map(Number);
+                                                                                                const start = sH * 60 + sM;
+                                                                                                      let end = eH * 60 + eM;
+                                                                                                            if (end === 0 || end <= start) end = 1440;
+                                                                                                                  return time.totalMinutes >= start && time.totalMinutes < end;
+                                                                                                                      });
+                                                                                                                        }, [time, currentSchedule]);
 
-  return (
-    <div className="min-h-screen bg-black text-white pb-32">
-      <header className="p-6 flex justify-between items-center border-b border-white/10">
-        <img src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206553/LOGO_HEADER_uygoqx.webp" alt="Logo" className="h-8" />
-        <button onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-[#ff6600] flex items-center justify-center"><User size={20}/></button>
-      </header>
+                                                                                                                          return (
+                                                                                                                              <div className="min-h-screen bg-black text-white pb-32">
+                                                                                                                                    <header className="p-6 flex justify-between items-center border-b border-white/10">
+                                                                                                                                            <img src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206553/LOGO_HEADER_uygoqx.webp" alt="Logo" className="h-8" />
+                                                                                                                                                    <button onClick={() => navigate('/profile')} className="w-10 h-10 rounded-full bg-[#ff6600] flex items-center justify-center"><User size={20}/></button>
+                                                                                                                                                          </header>
 
-      <main className="p-6 space-y-8">
-        <section className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
-          {currentSchedule.map(prog => (
-            <div key={prog.id} className="flex-shrink-0 w-32 text-center">
-              <div className={`w-32 h-32 rounded-full border-2 ${currentProgram?.id === prog.id ? 'border-[#ff6600]' : 'border-transparent'} overflow-hidden`}>
-                <img src={prog.image} className="w-full h-full object-cover" alt={prog.title} />
-              </div>
-              <p className="text-[10px] mt-2 font-bold truncate uppercase">{prog.title}</p>
-            </div>
-          ))}
-        </section>
+                                                                                                                                                                <main className="p-6 space-y-8">
+                                                                                                                                                                        <section className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide">
+                                                                                                                                                                                  {currentSchedule.map(prog => (
+                                                                                                                                                                                              <div key={prog.id} className="flex-shrink-0 w-32 text-center">
+                                                                                                                                                                                                            <div className={`w-32 h-32 rounded-full border-2 ${currentProgram?.id === prog.id ? 'border-[#ff6600]' : 'border-transparent'} overflow-hidden`}>
+                                                                                                                                                                                                                            <img src={prog.image} className="w-full h-full object-cover" alt={prog.title} />
+                                                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                                                                        <p className="text-[10px] mt-2 font-bold truncate uppercase">{prog.title}</p>
+                                                                                                                                                                                                                                                                    </div>
+                                                                                                                                                                                                                                                                              ))}
+                                                                                                                                                                                                                                                                                      </section>
 
-        <div className="text-center">
-          <h1 className="text-4xl font-black italic tracking-tighter">PRAISE FM BRASIL</h1>
-          <p className="text-[#ff6600] text-xs font-bold mt-2 animate-pulse uppercase">
-            {currentProgram ? `NO AR: ${currentProgram.title}` : 'SINTONIZE A ESPERANÇA'}
-          </p>
-        </div>
+                                                                                                                                                                                                                                                                                              <div className="text-center">
+                                                                                                                                                                                                                                                                                                        <h1 className="text-4xl font-black italic tracking-tighter">PRAISE FM BRASIL</h1>
+                                                                                                                                                                                                                                                                                                                  <p className="text-[#ff6600] text-xs font-bold mt-2 animate-pulse uppercase">
+                                                                                                                                                                                                                                                                                                                              {currentProgram ? `NO AR: ${currentProgram.title}` : 'SINTONIZE A ESPERANÇA'}
+                                                                                                                                                                                                                                                                                                                                        </p>
+                                                                                                                                                                                                                                                                                                                                                </div>
 
-        <div className="bg-white/5 p-6 rounded-3xl flex items-center justify-between">
-           <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-[#ff6600] rounded-full flex items-center justify-center"><Volume2 size={24}/></div>
-              <div>
-                <p className="text-sm font-bold truncate w-40">{currentProgram?.title || "Praise FM Brasil"}</p>
-                <p className="text-[10px] text-gray-400 uppercase">{currentProgram?.host || "Ao Vivo"}</p>
-              </div>
-           </div>
-           <button onClick={() => setIsPlaying(!isPlaying)} className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center">
-             {isPlaying ? <Pause fill="black"/> : <Play fill="black" className="ml-1"/>}
-           </button>
-        </div>
-      </main>
+                                                                                                                                                                                                                                                                                                                                                        <div className="bg-white/5 p-6 rounded-3xl flex items-center justify-between">
+                                                                                                                                                                                                                                                                                                                                                                   <div className="flex items-center space-x-4">
+                                                                                                                                                                                                                                                                                                                                                                                 <div className="w-12 h-12 bg-[#ff6600] rounded-full flex items-center justify-center"><Volume2 size={24}/></div>
+                                                                                                                                                                                                                                                                                                                                                                                               <div>
+                                                                                                                                                                                                                                                                                                                                                                                                               <p className="text-sm font-bold truncate w-40">{currentProgram?.title || "Praise FM Brasil"}</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                               <p className="text-[10px] text-gray-400 uppercase">{currentProgram?.host || "Ao Vivo"}</p>
+                                                                                                                                                                                                                                                                                                                                                                                                                                             </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                        </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                   <button onClick={() => setIsPlaying(!isPlaying)} className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                {isPlaying ? <Pause fill="black"/> : <Play fill="black" className="ml-1"/>}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           </button>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         </main>
 
-      <nav className="fixed bottom-0 w-full bg-black/90 backdrop-blur-lg border-t border-white/10 p-4 flex justify-around">
-        <NavItem icon={<Home/>} label="Início" active onClick={() => navigate('/app')}/>
-        <NavItem icon={<Music/>} label="Música" onClick={() => navigate('/music')}/>
-        <NavItem icon={<Calendar/>} label="Agenda" onClick={() => navigate('/schedule')}/>
-        <NavItem icon={<Search/>} label="Buscar"/>
-      </nav>
-    </div>
-  );
-};
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <nav className="fixed bottom-0 w-full bg-black/90 backdrop-blur-lg border-t border-white/10 p-4 flex justify-around">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <NavItem icon={<Home/>} label="Início" active onClick={() => navigate('/app')}/>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <NavItem icon={<Music/>} label="Música" onClick={() => navigate('/music')}/>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       <NavItem icon={<Calendar/>} label="Agenda" onClick={() => navigate('/schedule')}/>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               <NavItem icon={<Search/>} label="Buscar"/>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </nav>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         </div>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           );
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           };
 
-export default AppHomePage;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           export default AppHomePage;
