@@ -1,136 +1,64 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useArtists } from '../hooks/useArtists'; // ✅ Verifique se o arquivo existe
-import { useAuth } from '../contexts/AuthContext';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-
-interface Artist {
+// src/data/artists.ts
+export interface Artist {
   id: string;
   name: string;
   genre: string;
-  image?: string;
-  biography?: string;
+  image: string;
+  biography: string;
+  socialLinks?: {
+    instagram?: string;
+    youtube?: string;
+    spotify?: string;
+  };
 }
 
-const FeaturedArtistsPage: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { artists, loading, error } = useArtists();
-  const { isFavorite, toggleFavorite } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando artistas...</p>
-        </div>
-      </div>
-    );
+export const ARTISTS: Artist[] = [
+  {
+    id: "1",
+    name: "Fernandinho",
+    genre: "Worship Contemporâneo",
+    image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp",
+    biography: "Um dos maiores nomes da música gospel brasileira, Fernandinho é conhecido por suas canções de adoração que tocam milhões de corações pelo Brasil e mundo afora. Sua voz suave e letras profundamente espirituais fazem dele um dos artistas mais queridos da cena gospel.",
+    socialLinks: {
+      instagram: "fernandinhooficial",
+      youtube: "fernandinhooficial",
+      spotify: "fernandinho"
+    }
+  },
+  {
+    id: "2",
+    name: "Isaias Saad",
+    genre: "Adoração Profética",
+    image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp",
+    biography: "Ministro de louvor e compositor, Isaias Saad é reconhecido por suas canções proféticas e ministrações que levam os ouvintes a uma experiência profunda de comunhão com Deus. Suas músicas são marcadas por letras bíblicas e melodias envolventes.",
+    socialLinks: {
+      instagram: "isaiassaad",
+      youtube: "isaiassaadoficial",
+      spotify: "isaiassaad"
+    }
+  },
+  {
+    id: "3",
+    name: "Gabriela Rocha",
+    genre: "Pop Gospel",
+    image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp",
+    biography: "Com uma voz poderosa e carismática, Gabriela Rocha conquistou o Brasil e o mundo com suas canções de adoração contemporânea. Suas músicas combinam elementos do pop com letras profundamente espirituais, alcançando milhões de jovens em todo o planeta.",
+    socialLinks: {
+      instagram: "gabrielarocha",
+      youtube: "gabrielarochaoficial",
+      spotify: "gabrielarocha"
+    }
+  },
+  {
+    id: "4",
+    name: "Aline Barros",
+    genre: "Gospel Infantil / Adoração",
+    image: "https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp",
+    biography: "Referência na música gospel brasileira há mais de 30 anos, Aline Barros é conhecida por suas canções que edificam gerações. Com um ministério que alcança crianças, jovens e adultos, suas músicas são verdadeiros hinos de fé que marcaram a história da música cristã no Brasil.",
+    socialLinks: {
+      instagram: "alinebarros",
+      youtube: "alinebarrosoficial",
+      spotify: "alinebarros"
+    }
   }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-4xl mb-4">⚠️</div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Erro ao carregar artistas</h2>
-          <p className="text-gray-600">{error.message}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="mt-4 bg-blue-600 text-white px-4-2 rounded hover:bg-blue-700 transition"
-          >
-            Tentar novamente
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header 
-        onNavigate={navigate} 
-        currentPage={location.pathname} 
-      />
-      
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Artistas em Destaque
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Descubra os artistas cristãos que estão marcando presença na Praise FM Brasil
-          </p>
-        </div>
-
-        {artists.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">🎶</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Nenhum artista encontrado</h2>
-            <p className="text-gray-600 mb-6">Tente novamente mais tarde ou verifique sua conexão com a internet</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              Recarregar
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {artists.map((artist: Artist) => (
-              <div 
-                key={artist.id} 
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                onClick={() => navigate(`/artist/${artist.id}`)}
-              >
-                <div className="relative">
-                  <img
-                    src={artist.image || '/default-artist.jpg'}
-                    alt={artist.name}
-                    className="w-full h-64 object-cover"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite({
-                        id: artist.id,
-                        type: 'artist',
-                        title: artist.name,
-                        subtitle: artist.genre,
-                        image: artist.image
-                      });
-                    }}
-                    className={`absolute top-4 right-4 p-2 rounded-full ${
-                      isFavorite(artist.id)
-                        ? 'bg-yellow-400 text-white'
-                        : 'bg-white text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    {isFavorite(artist.id) ? '★' : '☆'}
-                  </button>
-                </div>
-                
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {artist.name}
-                  </h3>
-                  <p className="text-gray-600 mb-4">{artist.genre}</p>
-                  <p className="text-gray-500 text-sm">
-                    {artist.biography?.substring(0, 100)}
-                    {artist.biography && artist.biography.length > 100 ? '...' : ''}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-
-      <Footer />
-    </div>
-  );
-};
-
-export default FeaturedArtistsPage;
+];
