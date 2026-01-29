@@ -1,6 +1,5 @@
 import { Program } from './types';
 
-// Centralizamos os horários e dados aqui para evitar repetição no App.tsx
 export const programs: Program[] = [
   {
     id: 'morning-show',
@@ -29,16 +28,15 @@ export const programs: Program[] = [
     description: 'Um momento de reflexão profunda e adoração no seu horário de almoço.',
     image: 'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&q=80'
   }
-  // Adicione os outros programas seguindo este mesmo padrão de ID
 ];
 
-// O SCHEDULES usa os IDs acima para mapear a grade semanal
+// O SCHEDULES organiza a grade por dia da semana (0 = Domingo)
 export const SCHEDULES: Record<number, Program[]> = {
-  0: [programs[0], programs[1], programs[2]], // Domingo
-  1: [programs[0], programs[1], programs[2]], // Segunda
-  2: [programs[0], programs[1], programs[2]], // Terça
-  3: [programs[0], programs[1], programs[2]], // Quarta
-  4: [programs[0], programs[1], programs[2]], // Quinta
-  5: [programs[0], programs[1], programs[2]], // Sexta
-  6: [programs[0], programs[1], programs[2]], // Sábado
+  0: [programs[0], programs[1], programs[2]],
+  1: [programs[0], programs[1], programs[2]],
+  2: [programs[0], programs[1], programs[2]],
+  3: [programs[0], programs[1], programs[2]],
+  4: [programs[0], programs[1], programs[2]],
+  5: [programs[0], programs[1], programs[2]],
+  6: [programs[0], programs[1], programs[2]],
 };
