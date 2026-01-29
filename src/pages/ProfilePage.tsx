@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
@@ -29,7 +28,7 @@ const ProfilePage: React.FC = () => {
   const fetchProfile = async () => {
     setFetching(true);
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('username, avatar_url')
         .eq('id', user?.id)
@@ -70,7 +69,7 @@ const ProfilePage: React.FC = () => {
 
       if (uploadError) throw uploadError;
 
-      // 2. Obter URL Pública
+      // 2. ✅ CORREÇÃO: Obter URL pública de forma robusta
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
