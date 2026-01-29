@@ -1,46 +1,56 @@
-import React from 'react';
-import type { Program, FavoriteItem } from '../types';
-import { programs } from '../constants';
+// src/components/Hero.tsx
+import React, { useMemo, type FC } from 'react';
+import { SCHEDULES } from '../constants';
+import type { Program } from '../types';
 
 interface HeroProps {
-  favoriteItems: FavoriteItem[];
-  liveProgram?: Program;
+  onNavigateToProgram: (program: Program) => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ favoriteItems, liveProgram }) => {
+const getSaoPauloDate = (baseDate: Date = new Date()) =>
+  new Date(baseDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+
+const Hero: FC<HeroProps> = ({ onNavigateToProgram }) => {
+  const now = getSaoPauloDate();
+
+  const currentSchedule = useMemo(() => {
+    const dayIndex = now.getDay();
+    return SCHEDULES[dayIndex] || SCHEDULES[1];
+  }, [now]);
+
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+  const liveProgram = useMemo(() => {
+    return currentSchedule.find(prog => {
+      const [sH, sM] = prog.startTime.split(':').map(Number);
+      const [eH, eM] = prog.endTime.split(':').map(Number);
+      const start = sH * 60 + sM;
+      let end = eH * 60 + eM;
+      if (end === 0 || end <= start) end = 24 * 60;
+      return nowMinutes >= start && nowMinutes < end;
+    });
+  }, [currentSchedule, nowMinutes]);
+
+  if (!liveProgram) return null;
+
   return (
-    <section className="hero-section">
-      <div className="hero-content">
-        <h1>Praise FM Brasil</h1>
-        <p>Sua rádio gospel online 24h</p>
-
-        {liveProgram && (
-          <div className="live-program">
-            <h2>On Air Now</h2>
-            <p>{liveProgram.title} - {liveProgram.host}</p>
-          </div>
-        )}
-
-        <div className="favorite-items">
-          {favoriteItems.map((item: FavoriteItem) => (
-            <div key={item.id} className="favorite-card">
-              <img src={item.image ?? '/placeholder-image.png'} alt={item.title} />
-              <h3>{item.title}</h3>
-              {item.subtitle && <p>{item.subtitle}</p>}
-            </div>
-          ))}
-        </div>
-
-        <div className="schedule">
-          <h2>Programação</h2>
-          {programs.map((prog: Program) => (
-            <div key={prog.id} className="program-card">
-              <span>{prog.startTime} - {prog.endTime}</span>
-              <span>{prog.title}</span>
-              <span>{prog.host}</span>
-            </div>
-          ))}
-        </div>
+    <section className="bg-[#f2f2f2] dark:bg-[#000] py-12 md:py-20 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 text-center">
+        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white uppercase tracking-tighter mb-6">
+          No Ar Agora
+        </h1>
+        <h2 className="text-2xl md:text-3xl font-medium text-gray-700 dark:text-gray-300 mb-4">
+          {liveProgram.title}
+        </h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">
+          com {liveProgram.host}
+        </p>
+        <button 
+          onClick={() => onNavigateToProgram(liveProgram)} 
+          className="bg-[#ff6600] hover:bg-[#e65a00] text-white px-6 py-3 font-medium uppercase tracking-widest transition-colors rounded-md"
+        >
+          Ver detalhes
+        </button>
       </div>
     </section>
   );
