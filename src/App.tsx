@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -26,9 +25,9 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import CookiesPolicyPage from './pages/CookiesPolicyPage';
 import { SCHEDULES } from './constants';
-import { Program } from './types';
+import type { Program } from './types';
 
-// Updated URLs for Praise FM Brasil
+// Praise FM Brasil Stream
 const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
 const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/olisuxy9v3vtv';
 
@@ -40,15 +39,17 @@ const BLOCKED_METADATA_KEYWORDS = [
   'jingle', 'bumper', 'teaser', 'coming up'
 ];
 
-const getChicagoDayAndTotalMinutes = () => {
+const getBrazilDayAndTotalMinutes = () => {
   const now = new Date();
   const options: Intl.DateTimeFormatOptions = {
     timeZone: 'America/Sao_Paulo',
+    hour12: false,
+    hour: 'numeric',
+    minute: 'numeric'
   };
-  const brazilDate = new Date(now.toLocaleString('en-US', options));
-  const h = brazilDate.getHours();
-  const m = brazilDate.getMinutes();
-  return { day: brazilDate.getDay(), total: h * 60 + m };
+  const brazilTime = new Intl.DateTimeFormat('pt-BR', options).format(now);
+  const [h, m] = brazilTime.split(':').map(Number);
+  return { day: now.getDay(), total: h * 60 + m };
 };
 
 interface LiveMetadata {
@@ -69,7 +70,7 @@ const ScrollToTop = () => {
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen bg-white dark:bg-[#121212]"></div>;
+  if (loading) return <div className="min-h-screen bg-white dark:bg-[#000]"></div>;
   return user ? <>{children}</> : <Navigate to="/login" />;
 };
 
@@ -85,7 +86,7 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { day, total } = getChicagoDayAndTotalMinutes();
+  const { day, total } = getBrazilDayAndTotalMinutes();
   
   const { currentProgram, queue } = useMemo(() => {
     const schedule = SCHEDULES[day] || SCHEDULES[1];
@@ -93,7 +94,8 @@ const AppContent: React.FC = () => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
       const start = sH * 60 + sM;
-      const end = eH === 0 ? 24 * 60 : eH * 60 + eM;
+      let end = eH * 60 + eM;
+      if (end === 0 || end <= start) end = 24 * 60;
       return total >= start && total < end;
     });
     
@@ -109,16 +111,13 @@ const AppContent: React.FC = () => {
   }, [theme]);
 
   useEffect(() => {
-    if (selectedProgram) {
-      setSelectedProgram(null);
-    }
+    if (selectedProgram) setSelectedProgram(null);
   }, [location.pathname]);
 
+  // Metadata Sync Logic
   useEffect(() => {
     const connectMetadata = () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
+      if (eventSourceRef.current) eventSourceRef.current.close();
       
       try {
         const es = new EventSource(METADATA_URL);
@@ -133,7 +132,6 @@ const AppContent: React.FC = () => {
               const [artistPart, ...titleParts] = streamTitle.split(' - ');
               const artist = artistPart.trim();
               const title = titleParts.join(' - ').trim();
-              if (!artist || !title) return;
               
               const musicCheck = !BLOCKED_METADATA_KEYWORDS.some(k => 
                 `${artist} ${title}`.toLowerCase().includes(k)
@@ -147,15 +145,10 @@ const AppContent: React.FC = () => {
               };
               
               setLiveMetadata(prev => {
-                const isNewTrack = !prev || prev.title !== newMetadata.title || prev.artist !== newMetadata.artist;
-                if (isNewTrack) {
+                const isNew = !prev || prev.title !== newMetadata.title || prev.artist !== newMetadata.artist;
+                if (isNew) {
                   if (newMetadata.isMusic) {
-                    setTrackHistory(h => {
-                      if (h.length > 0 && h[0].title === newMetadata.title && h[0].artist === newMetadata.artist) {
-                        return h;
-                      }
-                      return [newMetadata, ...h].slice(0, 10);
-                    });
+                    setTrackHistory(h => [newMetadata, ...h].slice(0, 10));
                   }
                   return newMetadata;
                 }
@@ -166,8 +159,7 @@ const AppContent: React.FC = () => {
         };
 
         es.onerror = () => {
-          if (es) es.close();
-          if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
+          es.close();
           reconnectTimeoutRef.current = window.setTimeout(connectMetadata, 5000);
         };
       } catch (err) { }
@@ -175,10 +167,7 @@ const AppContent: React.FC = () => {
     
     connectMetadata();
     return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
+      eventSourceRef.current?.close();
       if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
     };
   }, []);
@@ -188,16 +177,9 @@ const AppContent: React.FC = () => {
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      // Force reload source to avoid stale buffer or 'no supported source' error on reconnection
-      const savedVol = audioRef.current.volume;
       audioRef.current.src = STREAM_URL; 
-      audioRef.current.volume = savedVol;
       audioRef.current.load();
-      audioRef.current.play().catch(e => {
-        if (e.name !== 'AbortError' && !e.message?.includes('interrupted')) {
-          console.error("Playback failed:", e.message);
-        }
-      });
+      audioRef.current.play().catch(() => {});
     }
     setIsPlaying(!isPlaying);
   };
@@ -206,8 +188,7 @@ const AppContent: React.FC = () => {
     audioRef.current = new Audio(STREAM_URL);
     audioRef.current.crossOrigin = "anonymous";
     const savedVol = localStorage.getItem('praise-volume');
-    const initialVol = savedVol ? parseFloat(savedVol) : 0.8;
-    audioRef.current.volume = initialVol;
+    audioRef.current.volume = savedVol ? parseFloat(savedVol) : 0.8;
 
     return () => {
       if (audioRef.current) {
@@ -226,7 +207,7 @@ const AppContent: React.FC = () => {
   const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
 
   return (
-    <div className="min-h-screen flex flex-col pb-[120px] dark:bg-[#000] transition-colors duration-300">
+    <div className="min-h-screen flex flex-col pb-[120px] dark:bg-[#000] transition-colors duration-300 font-sans antialiased">
       <Navbar 
         activeTab={activeTab} 
         theme={theme}
@@ -246,7 +227,11 @@ const AppContent: React.FC = () => {
           <Routes>
             <Route path="/" element={
               <>
-                <Hero onListenClick={togglePlayback} isPlaying={isPlaying} liveMetadata={liveMetadata} onNavigateToProgram={handleNavigateToProgram} />
+                <Hero 
+                  onListenClick={togglePlayback} 
+                  isPlaying={isPlaying} 
+                  onNavigateToProgram={handleNavigateToProgram} 
+                />
                 <RecentlyPlayed tracks={trackHistory} />
               </>
             } />
@@ -273,6 +258,7 @@ const AppContent: React.FC = () => {
       </main>
 
       <Footer />
+      
       {currentProgram && (
         <LivePlayerBar 
           isPlaying={isPlaying} 
