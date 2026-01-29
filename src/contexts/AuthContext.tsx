@@ -1,22 +1,7 @@
-// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import type { User, Session } from '@supabase/supabase-js';
+import { User, Session } from '@supabase/supabaseClient-js';
 
-// =====================
-// TIPOS EXPORTADOS
-// =====================
-export interface FavoriteItem {
-  id: string;
-  type: "program" | "track" | "devotional" | "artist";
-  title: string;
-  subtitle?: string;
-  image?: string;
-}
-
-// =====================
-// CONTEXTO
-// =====================
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -24,8 +9,6 @@ interface AuthContextType {
   favorites: any[];
   toggleFavorite: (item: any) => Promise<void>;
   isFavorite: (id: string) => boolean;
-  signUp: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
-  signIn: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
   signOut: () => Promise<void>;
   refreshFavorites: () => Promise<void>;
 }
@@ -61,48 +44,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(null);
         setFavorites([]);
       }
-      
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Busca favoritos do usuário
   const fetchFavorites = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('favorites')
         .select('*')
         .eq('user_id', userId);
-
+      
       if (error) {
         if (error.code === 'PGRST103') {
-          console.warn("Supabase: 'favorites' table not found. Please run the migration SQL.");
+          console.warn("Supabase: Tabela 'favorites' não encontrada. Por favor, execute o SQL de migração.");
         } else {
-          console.error("Error fetching favorites:", error.message);
+          console.error("Erro ao buscar favoritos:", error.message);
         }
         return;
       }
-
       setFavorites(data || []);
     } catch (e: any) {
-      console.error("Unexpected error fetching favorites:", e.message || String(e));
+      console.error("Erro inesperado ao buscar favoritos:", e.message || String(e));
     }
   };
 
-  // Atualiza lista de favoritos
   const refreshFavorites = async () => {
     if (user) await fetchFavorites(user.id);
   };
 
-  // Alterna favorito
   const toggleFavorite = async (item: any) => {
     if (!user) return;
 
     const itemIdString = String(item.id || item.item_id);
     const existing = favorites.find(f => String(f.item_id) === itemIdString);
-
+    
     try {
       if (existing) {
         const { error } = await supabase
@@ -111,10 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .eq('id', existing.id);
           
         if (error) {
-          if (error.code === 'PGRST103') {
-            alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
-          }
-          console.error("Error removing favorite:", error.message);
+          if (error.code === 'PGRST103') alert("Configuração do Banco de Dados Necessária: Por favor, crie a tabela 'favorites' no seu painel do Supabase.");
+          console.error("Erro ao remover favorito:", error.message);
         } else {
           setFavorites(prev => prev.filter(f => f.id !== existing.id));
         }
@@ -134,51 +110,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .select();
           
         if (error) {
-          if (error.code === 'PGRST103') {
-            alert("Database Setup Required: Please create the 'favorites' table in your Supabase dashboard.");
-          }
-          console.error("Error adding favorite:", error.message);
+          if (error.code === 'PGRST103') alert("Configuração do Banco de Dados Necessária: Por favor, crie a tabela 'favorites' no seu painel do Supabase.");
+          console.error("Erro ao adicionar favorito:", error.message);
         } else if (data && data.length > 0) {
           setFavorites(prev => [...prev, data[0]]);
         }
       }
     } catch (err: any) {
-      console.error("Toggle favorite failed:", err.message);
+      console.error("Falha ao alternar favorito:", err.message);
     }
   };
 
-  // Checa se o item já está nos favoritos
   const isFavorite = (id: string) => {
     const searchId = String(id);
     return favorites.some(f => String(f.item_id) === searchId);
   };
 
-  // Signup
-  const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return { user: null, error: error.message };
-    return { 
-      user: data.user, 
-      error: null 
-    };
-  };
-
-  // Signin
-  const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { user: null, error: error.message };
-    return { 
-      user: data.user, 
-      error: null 
-    };
-  };
-
-  // Signout
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
     } catch (e: any) {
-      console.error("Sign out error:", e.message);
+      console.error("Erro ao sair:", e.message);
     } finally {
       setUser(null);
       setSession(null);
@@ -188,17 +140,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      loading,
-      favorites,
-      toggleFavorite,
-      isFavorite,
-      signUp,
-      signIn,
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading, 
+      favorites, 
+      toggleFavorite, 
+      isFavorite, 
       signOut,
-      refreshFavorites
+      refreshFavorites 
     }}>
       {children}
     </AuthContext.Provider>
@@ -208,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };
