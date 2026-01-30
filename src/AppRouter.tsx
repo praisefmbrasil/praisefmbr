@@ -1,7 +1,7 @@
-import React from 'react'; // Adicionado para garantir compatibilidade
+import React from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
-// Importação de Componentes
+// Importação de Componentes (Layout Moderno)
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import RecentlyPlayed from './components/RecentlyPlayed';
@@ -11,7 +11,7 @@ import ScheduleList from './components/ScheduleList';
 // Importação de Páginas
 import PresentersPage from './pages/PresentersPage';
 import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/SignUpPage'; // Ajustado o caminho para refletir a página correta
+import SignUpPage from './pages/SignUpPage';
 import ProfilePage from './pages/ProfilePage';
 
 // Importação de Tipos
@@ -27,6 +27,7 @@ interface RouterProps {
   onNavigateToProgram: (program: Program) => void;
 }
 
+// A função AppRouter deve envolver todo o código
 const AppRouter: React.FC<RouterProps> = ({ 
   theme, 
   onToggleTheme, 
@@ -39,60 +40,50 @@ const AppRouter: React.FC<RouterProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  const activeTab =
-    location.pathname === '/'
-      ? 'home'
-      : location.pathname.split('/')[1];
-
+  // Define a aba ativa e se deve esconder a Navbar em páginas de Login
+  const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
   const isAuthView = ['/login', '/signup'].includes(location.pathname);
 
   return (
     <>
+      {/* Garante que a Navbar aparece com o estilo USA (Home, Music, Schedule, etc) */}
       {!isAuthView && (
-        <Navbar
-          activeTab={activeTab}
-          theme={theme}
-          onToggleTheme={onToggleTheme}
+        <Navbar 
+          activeTab={activeTab} 
+          theme={theme} 
+          onToggleTheme={onToggleTheme} 
         />
       )}
 
       <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Hero
-                onListenClick={onListenClick}
-                isPlaying={isPlaying}
-                liveMetadata={liveMetadata}
-                onNavigateToProgram={onNavigateToProgram}
-              />
-              <RecentlyPlayed tracks={trackHistory} />
-            </>
-          }
-        />
+        <Route path="/" element={
+          <>
+            {/* O Hero é o que dá aquele visual de destaque com o botão Play grande */}
+            <Hero 
+              onListenClick={onListenClick} 
+              isPlaying={isPlaying} 
+              liveMetadata={liveMetadata} 
+              onNavigateToProgram={onNavigateToProgram} 
+            />
+            <RecentlyPlayed tracks={trackHistory} />
+          </>
+        } />
 
         <Route path="/music" element={<Playlist />} />
 
-        <Route
-          path="/schedule"
-          element={
-            <ScheduleList
-              onNavigateToProgram={onNavigateToProgram}
-              onBack={() => navigate('/')}
-            />
-          }
-        />
+        <Route path="/schedule" element={
+          <ScheduleList 
+            onNavigateToProgram={onNavigateToProgram} 
+            onBack={() => navigate('/')} 
+          />
+        } />
 
-        <Route
-          path="/presenters"
-          element={<PresentersPage onNavigateToProgram={onNavigateToProgram} />}
-        />
-
+        <Route path="/presenters" element={<PresentersPage onNavigateToProgram={onNavigateToProgram} />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/profile" element={<ProfilePage />} />
 
+        {/* Redireciona qualquer erro de link para a Home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
