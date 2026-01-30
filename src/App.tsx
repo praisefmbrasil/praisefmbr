@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HashRouter } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import AppRouter from './router';
+import AppRouter from './AppRouter';
 import Footer from './components/Footer';
 import LivePlayerBar from './components/LivePlayerBar';
 import { Program } from './types';
