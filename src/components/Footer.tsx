@@ -10,14 +10,16 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-12">
           <div className="col-span-2">
             <div className="flex items-center mb-6 cursor-pointer" onClick={() => navigate('/')}>
+              {/* 1. Logo atualizado para a versão Brasil */}
               <img 
-                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Brasil_p1qfof.webp" 
+                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp" 
                 alt="Praise FM Brasil Logo" 
                 className="h-10 w-auto object-contain"
               />
             </div>
+            {/* 2. Descrição traduzida e adaptada */}
             <p className="text-gray-400 text-sm leading-relaxed max-sm font-normal">
-              Sua casa para os melhores louvores, conteúdos devocionais exclusivos e a nova geração de artistas gospel. Selecionado diariamente para edificar sua fé.
+              O seu lugar para a melhor música worship do mundo, conteúdo devocional exclusivo e a nova geração de artistas de fé. Curadoria diária para o seu espírito.
             </p>
           </div>
           <div>
@@ -36,7 +38,7 @@ const Footer: React.FC = () => {
                   onClick={() => navigate('/new-releases')} 
                   className="hover:text-[#ff6600] transition-colors text-left"
                 >
-                  Novos Lançamentos
+                  Lançamentos
                 </button>
               </li>
               <li>
@@ -53,7 +55,7 @@ const Footer: React.FC = () => {
              <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Rádio</h4>
             <ul className="space-y-4 text-sm font-normal text-gray-400">
               <li><button onClick={() => navigate('/schedule')} className="hover:text-[#ff6600] transition-colors text-left">Grade Completa</button></li>
-              <li><button onClick={() => navigate('/presenters')} className="hover:text-[#ff6600] transition-colors text-left">Nossos Apresentadores</button></li>
+              <li><button onClick={() => navigate('/presenters')} className="hover:text-[#ff6600] transition-colors text-left">Nossos Locutores</button></li>
               <li><button onClick={() => navigate('/devotional')} className="hover:text-[#ff6600] transition-colors text-left">Devocional Diário</button></li>
             </ul>
           </div>
@@ -62,15 +64,16 @@ const Footer: React.FC = () => {
             <ul className="space-y-4 text-sm font-normal text-gray-400">
               <li><button onClick={() => navigate('/help')} className="hover:text-[#ff6600] transition-colors text-left">Central de Ajuda</button></li>
               <li><button onClick={() => navigate('/feedback')} className="hover:text-[#ff6600] transition-colors text-left">Feedback & Suporte</button></li>
-              <li><a href="mailto:contato@praisefmbrasil.com.br" className="hover:text-[#ff6600] transition-colors">Contato Direto</a></li>
+              <li><a href="mailto:fmpraiseradio@gmail.com" className="hover:text-[#ff6600] transition-colors">Contato Direto</a></li>
             </ul>
           </div>
           <div>
              <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Siga-nos</h4>
             <ul className="space-y-4 text-sm font-normal text-gray-400">
               <li>
+                {/* 3. Link do Instagram atualizado (ajustar se tiver um @ específico para o Brasil) */}
                 <a 
-                  href="https://www.instagram.com/praisefmbrasil/" 
+                  href="https://www.instagram.com/fmpraise.usa/" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="hover:text-[#ff6600] transition-colors"
@@ -82,9 +85,10 @@ const Footer: React.FC = () => {
           </div>
         </div>
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-normal text-gray-500 uppercase tracking-widest">
-          <p>© 2026 PRAISE FM BRASIL. INSPIRADO PELA EXCELÊNCIA.</p>
+          {/* 4. Direitos autorais atualizados */}
+          <p>© 2026 PRAISE FM BRASIL. INSPIRADOS PELA EXCELÊNCIA.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors">Política de Privacidade</button>
+            <button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors">Privacidade</button>
             <button onClick={() => navigate('/terms')} className="hover:text-white transition-colors">Termos de Uso</button>
             <button onClick={() => navigate('/cookies')} className="hover:text-white transition-colors">Cookies</button>
           </div>

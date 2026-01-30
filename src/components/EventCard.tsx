@@ -7,7 +7,7 @@ interface EventProps {
     venue: {
       name: string;
       city: string;
-      region: string; // Estado (ex: SP, RJ)
+      region: string;
       country: string;
     };
     url: string;
@@ -16,12 +16,15 @@ interface EventProps {
 
 const EventCard: React.FC<EventProps> = ({ event }) => {
   const date = new Date(event.datetime);
+  
+  // 1. Formatação para o padrão brasileiro (dia/mês/ano)
   const formattedDate = date.toLocaleDateString('pt-BR', {
     day: 'numeric',
     month: 'short',
     year: 'numeric'
-  }).replace('.', ''); // Remove pontos da abreviação do mês
+  });
   
+  // 2. Formatação de hora 24h
   const formattedTime = date.toLocaleTimeString('pt-BR', {
     hour: '2-digit',
     minute: '2-digit'
@@ -40,9 +43,10 @@ const EventCard: React.FC<EventProps> = ({ event }) => {
           </h4>
           <p className="text-[11px] text-gray-500 uppercase tracking-widest flex items-center font-medium">
             <MapPin className="w-3.5 h-3.5 mr-1 text-[#ff6600]" /> 
-            {event.venue.city}, {event.venue.region} {event.venue.country !== 'Brasil' ? ` - ${event.venue.country}` : ''}
+            {/* 3. Localização formatada sem priorizar EUA */}
+            {event.venue.city}, {event.venue.region} {event.venue.country !== 'Brazil' && event.venue.country !== 'Brasil' ? `| ${event.venue.country}` : ''}
           </p>
-          <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em]">Portões: {formattedTime}</p>
+          <p className="text-[9px] text-gray-400 mt-1 uppercase tracking-[0.2em]">Início: {formattedTime}</p>
         </div>
       </div>
       <a 
