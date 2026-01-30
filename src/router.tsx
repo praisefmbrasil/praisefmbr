@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
-// Importação de Componentes (Layout Moderno)
+// Importação de Componentes
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import RecentlyPlayed from './components/RecentlyPlayed';
@@ -27,7 +27,6 @@ interface RouterProps {
   onNavigateToProgram: (program: Program) => void;
 }
 
-// A função AppRouter deve envolver todo o código
 const AppRouter: React.FC<RouterProps> = ({ 
   theme, 
   onToggleTheme, 
@@ -40,13 +39,13 @@ const AppRouter: React.FC<RouterProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Define a aba ativa e se deve esconder a Navbar em páginas de Login
+  // Define a aba ativa e se é vista de login/cadastro
   const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
   const isAuthView = ['/login', '/signup'].includes(location.pathname);
 
   return (
     <>
-      {/* Garante que a Navbar aparece com o estilo USA (Home, Music, Schedule, etc) */}
+      {/* Aqui a carcaça se conecta: passando activeTab, theme e onToggleTheme */}
       {!isAuthView && (
         <Navbar 
           activeTab={activeTab} 
@@ -58,7 +57,6 @@ const AppRouter: React.FC<RouterProps> = ({
       <Routes>
         <Route path="/" element={
           <>
-            {/* O Hero é o que dá aquele visual de destaque com o botão Play grande */}
             <Hero 
               onListenClick={onListenClick} 
               isPlaying={isPlaying} 
@@ -83,7 +81,6 @@ const AppRouter: React.FC<RouterProps> = ({
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/profile" element={<ProfilePage />} />
 
-        {/* Redireciona qualquer erro de link para a Home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
