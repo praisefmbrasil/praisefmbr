@@ -7,7 +7,6 @@ import LivePlayerBar from './components/LivePlayerBar';
 import { Program } from './types';
 import { SCHEDULES } from './constants';
 
-// Stream oficial da Praise FM Brasil
 const STREAM_URL = 'https://stream.zeno.fm/f3766utp6v8uv';
 
 const AppContent: React.FC = () => {
@@ -15,18 +14,16 @@ const AppContent: React.FC = () => {
   const [liveMetadata, setLiveMetadata] = useState<any>(null);
   const [trackHistory, setTrackHistory] = useState<any[]>([]);
   const [theme, setTheme] = useState<'light' | 'dark'>(() => 
-    (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'dark' // Iniciando em dark para o look USA
+    (localStorage.getItem('praise-theme') as 'light' | 'dark') || 'dark'
   );
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Aplica o tema dark/light na raiz do site
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('praise-theme', theme);
   }, [theme]);
 
-  // Inicializa o áudio apenas uma vez
   useEffect(() => {
     const audio = new Audio(STREAM_URL);
     audio.crossOrigin = "anonymous";
@@ -54,7 +51,6 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-[120px] bg-white text-black dark:bg-[#0b0b0b] dark:text-white transition-colors">
-      {/* O AppRouter recebe as props e injeta na Navbar moderna */}
       <AppRouter 
         theme={theme}
         onToggleTheme={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
@@ -67,7 +63,6 @@ const AppContent: React.FC = () => {
 
       <Footer />
       
-      {/* Player de rodapé igual ao da versão USA */}
       <LivePlayerBar 
         isPlaying={isPlaying} 
         onTogglePlayback={togglePlayback} 
