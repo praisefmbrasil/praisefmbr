@@ -23,9 +23,10 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
     () => Number(localStorage.getItem('praise-volume')) || 0.8
   );
   const [muted, setMuted] = useState(false);
+  const [showVolume, setShowVolume] = useState(false);
 
   /* ======================
-     AUDIO
+     AUDIO SYNC
   ====================== */
   useEffect(() => {
     if (!audioRef.current) return;
@@ -33,36 +34,20 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
     localStorage.setItem('praise-volume', volume.toString());
   }, [volume, muted, audioRef]);
 
-  /* ======================
-     MEDIA SESSION
-  ====================== */
-  useEffect(() => {
-    if (!('mediaSession' in navigator)) return;
-
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: program.title,
-      artist: program.host,
-      artwork: [{ src: program.image, sizes: '512x512', type: 'image/png' }]
-    });
-
-    navigator.mediaSession.setActionHandler('play', onTogglePlayback);
-    navigator.mediaSession.setActionHandler('pause', onTogglePlayback);
-  }, [program, onTogglePlayback]);
-
   const handleToggle = () => {
     if (!hasStarted) setHasStarted(true);
     onTogglePlayback();
   };
 
   /* ======================
-     BEFORE PLAY (BBC)
+     BEFORE PLAY
   ====================== */
   if (!hasStarted) {
     return (
-      <div className="flex justify-center py-10">
+      <div className="flex justify-center py-12">
         <button
           onClick={handleToggle}
-          className="text-sm font-semibold uppercase tracking-widest px-10 py-3 bg-black text-white rounded-full hover:opacity-90 transition"
+          className="text-sm font-semibold uppercase tracking-widest px-12 py-3 bg-black text-white rounded-full hover:opacity-90 transition"
         >
           TOCAR
         </button>
@@ -76,7 +61,7 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
           SCHEDULE DRAWER
       ====================== */}
       <div
-        className={`fixed inset-y-0 right-0 w-full md:w-[380px] bg-white dark:bg-[#121212] z-[90] transition-transform duration-300 ${
+        className={`fixed inset-y-0 right-0 w-full md:w-[380px] bg-white dark:bg-[#121212] z-[90] transition-transform ${
           showSchedule ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -90,13 +75,14 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
         <div className="overflow-y-auto">
           {[program, ...queue].slice(0, 5).map((p, i) => (
             <div key={p.id} className="flex gap-4 p-4 border-b dark:border-white/5">
-              <img src={p.image} className="w-12 h-12 object-cover rounded" />
+              <img src={p.image} className="w-12 h-12 rounded object-cover" />
               <div>
                 <p className="font-semibold">{p.title}</p>
                 <p className="text-xs text-gray-500">{p.host}</p>
                 {i === 0 && (
-                  <span className="text-[10px] font-bold text-[#00d9c9] uppercase">
-                    Ao vivo
+                  <span className="text-[10px] font-bold text-red-500 uppercase flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                    Live
                   </span>
                 )}
               </div>
@@ -113,34 +99,62 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
       )}
 
       {/* ======================
-          BBC MINI PLAYER
+          BBC PRO PLAYER
       ====================== */}
-      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-white dark:bg-[#121212] border-t dark:border-white/10 animate-in slide-in-from-bottom-4 duration-300">
+      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-white dark:bg-[#121212] border-t dark:border-white/10 animate-in slide-in-from-bottom-4">
         <div className="flex items-center justify-between px-6 py-3">
 
           {/* INFO */}
           <div className="min-w-0">
             <p className="font-semibold truncate">{program.title}</p>
-            <p className="text-xs text-gray-500 truncate">
-              {program.host}
-            </p>
+            <p className="text-xs text-gray-500 truncate">{program.host}</p>
           </div>
 
           {/* CONTROLS */}
           <div className="flex items-center gap-6">
+
+            {/* LIVE */}
+            {isPlaying && (
+              <div className="flex items-center gap-1 text-xs font-bold uppercase text-red-500">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                Live
+              </div>
+            )}
+
+            {/* PLAY */}
             <button
               onClick={handleToggle}
-              className="text-sm font-semibold uppercase tracking-widest hover:opacity-70 transition"
+              className="text-sm font-semibold uppercase tracking-widest hover:opacity-70"
             >
               {isPlaying ? 'PAUSAR' : 'TOCAR'}
             </button>
 
-            <button onClick={() => setShowSchedule(true)}>
-              <List className="w-5 h-5" />
-            </button>
+            {/* VOLUME */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShowVolume(true)}
+              onMouseLeave={() => setShowVolume(false)}
+            >
+              <button onClick={() => setMuted(m => !m)}>
+                {muted || volume === 0 ? <VolumeX /> : <Volume2 />}
+              </button>
 
-            <button onClick={() => setMuted(m => !m)}>
-              {muted || volume === 0 ? <VolumeX /> : <Volume2 />}
+              {showVolume && (
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={muted ? 0 : volume}
+                  onChange={e => setVolume(Number(e.target.value))}
+                  className="absolute -top-10 left-1/2 -translate-x-1/2 w-24 accent-black dark:accent-white"
+                />
+              )}
+            </div>
+
+            {/* QUEUE */}
+            <button onClick={() => setShowSchedule(true)}>
+              <List />
             </button>
           </div>
         </div>
