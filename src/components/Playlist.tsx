@@ -1,299 +1,177 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Play, Music, Heart, Info, ExternalLink, Pause, Loader2, X, Calendar } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { Home, Music, Radio, Menu, Calendar, Sun, Moon, X, User as UserIcon, Library, Settings, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
-const MASTER_ARTISTS = [
-  "Fernandinho", "Gabriela Rocha", "Isaias Saad", "Aline Barros", 
-  "Kemuel", "Preto no Branco", "Morada", "Theo Rubia", 
-  "Cassiane", "Anderson Freire", "Bruna Karla", "Midian Lima", 
-  "Nívea Soares", "Eyshila", "Thalles Roberto", "Leonardo Gonçalves",
-  "Soraya Moraes", "André Valadão", "Diante do Trono", "Paulo César Baruk"
-];
+interface NavbarProps {
+  activeTab: string;
+  theme: 'light' | 'dark';
+  onToggleTheme: () => void;
+}
 
-const ARCHIVE_DATA = [
-  { date: "Out 24", artists: ["Fernandinho", "Gabriela Rocha", "Isaias Saad"] },
-  { date: "Out 23", artists: ["Aline Barros", "Kemuel", "Preto no Branco"] },
-  { date: "Out 22", artists: ["Morada", "Theo Rubia", "Cassiane"] },
-  { date: "Out 21", artists: ["Anderson Freire", "Bruna Karla", "Midian Lima"] }
-];
-
-type Track = {
-  trackId: number;
-  trackName: string;
-  artistName: string;
-  artworkUrl100: string;
-  previewUrl?: string;
-};
-
-const getRotationSeed = () => {
-  const oneDayInMs = 24 * 60 * 60 * 1000;
-  return Math.floor(Date.now() / oneDayInMs);
-};
-
-const shuffleWithSeed = (array: any[], seed: number) => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = (seed * (i + 1)) % shuffled.length;
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
-const PlaylistCard: React.FC<{ track: Track; isPlaying: boolean; onTogglePlay: () => void }> = ({ track, isPlaying, onTogglePlay }) => {
-  const { toggleFavorite, isFavorite, user } = useAuth();
+const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const navigate = useNavigate();
-
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!user) return navigate('/login');
-    toggleFavorite({ 
-      id: track.trackId.toString(), 
-      title: track.trackName, 
-      host: track.artistName, 
-      image: track.artworkUrl100.replace("100x100", "600x600"),
-      type: 'track' 
-    });
-  };
-
-  return (
-    <div className="group relative bg-white dark:bg-[#111] border border-gray-100 dark:border-white/5 transition-all duration-300 hover:shadow-xl">
-      <div className="relative aspect-square overflow-hidden">
-        <img 
-          src={track.artworkUrl100.replace("100x100", "600x600")} 
-          alt={track.trackName} 
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-        />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
-          <button 
-            onClick={(e) => { e.stopPropagation(); onTogglePlay(); }}
-            className="w-14 h-14 bg-[#ff6600] rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all shadow-2xl"
-          >
-            {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
-          </button>
-        </div>
-        <button 
-          onClick={handleFavorite}
-          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all ${isFavorite(track.trackId.toString()) ? 'bg-red-500 text-white opacity-100' : 'bg-black/20 text-white hover:bg-[#ff6600] opacity-0 group-hover:opacity-100'}`}
-        >
-          <Heart className={`w-4 h-4 ${isFavorite(track.trackId.toString()) ? 'fill-current' : ''}`} />
-        </button>
-      </div>
-      <div className="p-4">
-        <h3 className="font-medium text-lg text-gray-900 dark:text-white leading-tight truncate uppercase tracking-tighter">
-          {track.trackName}
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400 text-[10px] font-normal uppercase tracking-[0.2em] mt-1">
-          {track.artistName}
-        </p>
-      </div>
-    </div>
-  );
-};
-
-const Playlist: React.FC = () => {
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activePreview, setActivePreview] = useState<number | null>(null);
-  const [showArchive, setShowArchive] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const currentArtists = useMemo(() => {
-    const seed = getRotationSeed();
-    return shuffleWithSeed(MASTER_ARTISTS, seed).slice(0, 12);
-  }, []);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
-    const fetchTracks = async () => {
-      setLoading(true);
-      try {
-        const results: Track[] = [];
-        for (const artist of currentArtists) { 
-          const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist)}&media=music&entity=song&limit=1`);
-          
-          if (res.ok) {
-            const text = await res.text();
-            if (text && text.trim().length > 0) {
-              try {
-                const json = JSON.parse(text);
-                if (json.results && json.results.length > 0) results.push(json.results[0]);
-              } catch (parseErr) {
-                console.debug("Playlist iTunes parse error para:", artist);
-              }
-            }
-          }
-        }
-        setTracks(results);
-      } catch (e) {
-        console.debug("Erro ao carregar playlist Praise FM - Rede instável");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTracks();
-  }, [currentArtists]);
-
-  const togglePreview = (track: Track) => {
-    if (!track.previewUrl || !audioRef.current) return;
-    
-    if (activePreview === track.trackId) {
-      audioRef.current.pause();
-      setActivePreview(null);
-    } else {
-      audioRef.current.src = track.previewUrl;
-      audioRef.current.play().catch(() => setActivePreview(null));
-      setActivePreview(track.trackId);
+    if (user) {
+      const fetchAvatar = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single();
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      };
+      fetchAvatar();
     }
-  };
+  }, [user]);
 
-  const aList = tracks.slice(0, 4);
-  const bList = tracks.slice(4, 8);
-  const cList = tracks.slice(8, 12);
+  // Itens de navegação traduzidos para a Praise FM Brasil
+  const navItems = [
+    { id: 'home', label: 'Início', icon: Home, path: '/' },
+    { id: 'music', label: 'Músicas', icon: Music, path: '/music' },
+    { id: 'schedule', label: 'Programação', icon: Calendar, path: '/schedule' },
+    { id: 'events', label: 'Eventos', icon: Ticket, path: '/events' },
+    { id: 'devotional', label: 'Devocional', icon: Radio, path: '/devotional' },
+  ];
 
   return (
-    <div className="bg-[#f2f2f2] dark:bg-[#000] min-h-screen transition-colors duration-300">
-      <audio ref={audioRef} onEnded={() => setActivePreview(null)} />
-      
-      {showArchive && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-[#111] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
-            <div className="p-6 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-[#ff6600] text-white">
-              <div className="flex items-center space-x-3">
-                <Calendar className="w-5 h-5" />
-                <h2 className="text-xl font-medium uppercase tracking-tighter">Arquivo de Seleções</h2>
-              </div>
-              <button onClick={() => setShowArchive(false)} className="p-2 hover:bg-black/20 rounded-full transition-colors">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="flex-grow overflow-y-auto p-6 space-y-4">
-              {ARCHIVE_DATA.map((item, idx) => (
-                <div key={idx} className="p-5 border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 hover:border-[#ff6600] transition-colors group cursor-default">
-                  <span className="text-[10px] font-medium text-[#ff6600] uppercase tracking-[0.2em] mb-2 block">{item.date}</span>
-                  <h3 className="text-lg font-medium dark:text-white uppercase tracking-tight mb-3">Artistas em Destaque</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {item.artists.map((artist, aIdx) => (
-                      <span key={aIdx} className="bg-white dark:bg-black px-3 py-1 text-xs font-medium border border-gray-200 dark:border-white/10 dark:text-gray-300">
-                        {artist}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="p-6 border-t border-gray-100 dark:border-white/10 text-center">
-              <p className="text-xs text-gray-400 uppercase font-medium tracking-widest">Mostrando as últimas 4 edições diárias</p>
-            </div>
+    <header className="bg-white dark:bg-[#0b0b0b] text-black dark:text-white sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center h-full space-x-12">
+          {/* Logo Praise FM Brasil */}
+          <div className="flex items-center cursor-pointer h-full" onClick={() => navigate('/')}>
+            <img 
+              src="https://res.cloudinary.com/dtecypmsh/image/upload/v1766869698/SVGUSA_lduiui.webp"
+              alt="Praise FM Brasil Logo"
+              className={`h-7 w-auto object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''}`} 
+            />
           </div>
-        </div>
-      )}
 
-      <div className="bg-white dark:bg-[#111] border-b border-gray-200 dark:border-white/5 py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center space-x-2 text-[#ff6600] mb-4">
-            <Music className="w-4 h-4" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.4em]">Seleção Oficial Praise FM Brasil</span>
-          </div>
-          <h1 className="text-5xl md:text-8xl font-medium uppercase tracking-tighter mb-6 dark:text-white leading-none">Playlist</h1>
-          <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl font-normal leading-tight uppercase">
-            Curadoria diária. O som definitivo da <span className="text-black dark:text-white font-medium">Praise FM Brasil</span>, apresentando os sucessos de adoração mais impactantes.
-          </p>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-40">
-            <Loader2 className="w-12 h-12 text-[#ff6600] animate-spin mb-4" />
-            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gray-400">Atualizando Playlist Diária...</p>
-          </div>
-        ) : (
-          <>
-            {aList.length > 0 && (
-              <section className="mb-24">
-                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black dark:border-white pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white">A List</h2>
-                  <span className="text-[#ff6600] text-sm font-medium uppercase tracking-widest">Rotação Máxima</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {aList.map(track => (
-                    <PlaylistCard 
-                      key={track.trackId} 
-                      track={track} 
-                      isPlaying={activePreview === track.trackId}
-                      onTogglePlay={() => togglePreview(track)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {bList.length > 0 && (
-              <section className="mb-24">
-                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/20 dark:border-white/20 pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-60">B List</h2>
-                  <span className="text-gray-400 text-sm font-medium uppercase tracking-widest">Em Ascensão</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {bList.map(track => (
-                    <PlaylistCard 
-                      key={track.trackId} 
-                      track={track}
-                      isPlaying={activePreview === track.trackId}
-                      onTogglePlay={() => togglePreview(track)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {cList.length > 0 && (
-              <section className="mb-24">
-                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/10 dark:border-white/10 pb-4">
-                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-40">C List</h2>
-                  <span className="text-gray-300 text-sm font-medium uppercase tracking-widest">Novidades e Lançamentos</span>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                  {cList.map(track => (
-                    <PlaylistCard 
-                      key={track.trackId} 
-                      track={track}
-                      isPlaying={activePreview === track.trackId}
-                      onTogglePlay={() => togglePreview(track)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-          </>
-        )}
-
-        <div className="bg-white dark:bg-[#111] p-12 mt-20 border border-gray-200 dark:border-white/5">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="flex items-center space-x-8">
-              <div className="w-16 h-16 bg-[#ff6600] rounded-full flex items-center justify-center text-white flex-shrink-0">
-                <Info className="w-8 h-8" />
-              </div>
-              <div>
-                <h4 className="text-2xl font-medium uppercase tracking-tighter dark:text-white">Rotação Diária</h4>
-                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-lg mt-2 uppercase font-normal tracking-tight leading-relaxed">
-                  A <span className="text-[#ff6600] font-medium">Playlist Praise FM Brasil</span> é atualizada a cada 24 horas. Selecionamos as músicas mais impactantes de todo o país para inspirar sua jornada de fé diariamente.
-                </p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setShowArchive(true)}
-              className="bg-black dark:bg-white text-white dark:text-black px-10 py-5 text-[10px] font-medium uppercase tracking-[0.3em] flex items-center space-x-3 hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all shadow-lg active:scale-95"
+          {/* Navegação Desktop */}
+          <nav className="hidden md:flex items-center space-x-8 h-full">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => navigate(item.path)}
+                  className={`flex items-center space-x-2 text-[13px] font-bold transition-all h-full border-b-2 px-1 uppercase tracking-wider ${isActive
+                      ? 'text-black dark:text-white border-[#ff6600]'
+                      : 'text-gray-500 border-transparent hover:text-black dark:hover:text-white'}`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#ff6600]' : 'text-gray-400'}`} strokeWidth={2} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => navigate('/my-sounds')}
+              className={`flex items-center space-x-2 text-[13px] font-bold transition-all h-full border-b-2 px-1 uppercase tracking-wider ${activeTab === 'my-sounds' ? 'text-black dark:text-white border-[#ff6600]' : 'text-gray-500 border-transparent hover:text-black dark:hover:text-white'}`}
             >
-              <span>Ver Listas Anteriores</span>
-              <ExternalLink className="w-4 h-4" />
+              <Library className="w-4 h-4" strokeWidth={2} />
+              <span>Meus Sons</span>
+            </button>
+          </nav>
+        </div>
+
+        <div className="flex items-center">
+          {/* Alternador de Tema */}
+          <button
+            onClick={onToggleTheme}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-400 mr-4 md:mr-8"
+          >
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-[#ff6600]" />}
+          </button>
+
+          <div className="flex items-center space-x-4">
+            {user ? (
+              <div className="hidden md:flex items-center space-x-4">
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center space-x-3 group"
+                >
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 flex items-center justify-center border border-transparent group-hover:border-[#ff6600] transition-all">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Usuário" className="w-full h-full object-cover" />
+                    ) : (
+                      <UserIcon className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-black dark:group-hover:text-white transition-colors">Perfil</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="hidden md:block text-[10px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-300 hover:text-[#ff6600] transition-colors"
+              >
+                Entrar
+              </button>
+            )}
+
+            {/* Menu Mobile */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 md:hidden text-gray-800 dark:text-white"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Drawer Menu Mobile */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 top-16 bg-white dark:bg-[#0b0b0b] z-40 md:hidden p-6 animate-in fade-in slide-in-from-top-4 duration-300 overflow-y-auto">
+          <nav className="flex flex-col space-y-2">
+            {navItems.map((item) => (
+              <button 
+                key={item.id}
+                onClick={() => { navigate(item.path); setIsMobileMenuOpen(false); }}
+                className={`flex items-center space-x-4 p-4 rounded-xl text-lg font-bold uppercase tracking-tighter ${activeTab === item.id ? 'bg-[#ff6600]/10 text-[#ff6600]' : 'text-gray-600 dark:text-gray-400'}`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span>{item.label}</span>
+              </button>
+            ))}
+            <button 
+              onClick={() => { navigate('/my-sounds'); setIsMobileMenuOpen(false); }}
+              className={`flex items-center space-x-4 p-4 rounded-xl text-lg font-bold uppercase tracking-tighter ${activeTab === 'my-sounds' ? 'bg-[#ff6600]/10 text-[#ff6600]' : 'text-gray-600 dark:text-gray-400'}`}
+            >
+              <Library className="w-5 h-5" />
+              <span>Meus Sons</span>
+            </button>
+            
+            <div className="mt-4 pt-8 border-t border-gray-100 dark:border-white/5">
+              {user ? (
+                <button 
+                  onClick={() => { navigate('/profile'); setIsMobileMenuOpen(false); }}
+                  className="flex items-center space-x-4 p-4 rounded-xl text-lg font-bold text-[#ff6600] uppercase tracking-tighter"
+                >
+                  <Settings className="w-5 h-5" />
+                  <span>Configurações</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={() => { navigate('/login'); setIsMobileMenuOpen(false); }}
+                  className="flex items-center space-x-4 p-4 rounded-xl text-lg font-bold text-[#ff6600] uppercase tracking-tighter"
+                >
+                  <UserIcon className="w-5 h-5" />
+                  <span>Entrar / Criar Conta</span>
+                </button>
+              )}
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 };
 
-export default Playlist;
+export default Navbar;
