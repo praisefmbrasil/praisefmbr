@@ -27,7 +27,7 @@ interface ProgramDetailProps {
 
 const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/hvwifp8ezc6tv';
 
-// Ajustado para o fuso horário de Brasília
+// Ajustado para o fuso horário de Brasília (Praise FM Brasil)
 const getBrasiliaTotalMinutes = () => {
   const now = new Date();
   const brasiliaDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
@@ -81,7 +81,7 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
             grouped[date].push({
               artist: item.artist,
               title: item.title,
-              label: item.label || "TOCADA RECENTEMENTE",
+              label: item.label || "TOCADA ANTERIORMENTE",
               image: item.image_url,
               timestamp: new Date(item.played_at).getTime(),
               isLive: false
@@ -91,7 +91,7 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
           localStorage.setItem(`history_v2_${program.id}`, JSON.stringify(grouped));
         }
       } catch (err) {
-        console.error("Erro ao carregar histórico", err);
+        console.error("Falha ao carregar histórico", err);
       } finally {
         setLoadingHistory(false);
       }
@@ -143,8 +143,9 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
               const [artistPart, ...titleParts] = streamTitle.split(' - ');
               const artist = artistPart.trim();
               const title = titleParts.join(' - ').trim();
-              
-              const blocked = ['praise fm', 'comercial', 'vinheta', 'promo'].some(k => 
+              if (!artist || !title) return;
+
+              const blocked = ['praise fm', 'comercial', 'vinheta', 'promo', 'chamada'].some(k => 
                 title.toLowerCase().includes(k) || artist.toLowerCase().includes(k)
               );
               if (blocked) return;
@@ -161,7 +162,7 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
 
               setHistoryGroups(prev => {
                 const currentDayTracks = prev[todayKey] || [];
-                if (currentDayTracks.length > 0 && currentDayTracks[0].title === newTrack.title) return prev;
+                if (currentDayTracks.length > 0 && currentDayTracks[0].title === newTrack.title && currentDayTracks[0].artist === newTrack.artist) return prev;
                 
                 const updatedDay = [newTrack, ...currentDayTracks.map(t => ({ ...t, isLive: false }))].slice(0, 50);
                 const newState = { ...prev, [todayKey]: updatedDay };
@@ -174,14 +175,18 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
                   image_url: imageUrl,
                   played_at: new Date(trackTimestamp).toISOString(),
                   label: "GRAVADO AO VIVO"
-                }]).catch(e => console.error(e));
+                }]).catch(e => console.error("Erro sincronia:", e.message));
 
                 return newState;
               });
             }
-          } catch (err) { console.error(err); }
+          } catch (err) { console.error("Erro parse metadata", err); }
         };
-      } catch (err) { console.error(err); }
+        es.onerror = () => {
+          es.close();
+          setTimeout(connectMetadata, 5000);
+        };
+      } catch (err) { console.error("Falha conexão", err); }
     };
 
     connectMetadata();
@@ -192,18 +197,16 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
 
   return (
     <div className="bg-[#121212] min-h-screen text-white font-sans transition-colors duration-300">
-      {/* Header com botão voltar */}
       <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
         <button onClick={onBack} className="flex items-center text-gray-400 hover:text-white transition-colors group mb-6">
           <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Voltar para Início</span>
+          <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Voltar ao Início</span>
         </button>
         <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter text-white leading-tight mb-8">
           {program.title}
         </h1>
       </div>
 
-      {/* Barra de Navegação de Detalhes */}
       <div className="bg-[#1a1a1a] border-b border-white/5 sticky top-16 z-40">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center space-x-8">
@@ -218,7 +221,6 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Lado Esquerdo: Conteúdo Principal */}
           <div className="lg:col-span-8">
             <div className="relative aspect-video overflow-hidden mb-12 shadow-2xl group bg-[#000]">
               <img src={program.image} alt={program.title} className="w-full h-full object-cover" />
@@ -226,18 +228,17 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
               {isCurrentlyLive && (
                 <button onClick={onListenClick} className="absolute bottom-8 left-8 bg-[#ff6600] hover:bg-white text-black px-8 py-4 flex items-center space-x-4 transition-all">
                   <Volume2 className={`w-8 h-8 ${isPlaying ? 'animate-pulse' : ''}`} />
-                  <span className="text-2xl font-bold uppercase tracking-tighter">{isPlaying ? 'No Ar Agora' : 'Ouvir ao vivo'}</span>
+                  <span className="text-2xl font-bold uppercase tracking-tighter">{isPlaying ? 'No Ar Agora' : 'Ouvir Ao Vivo'}</span>
                 </button>
               )}
             </div>
 
             <div className="mb-12">
-              <h2 className="text-3xl font-bold mb-6 tracking-tighter uppercase text-white">Sobre o Programa</h2>
+              <h2 className="text-3xl font-bold mb-6 tracking-tighter uppercase text-white">Sobre</h2>
               <p className="text-lg text-gray-300 font-normal tracking-tight leading-relaxed mb-8">{program.description}</p>
             </div>
 
-            {/* Histórico de Músicas */}
-            <div className="bg-white text-black p-0 mb-12 shadow-2xl max-w-lg">
+            <div className="bg-white text-black p-0 mb-12 shadow-2xl border border-gray-100 max-w-lg">
               <div className="px-6 py-6 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="text-2xl font-bold uppercase tracking-tighter">Músicas Tocadas</h3>
                 {isCurrentlyLive && (
@@ -250,9 +251,9 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
               
               <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto no-scrollbar">
                 {loadingHistory ? (
-                  <div className="p-20 flex flex-col items-center justify-center text-gray-400">
+                  <div className="p-20 flex flex-col items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin text-[#ff6600] mb-4" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest">Carregando Histórico...</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Carregando Histórico...</p>
                   </div>
                 ) : sortedDateKeys.length > 0 ? (
                   sortedDateKeys.map(date => (
@@ -282,14 +283,13 @@ const ProgramDetail: React.FC<ProgramDetailProps> = ({ program, onBack, onViewSc
                 ) : (
                   <div className="p-12 text-center text-gray-400">
                     <Music className="w-10 h-10 mx-auto mb-4 opacity-20" />
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Nenhum histórico encontrado</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Sem histórico disponível</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Lado Direito: Info Lateral */}
           <div className="lg:col-span-4 space-y-12">
             <div className="bg-[#1a1a1a] p-8 border-l-4 border-[#ff6600]">
                <h3 className="text-[10px] font-bold uppercase text-gray-500 tracking-[0.2em] mb-4">Apresentador</h3>
