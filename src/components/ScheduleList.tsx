@@ -1,41 +1,62 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { SCHEDULES } from '../constants';
+import React from 'react';
+import { Calendar, Clock, ArrowLeft } from 'lucide-react';
 import { Program } from '../types';
+import { SCHEDULES } from '../constants';
 
-const ScheduleList: React.FC<{ onNavigateToProgram: (p: Program) => void }> = ({ onNavigateToProgram }) => {
-  const navigate = useNavigate();
-  const [now] = useState(new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })));
+// A INTERFACE CORRIGIDA AQUI:
+interface ScheduleListProps {
+  onNavigateToProgram: (program: Program) => void;
+  onBack: () => void; // <--- O TypeScript agora permite o uso do onBack
+}
 
-  const currentSchedule = useMemo(() => SCHEDULES[now.getDay()] || SCHEDULES[1], [now]);
-
+const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) => {
+  const days = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+  
   return (
-    <div className="min-h-screen bg-white dark:bg-black p-6 pb-24">
-      <button onClick={() => navigate('/app')} className="flex items-center text-[#ff6600] font-bold text-xs uppercase mb-8">
-        <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
-      </button>
+    <div className="bg-white dark:bg-[#000] min-h-screen pb-20">
+      <div className="max-w-7xl mx-auto px-4 pt-12">
+        {/* Botão Voltar com estilo Praise FM */}
+        <button 
+          onClick={onBack}
+          className="flex items-center text-gray-400 hover:text-[#ff6600] transition-colors group mb-8"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-[11px] font-black uppercase tracking-[0.2em]">Voltar ao Início</span>
+        </button>
 
-      <h1 className="text-5xl font-black uppercase tracking-tighter mb-12 border-b-4 border-black dark:border-white pb-4">
-        Programação
-      </h1>
+        <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter mb-12 italic dark:text-white">
+          Grade de<br /><span className="text-[#ff6600]">Programação</span>
+        </h1>
 
-      <div className="space-y-12">
-        {currentSchedule.map((prog) => (
-          <div 
-            key={prog.id} 
-            onClick={() => onNavigateToProgram(prog)}
-            className="flex items-start space-x-6 group cursor-pointer border-b border-gray-100 dark:border-white/5 pb-8"
-          >
-            <span className="text-2xl font-black text-gray-300 dark:text-gray-800 group-hover:text-[#ff6600] transition-colors">
-              {prog.startTime}
-            </span>
-            <div>
-              <h4 className="text-xl font-bold uppercase group-hover:text-[#ff6600]">{prog.title}</h4>
-              <p className="text-sm text-gray-500 uppercase font-bold">com {prog.host}</p>
-            </div>
-          </div>
-        ))}
+        <div className="space-y-20">
+          {days.map((dayName, dayIndex) => (
+            <section key={dayName} className="border-t-4 border-black dark:border-white pt-8">
+              <h2 className="text-3xl font-black uppercase mb-8 flex items-center dark:text-white">
+                <Calendar className="mr-4 text-[#ff6600]" />
+                {dayName}
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {(SCHEDULES[dayIndex as keyof typeof SCHEDULES] || []).map((prog) => (
+                  <div 
+                    key={`${dayIndex}-${prog.id}`}
+                    onClick={() => onNavigateToProgram(prog)}
+                    className="group cursor-pointer bg-gray-50 dark:bg-[#0f0f0f] p-6 border border-transparent hover:border-[#ff6600] transition-all"
+                  >
+                    <div className="flex items-center text-[#ff6600] text-[10px] font-black uppercase tracking-widest mb-4">
+                      <Clock className="w-3 h-3 mr-2" />
+                      {prog.startTime} - {prog.endTime}
+                    </div>
+                    <h3 className="text-xl font-black uppercase dark:text-white group-hover:text-[#ff6600] transition-colors">
+                      {prog.title}
+                    </h3>
+                    <p className="text-gray-500 text-xs mt-2 uppercase font-bold">{prog.host}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
     </div>
   );
