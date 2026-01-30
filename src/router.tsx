@@ -17,7 +17,6 @@ import ProfilePage from './pages/ProfilePage';
 // Importação de Tipos
 import { Program } from './types';
 
-// Definimos o que o Router precisa receber para a Navbar e outros componentes
 interface RouterProps {
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
@@ -40,12 +39,13 @@ const AppRouter: React.FC<RouterProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Cálculo da aba ativa e visualização de auth
+  // Define a aba ativa e se é uma vista de autenticação
   const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
   const isAuthView = ['/login', '/signup'].includes(location.pathname);
 
   return (
     <>
+      {/* Resolve o erro da Navbar passando as 3 props obrigatórias */}
       {!isAuthView && (
         <Navbar 
           activeTab={activeTab} 
