@@ -1,185 +1,195 @@
-import React, { useState, useEffect } from 'react';
-// Removido AlertCircle e outros ícones que causavam erro de importação
-import { Loader2, Search, X, Music, Info, Bell, BellRing, Home, Calendar, User } from 'lucide-react'; 
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabaseClient';
-import EventCard from '../components/EventCard';
+import React, { useState } from 'react'
+import {
+  Calendar,
+  MapPin,
+  Ticket,
+  Search,
+  ArrowLeft
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
-const BANDSINTOWN_APP_ID = 'praise_fm_bra_2026';
+type EventItem = {
+  date: string
+  venue: string
+  city: string
+  link: string
+}
 
-// Integrado com seus links oficiais do Cloudinary
-const FEATURED_GOSPEL_ARTISTS = [
-  { name: 'Fernandinho', genre: 'Louvor e Adoração', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp' },
-  { name: 'Isaias Saad', genre: 'Worship Brasil', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp' },
-  { name: 'Gabriela Rocha', genre: 'Adoração Contemporânea', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp' },
-  { name: 'Aline Barros', genre: 'Gospel Pop', image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp' }
-];
+type Artist = {
+  name: string
+  genre: string
+  image: string
+}
+
+// Artistas atualizados com os links do Cloudinary 
+const ARTISTS: Artist[] = [
+  {
+    name: 'Fernandinho',
+    genre: 'Christian Rock / Worship',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp',
+  },
+  {
+    name: 'Isaias Saad',
+    genre: 'Worship / Pop',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Isaias_Saad_fodxcn.webp',
+  },
+  {
+    name: 'Gabriela Rocha',
+    genre: 'Worship',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp',
+  },
+  {
+    name: 'Aline Barros',
+    genre: 'Gospel / Pop',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp',
+  },
+]
 
 const EventsPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searching, setSearching] = useState(false);
-  const [events, setEvents] = useState<any[]>([]);
-  const [currentArtist, setCurrentArtist] = useState<string | null>(null);
-  const [showAlertSystem, setShowAlertSystem] = useState(false);
-  const [subscribedArtists, setSubscribedArtists] = useState<string[]>([]);
-  const [isSavingAlerts, setIsSavingAlerts] = useState(false);
+  const [loadingArtist, setLoadingArtist] = useState<string | null>(null)
+  const [events, setEvents] = useState<Record<string, EventItem[]>>({})
 
-  // Busca alertas do perfil no Supabase
-  useEffect(() => {
-    if (user) {
-      const fetchAlerts = async () => {
-        const { data } = await supabase
-          .from('profiles')
-          .select('artist_alerts')
-          .eq('id', user.id)
-          .single();
-        if (data?.artist_alerts) setSubscribedArtists(data.artist_alerts);
-      };
-      fetchAlerts();
-    }
-  }, [user]);
+  const findEvents = (artistName: string) => {
+    setLoadingArtist(artistName)
 
-  const fetchArtistEvents = async (artistName: string) => {
-    if (!artistName.trim()) return;
-    setSearching(true);
-    setCurrentArtist(artistName);
-    
-    try {
-      const response = await fetch(
-        `https://rest.bandsintown.com/artists/${encodeURIComponent(artistName)}/events?app_id=${BANDSINTOWN_APP_ID}`
-      );
-      const data = await response.json();
-      setEvents(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error("Erro ao buscar eventos", err);
-      setEvents([]);
-    } finally {
-      setSearching(false);
-    }
-  };
-
-  const saveAlerts = async () => {
-    if (!user) return navigate('/login');
-    setIsSavingAlerts(true);
-    await supabase.from('profiles').update({ artist_alerts: subscribedArtists }).eq('id', user.id);
-    setIsSavingAlerts(false);
-    setShowAlertSystem(false);
-  };
+    // Simulação de busca de eventos em solo brasileiro
+    setTimeout(() => {
+      setEvents((prev) => ({
+        ...prev,
+        [artistName]: [
+          {
+            date: '15 Mai, 2026',
+            venue: 'Espaço Unimed',
+            city: 'São Paulo, SP',
+            link: 'https://www.eventim.com.br',
+          },
+          {
+            date: '12 Jun, 2026',
+            venue: 'Jeunesse Arena',
+            city: 'Rio de Janeiro, RJ',
+            link: 'https://www.ticketmaster.com.br',
+          },
+        ],
+      }))
+      setLoadingArtist(null)
+    }, 1200)
+  }
 
   return (
-    <div className="bg-white dark:bg-black min-h-screen pb-32 transition-colors">
-      {/* Header Estilizado */}
-      <header className="p-6 bg-black text-white flex justify-between items-center border-b border-white/10">
-        <h1 className="text-2xl font-black italic tracking-tighter">EVENTOS GOSPEL</h1>
-        <button onClick={() => setShowAlertSystem(true)} className="relative p-2 bg-white/10 rounded-full">
-          {subscribedArtists.length > 0 ? <BellRing size={20} className="text-[#ff6600]" /> : <Bell size={20} />}
-        </button>
-      </header>
+    <div className="min-h-screen bg-white dark:bg-[#000] text-black dark:text-white pb-32">
+      
+      {/* HERO SECTION */}
+      <section className="bg-black text-white pt-24 pb-20 px-6 border-b border-white/10 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto relative z-10">
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center text-gray-400 hover:text-[#ff6600] mb-12 text-[10px] font-black uppercase tracking-[0.4em] group transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            Voltar
+          </button>
 
-      {/* Busca */}
-      <div className="p-6 bg-black">
-        <div className="relative">
-          <input 
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && fetchArtistEvents(searchTerm)}
-            placeholder="Buscar cantor ou banda..."
-            className="w-full bg-white/10 border-none p-4 pl-12 rounded-2xl text-white outline-none focus:ring-2 focus:ring-[#ff6600]"
-          />
-          <Search className="absolute left-4 top-4 text-gray-400" size={20} />
-          {searching && <Loader2 className="absolute right-4 top-4 animate-spin text-[#ff6600]" size={20} />}
+          <div className="flex items-center gap-3 text-[#ff6600] mb-6">
+            <Ticket size={20} className="stroke-[2.5px]" />
+            <span className="text-[10px] font-black tracking-[0.5em] uppercase">
+              Agenda Praise FM Brasil
+            </span>
+          </div>
+
+          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none">
+            Eventos e<br />Shows
+          </h1>
+
+          <p className="mt-8 max-w-2xl text-gray-400 font-bold uppercase text-[11px] tracking-[0.2em] leading-relaxed">
+            Acompanhe os maiores ministérios de louvor do país. Datas, locais e ingressos em um só lugar.
+          </p>
         </div>
-      </div>
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-[#ff6600]/5 skew-x-[-20deg] translate-x-20" />
+      </section>
 
-      <main className="p-6 space-y-8">
-        {/* Artistas em Destaque */}
-        {!currentArtist && (
-          <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Artistas Recomendados</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {FEATURED_GOSPEL_ARTISTS.map(artist => (
-                <button 
-                  key={artist.name}
-                  onClick={() => { setSearchTerm(artist.name); fetchArtistEvents(artist.name); }}
-                  className="relative group overflow-hidden rounded-3xl aspect-square"
-                >
-                  <img src={artist.image} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4 text-left">
-                    <p className="text-white font-bold text-sm">{artist.name}</p>
-                    <p className="text-[#ff6600] text-[10px] font-bold uppercase tracking-tighter">{artist.genre}</p>
-                  </div>
-                </button>
-              ))}
+      {/* LISTA DE ARTISTAS */}
+      <section className="max-w-6xl mx-auto px-6 py-20 space-y-16">
+        {ARTISTS.map((artist) => (
+          <div
+            key={artist.name}
+            className="flex flex-col md:flex-row bg-gray-50 dark:bg-[#0a0a0a] border border-gray-100 dark:border-white/5 rounded-sm overflow-hidden group shadow-2xl"
+          >
+            {/* IMAGEM DO ARTISTA  */}
+            <div className="md:w-2/5 aspect-square md:aspect-auto overflow-hidden">
+              <img
+                src={artist.image}
+                alt={artist.name}
+                className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
+              />
             </div>
-          </section>
-        )}
 
-        {/* Lista de Eventos Encontrados */}
-        {currentArtist && (
-          <section className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="font-black text-xl uppercase italic">Agenda: {currentArtist}</h2>
-              <button onClick={() => setCurrentArtist(null)} className="text-[#ff6600] text-xs font-bold uppercase">Limpar</button>
-            </div>
-            {events.length > 0 ? (
-              events.map((event, idx) => <EventCard key={idx} event={event} />)
-            ) : !searching && (
-              <div className="text-center py-20 opacity-40">
-                <Music size={48} className="mx-auto mb-4" />
-                <p>Nenhum evento encontrado para este artista.</p>
-              </div>
-            )}
-          </section>
-        )}
-      </main>
+            {/* CONTEÚDO */}
+            <div className="p-10 flex-1 flex flex-col justify-center">
+              <span className="text-[#ff6600] text-[10px] font-black uppercase tracking-[0.4em] mb-2">
+                {artist.genre}
+              </span>
 
-      {/* Modal de Alertas de Artistas */}
-      {showAlertSystem && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-end sm:items-center justify-center">
-          <div className="bg-white dark:bg-[#111] w-full max-w-lg rounded-t-[40px] sm:rounded-[40px] overflow-hidden">
-            <div className="p-8 flex justify-between items-center border-b dark:border-white/5">
-              <h2 className="text-xl font-black uppercase italic">Meus Alertas</h2>
-              <button onClick={() => setShowAlertSystem(false)} className="p-2 bg-gray-100 dark:bg-white/5 rounded-full"><X size={20}/></button>
-            </div>
-            <div className="p-8 space-y-4">
-              <p className="text-sm opacity-60">Selecione os artistas que você deseja receber notificações de novos shows.</p>
-              <div className="max-h-60 overflow-y-auto space-y-2">
-                {FEATURED_GOSPEL_ARTISTS.map(artist => (
-                   <label key={artist.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-2xl cursor-pointer">
-                      <span className="font-bold text-sm">{artist.name}</span>
-                      <input 
-                        type="checkbox" 
-                        checked={subscribedArtists.includes(artist.name)}
-                        onChange={() => setSubscribedArtists(prev => prev.includes(artist.name) ? prev.filter(a => a !== artist.name) : [...prev, artist.name])}
-                        className="w-5 h-5 accent-[#ff6600]"
-                      />
-                   </label>
-                ))}
-              </div>
-              <button 
-                onClick={saveAlerts}
-                className="w-full bg-[#ff6600] text-white py-5 rounded-2xl font-black uppercase tracking-widest active:scale-95 transition-all"
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-8 leading-none">
+                {artist.name}
+              </h2>
+
+              <button
+                onClick={() => findEvents(artist.name)}
+                className="inline-flex items-center justify-center gap-3 bg-black dark:bg-white text-white dark:text-black px-10 py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all w-fit"
               >
-                {isSavingAlerts ? "Salvando..." : "Confirmar Configurações"}
+                {loadingArtist === artist.name ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    Buscando Agenda...
+                  </div>
+                ) : (
+                  <>
+                    <Search size={14} className="stroke-[3px]" />
+                    Buscar Ingressos
+                  </>
+                )}
               </button>
+
+              {/* LISTA DE DATAS ENCONTRADAS */}
+              {events[artist.name] && (
+                <div className="mt-12 space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
+                  {events[artist.name].map((event, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col sm:flex-row justify-between items-center gap-6 border border-gray-200 dark:border-white/10 p-6 bg-white dark:bg-black hover:border-[#ff6600] transition-all"
+                    >
+                      <div className="flex items-center gap-6 w-full">
+                        <div className="bg-[#ff6600] p-3 text-black">
+                          <Calendar size={20} className="stroke-[2.5px]" />
+                        </div>
+                        <div>
+                          <p className="font-black uppercase text-sm tracking-tight">{event.venue}</p>
+                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">
+                            {event.date} • {event.city}
+                          </p>
+                        </div>
+                      </div>
+
+                      <a
+                        href={event.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="bg-black dark:bg-white text-white dark:text-black px-8 py-4 text-[9px] font-black uppercase tracking-widest hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all whitespace-nowrap flex items-center gap-2 w-full sm:w-auto justify-center"
+                      >
+                        Comprar
+                        <MapPin size={12} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Navegação Inferior */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-black/95 backdrop-blur-xl border-t border-gray-100 dark:border-white/10 px-8 py-5 flex justify-between items-center z-50">
-        <button onClick={() => navigate('/app')} className="text-gray-400"><Home size={24}/></button>
-        <button onClick={() => navigate('/music')} className="text-gray-400"><Music size={24}/></button>
-        <button onClick={() => navigate('/events')} className="text-[#ff6600]"><Calendar size={24}/></button>
-        <button onClick={() => navigate('/profile')} className="text-gray-400"><User size={24}/></button>
-      </nav>
+        ))}
+      </section>
     </div>
-  );
-};
+  )
+}
 
-export default EventsPage;
+export default EventsPage

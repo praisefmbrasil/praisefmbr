@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { User, Mail, Camera, Save, Loader2, ArrowLeft, ShieldCheck, Upload, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,8 +34,6 @@ const ProfilePage: React.FC = () => {
         .eq('id', user?.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 é "nenhum registro encontrado"
-
       if (data) {
         setProfile(prev => ({ 
           ...prev, 
@@ -44,7 +42,7 @@ const ProfilePage: React.FC = () => {
         }));
       }
     } catch (err) {
-      console.error("Error fetching profile:", err);
+      console.error("Erro ao buscar perfil:", err);
     } finally {
       setFetching(false);
     }
@@ -56,32 +54,29 @@ const ProfilePage: React.FC = () => {
       setMessage(null);
 
       if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('Você precisa selecionar uma imagem.');
+        throw new Error('Você precisa selecionar uma imagem para upload.');
       }
 
       const file = event.target.files[0];
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user?.id}-${Date.now()}.${fileExt}`; // Usar timestamp é mais seguro que random
+      const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // 1. Upload para o Bucket 'avatars'
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // 2. Obter URL Pública
       const { data: { publicUrl } } = supabase.storage
         .from('avatars')
         .getPublicUrl(filePath);
 
-      // 3. Atualizar estado local
       setProfile(prev => ({ ...prev, avatar_url: publicUrl }));
       setMessage({ type: 'success', text: 'Foto carregada! Não esqueça de salvar as alterações.' });
 
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Erro no upload. Verifique se o bucket "avatars" é público.' });
+      setMessage({ type: 'error', text: error.message || 'Erro ao carregar imagem.' });
     } finally {
       setUploading(false);
     }
@@ -105,7 +100,7 @@ const ProfilePage: React.FC = () => {
       if (error) throw error;
       setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
       
-      setTimeout(() => setMessage(null), 4000);
+      setTimeout(() => setMessage(null), 3000);
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Erro ao salvar perfil' });
     } finally {
@@ -116,63 +111,57 @@ const ProfilePage: React.FC = () => {
   if (fetching && !profile.username) {
     return (
       <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="w-10 h-10 animate-spin text-[#ff6600]" />
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-500">Sincronizando Praise ID</p>
-        </div>
+        <Loader2 className="w-8 h-8 animate-spin text-[#ff6600]" />
       </div>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300 antialiased">
-      {/* Header Editorial */}
-      <div className="bg-black text-white py-24 border-b border-white/5 relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 relative z-10">
+    <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300">
+      {/* Header Brutalista */}
+      <div className="bg-black text-white py-24 border-b-4 border-[#ff6600] relative overflow-hidden">
+        <div className="max-w-5xl mx-auto px-4 relative z-10">
           <button 
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-500 hover:text-[#ff6600] mb-12 text-[10px] font-bold uppercase tracking-[0.4em] group transition-colors"
+            className="flex items-center text-gray-400 hover:text-white mb-10 text-[10px] font-black uppercase tracking-[0.4em] group"
           >
-            <ArrowLeft className="w-4 h-4 mr-3 group-hover:-translate-x-2 transition-transform" />
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Voltar
           </button>
-          <h1 className="text-6xl md:text-8xl font-medium uppercase tracking-tighter leading-none">
-            Minha<br />Conta
-          </h1>
+          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-none italic">Sua Conta</h1>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+      <div className="max-w-5xl mx-auto px-4 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-16">
           
-          {/* Coluna da Esquerda: Avatar e Status */}
-          <div className="lg:col-span-4 flex flex-col items-center">
+          {/* Coluna da Foto */}
+          <div className="md:col-span-4 flex flex-col items-center">
             <div 
               className="relative w-56 h-56 group cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
-              <div className="w-full h-full rounded-full overflow-hidden bg-gray-100 dark:bg-white/5 border-[1px] border-gray-200 dark:border-white/10 flex items-center justify-center shadow-2xl transition-all duration-500 group-hover:border-[#ff6600]">
+              <div className="w-full h-full bg-gray-100 dark:bg-[#111] border-4 border-black dark:border-white flex items-center justify-center shadow-[10px_10px_0px_#ff6600] transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none overflow-hidden">
                 {uploading ? (
-                  <div className="flex flex-col items-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#ff6600]" />
-                  </div>
+                  <Loader2 className="w-10 h-10 animate-spin text-[#ff6600]" />
                 ) : profile.avatar_url ? (
                   <img 
                     src={profile.avatar_url} 
-                    alt="Profile" 
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    alt="Perfil" 
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="flex flex-col items-center text-gray-400">
-                    <User className="w-16 h-16 mb-2 opacity-20" />
+                    <User className="w-16 h-16 mb-2" />
+                    <span className="text-[9px] font-black uppercase tracking-widest">Enviar Foto</span>
                   </div>
                 )}
               </div>
               
-              {/* Overlay de Upload */}
-              <div className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                <Camera className="w-8 h-8 mb-2 text-[#ff6600]" />
-                <span className="text-[9px] font-black uppercase tracking-widest">Alterar Foto</span>
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                <Camera className="w-8 h-8 mb-2" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Alterar</span>
               </div>
 
               <input 
@@ -184,96 +173,83 @@ const ProfilePage: React.FC = () => {
               />
             </div>
             
-            <div className="text-center mt-10">
-              <h2 className="text-3xl font-medium uppercase tracking-tighter dark:text-white">
-                {profile.username || 'Ouvinte Praise'}
-              </h2>
-              <div className="flex items-center justify-center mt-3 space-x-3">
-                <ShieldCheck className="w-4 h-4 text-[#ff6600]" />
-                <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">Praise ID Verificado</p>
-              </div>
+            <h2 className="mt-12 text-4xl font-black uppercase tracking-tighter dark:text-white text-center italic">
+              {profile.username || 'Ouvinte Praise'}
+            </h2>
+            <div className="flex items-center mt-3 space-x-2 bg-gray-100 dark:bg-white/5 px-4 py-1">
+              <ShieldCheck className="w-4 h-4 text-[#ff6600]" />
+              <p className="text-black dark:text-white text-[10px] font-black uppercase tracking-[0.2em]">Praise ID Verificado</p>
             </div>
 
             <button 
               onClick={signOut}
-              className="mt-16 flex items-center space-x-3 text-red-500/60 hover:text-red-500 text-[10px] font-bold uppercase tracking-[0.3em] transition-all group"
+              className="mt-16 flex items-center space-x-2 text-red-500 text-[11px] font-black uppercase tracking-[0.3em] hover:bg-red-500 hover:text-white p-3 border-2 border-red-500 transition-all w-full justify-center"
             >
-              <LogOut className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              <span>Encerrar Sessão</span>
+              <LogOut className="w-4 h-4" />
+              <span>Sair da Conta</span>
             </button>
           </div>
 
-          {/* Coluna da Direita: Formulário */}
-          <div className="lg:col-span-8">
+          {/* Coluna do Formulário */}
+          <div className="md:col-span-8">
             <form onSubmit={handleUpdate} className="space-y-12">
               {message && (
-                <div className={`p-6 text-[10px] font-bold uppercase tracking-[0.2em] border-l-2 animate-in fade-in slide-in-from-left-4 ${
-                  message.type === 'success' 
-                  ? 'bg-green-500/5 text-green-500 border-green-500' 
-                  : 'bg-red-500/5 text-red-500 border-red-500'
-                }`}>
+                <div className={`p-6 text-xs font-black uppercase tracking-widest border-l-8 animate-in fade-in slide-in-from-top-2 shadow-lg ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-600' : 'bg-red-50 text-red-700 border-red-600'}`}>
                   {message.text}
                 </div>
               )}
 
-              <div className="grid gap-12">
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">
-                    Nome de Exibição
-                  </label>
-                  <input 
-                    type="text"
-                    required
-                    value={profile.username}
-                    onChange={(e) => setProfile({...profile, username: e.target.value})}
-                    className="w-full bg-transparent border-b border-gray-200 dark:border-white/10 focus:border-[#ff6600] py-4 outline-none transition-all dark:text-white text-2xl font-light tracking-tight placeholder:text-gray-200 dark:placeholder:text-white/5"
-                    placeholder="Como quer ser chamado?"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400">
-                    E-mail de Acesso
-                  </label>
-                  <div className="flex items-center border-b border-gray-100 dark:border-white/5 py-4">
-                    <Mail className="w-4 h-4 mr-4 text-gray-300" />
-                    <input 
-                      type="email"
-                      disabled
-                      value={profile.email}
-                      className="w-full bg-transparent outline-none text-gray-400 font-light text-xl cursor-not-allowed"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-4">
+                <label className="text-[11px] font-black uppercase tracking-[0.4em] text-[#ff6600] flex items-center">
+                  <User className="w-4 h-4 mr-2" /> Nome de Exibição
+                </label>
+                <input 
+                  type="text"
+                  required
+                  value={profile.username}
+                  onChange={(e) => setProfile({...profile, username: e.target.value})}
+                  className="w-full bg-gray-50 dark:bg-white/5 border-4 border-black dark:border-white focus:border-[#ff6600] p-6 outline-none transition-all dark:text-white text-xl font-black italic uppercase tracking-tighter"
+                  placeholder="Seu Nome"
+                />
               </div>
 
-              <div className="pt-8">
+              <div className="space-y-4">
+                <label className="text-[11px] font-black uppercase tracking-[0.4em] text-gray-400 flex items-center">
+                  <Mail className="w-4 h-4 mr-2" /> Endereço de E-mail
+                </label>
+                <input 
+                  type="email"
+                  disabled
+                  value={profile.email}
+                  className="w-full bg-gray-100 dark:bg-white/10 p-6 outline-none text-gray-500 font-bold cursor-not-allowed border-4 border-dashed border-gray-300 dark:border-white/10 italic text-xl uppercase tracking-tighter"
+                />
+              </div>
+
+              <div className="pt-6">
                 <button 
                   type="submit"
                   disabled={loading || uploading}
-                  className="w-full md:w-auto bg-[#ff6600] text-white px-20 py-6 text-[11px] font-bold uppercase tracking-[0.4em] hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center space-x-4 disabled:opacity-30 shadow-xl active:scale-95"
+                  className="w-full md:w-auto bg-[#ff6600] text-white px-16 py-6 text-[12px] font-black uppercase tracking-[0.4em] hover:bg-black transition-all flex items-center justify-center space-x-4 disabled:opacity-50 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#fff] active:translate-y-1 active:shadow-none"
                 >
-                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                  {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
                   <span>Salvar Alterações</span>
                 </button>
               </div>
             </form>
 
-            {/* Info Box Estilo Editorial */}
-            <div className="mt-24 p-10 bg-gray-50 dark:bg-white/[0.02] border border-gray-100 dark:border-white/5">
+            {/* Card Informativo */}
+            <div className="mt-24 p-10 bg-black dark:bg-white text-white dark:text-black shadow-[15px_15px_0px_#ff6600]">
               <div className="flex items-start space-x-6">
-                <Upload className="w-6 h-6 text-[#ff6600] mt-1" />
+                <Upload className="w-8 h-8 text-[#ff6600] flex-shrink-0" />
                 <div>
-                  <h4 className="text-xs font-bold uppercase tracking-widest dark:text-white mb-3">Privacidade e Dados</h4>
-                  <p className="text-[11px] text-gray-500 uppercase leading-loose font-normal tracking-wider">
-                    Suas informações de perfil são usadas apenas para personalizar sua experiência na Praise FM Brasil. 
-                    As fotos de perfil são armazenadas de forma segura via Supabase Storage.
+                  <h4 className="text-lg font-black uppercase tracking-widest italic">Upload Direto Ativo</h4>
+                  <p className="text-xs mt-3 uppercase leading-relaxed font-bold opacity-70">
+                    Você pode clicar no seu avatar para carregar uma nova foto diretamente. Usamos tecnologia Supabase Storage para garantir que seus dados e imagens estejam sempre seguros e acessíveis.
                   </p>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

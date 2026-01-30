@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, ArrowRight } from 'lucide-react';
-import type { Program } from '../types';
+import { Program } from '../types';
 import { SCHEDULES } from '../constants';
 
 interface PresentersPageProps {
@@ -11,120 +11,113 @@ const PRESENTERS_DATA = [
   {
     name: 'Samuel Andrade',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp',
-    bio: 'A voz serena das suas madrugadas. Samuel traz momentos de oração profunda e louvores que preparam o seu espírito para o novo dia.',
+    [cite_start]bio: 'Samuel conduz o "Madrugada com Cristo", trazendo uma palavra de paz e adoração profunda para quem busca a presença de Deus nas primeiras horas do dia[cite: 2, 3].',
     programTitle: 'Madrugada com Cristo'
   },
   {
     name: 'Lucas Martins',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp',
-    bio: 'Comece seu dia com muita fé e energia. Lucas apresenta as principais novidades da música cristã e reflexões que edificam sua manhã.',
+    [cite_start]bio: 'Comanda o "Manhã com Cristo", trazendo energia, louvores inspiradores e a motivação necessária para começar o seu dia bem informado e abençoado[cite: 2, 3].',
     programTitle: 'Manhã com Cristo'
   },
   {
     name: 'Rafael Costa',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp',
-    bio: 'Sua tarde com os maiores sucessos do mundo gospel. Rafael traz interatividade e alegria para o seu horário de trabalho.',
+    [cite_start]bio: 'O apresentador do "Tarde Gospel", selecionando as melhores músicas para acompanhar sua rotina com alegria e mensagens de fé[cite: 2, 3].',
     programTitle: 'Tarde Gospel'
   },
   {
     name: 'Ana Paula',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp',
-    bio: 'Uma entusiasta dos novos talentos. Ana Paula apresenta a nova geração de artistas e os lançamentos mais frescos do worship nacional.',
+    [cite_start]bio: 'Ana Paula apresenta o "Praise FM Nova Geração", focando nos novos talentos e nas batidas que movem a juventude cristã no Brasil[cite: 2, 3].',
     programTitle: 'Praise FM Nova Geração'
   },
   {
     name: 'Bruno Almeida',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp',
-    bio: 'Sua melhor companhia na volta para casa. Bruno mistura os hits do momento com histórias inspiradoras e muita descontração no trânsito.',
+    [cite_start]bio: 'No comando do "De Carona com a Praise FM", Bruno traz dinamismo e os grandes sucessos para o seu trajeto, garantindo uma volta para casa abençoada[cite: 2, 3].',
     programTitle: 'De Carona com a Praise FM'
   },
   {
     name: 'Rodrigo Veras',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp',
-    bio: 'Um mergulho na história da adoração. Rodrigo resgata os hinos inesquecíveis e as canções que marcaram gerações de cristãos no Brasil.',
+    [cite_start]bio: 'Rodrigo apresenta o "Praise FM Brasil Clássicos", revisitando os hinos e canções que marcaram gerações e construíram a história da música gospel[cite: 2, 3].',
     programTitle: 'Praise FM Brasil Clássicos'
+  },
+  {
+    name: 'Felipe Santos',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp',
+    [cite_start]bio: 'Responsável pelo "Domingo com Cristo", Felipe torna suas manhãs de domingo especiais com uma seleção de louvores que preparam o coração para a semana[cite: 2, 4].',
+    programTitle: 'Domingo com Cristo'
+  },
+  {
+    name: 'Thiago Moreira',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp',
+    [cite_start]bio: 'Thiago apresenta o "Praise FM Pop", trazendo o melhor do cenário cristão contemporâneo em um ritmo acelerado e envolvente[cite: 2, 4].',
+    programTitle: 'Praise FM Pop'
   }
 ];
 
 const PresentersPage: React.FC<PresentersPageProps> = ({ onNavigateToProgram }) => {
   
-  // Função otimizada para encontrar programas na grade
-  const findProgram = (title: string): Program | null => {
-    // Usamos flat() para criar uma lista única de todos os programas cadastrados no SCHEDULES
-    const allPrograms = Object.values(SCHEDULES).flat();
-    return allPrograms.find(p => p.title === title) || null;
+  const findProgram = (title: string) => {
+    for (let day = 0; day <= 6; day++) {
+      const prog = (SCHEDULES[day] || []).find(p => p.title.toUpperCase() === title.toUpperCase());
+      if (prog) return prog;
+    }
+    return null;
   };
 
   return (
-    <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300 antialiased">
-      {/* Header Editorial */}
-      <div className="bg-black text-white py-24 border-b border-white/5 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="flex items-center space-x-4 text-[#ff6600] mb-8">
-            <Users className="w-5 h-5" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.5em]">The Voices</span>
+    <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300">
+      {/* Header Estilo Brutalista */}
+      <div className="bg-black text-white py-24 border-b-4 border-[#ff6600] relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="flex items-center space-x-3 text-[#ff6600] mb-8 font-black uppercase tracking-[0.4em] text-[10px]">
+            <Users className="w-5 h-5 fill-current" />
+            [cite_start]<span>As Vozes da Praise FM Brasil [cite: 3]</span>
           </div>
-          <h1 className="text-6xl md:text-9xl font-medium uppercase tracking-tighter leading-[0.85] mb-10">
-            Nossos<br />Apresentadores
-          </h1>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl font-light uppercase tracking-tight leading-snug">
-            Conheça a equipe dedicada a te aproximar do coração da adoração todos os dias, em todas as estações da sua vida.
+          <h1 className="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-none mb-10 italic">Nossos<br />Locutores</h1>
+          <p className="text-xl text-gray-400 max-w-2xl font-bold uppercase tracking-tight leading-tight">
+            [cite_start]Conheça o time dedicado a levar a palavra de Deus e o melhor do louvor nacional até você, todos os dias da semana[cite: 3, 4].
           </p>
-        </div>
-        {/* Sutil detalhe de fundo para preencher o espaço */}
-        <div className="absolute right-[-10%] top-1/2 -translate-y-1/2 text-white/[0.02] text-[20vw] font-bold uppercase select-none pointer-events-none">
-          Praise
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {PRESENTERS_DATA.map((presenter, idx) => {
             const program = findProgram(presenter.programTitle);
             
             return (
-              <div key={idx} className="flex flex-col group transition-all duration-500">
-                {/* Image Container */}
-                <div className="relative aspect-[3/4] overflow-hidden bg-gray-100 dark:bg-[#111] mb-8">
+              <div key={idx} className="flex flex-col group bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-white/5 overflow-hidden transition-all duration-500 hover:shadow-[20px_20px_0px_rgba(255,102,0,0.15)]">
+                <div className="relative aspect-[3/4] overflow-hidden bg-black">
                   <img 
                     src={presenter.image} 
                     alt={presenter.name} 
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" 
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 md:opacity-0 group-hover:opacity-80 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
                   
-                  <div className="absolute bottom-8 left-8 right-8 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                    <span className="text-[#ff6600] text-[10px] font-bold uppercase tracking-[0.3em] mb-3 block opacity-0 group-hover:opacity-100 transition-opacity delay-100">
-                      {presenter.programTitle}
-                    </span>
-                    <h2 className="text-4xl font-medium text-white uppercase tracking-tighter leading-none opacity-0 group-hover:opacity-100 transition-opacity delay-200">
-                      {presenter.name}
-                    </h2>
+                  <div className="absolute bottom-8 left-8 right-8">
+                    [cite_start]<span className="text-[#ff6600] text-[10px] font-black uppercase tracking-[0.3em] mb-3 block">{presenter.programTitle} [cite: 3]</span>
+                    [cite_start]<h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none italic">{presenter.name} [cite: 2]</h2>
                   </div>
                 </div>
                 
-                {/* Text Content */}
-                <div className="flex-grow flex flex-col px-2">
-                  <h3 className="text-2xl font-medium uppercase tracking-tighter dark:text-white mb-4 md:hidden">
-                    {presenter.name}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-400 text-sm font-light leading-relaxed mb-8">
+                <div className="p-10 flex-grow flex flex-col">
+                  <p className="text-gray-600 dark:text-gray-400 text-sm font-bold leading-relaxed mb-10 uppercase tracking-tight">
                     {presenter.bio}
                   </p>
                   
                   <div className="mt-auto">
-                    {program ? (
-                      <button 
-                        onClick={() => onNavigateToProgram(program)}
-                        className="group/btn flex items-center space-x-4 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-900 dark:text-white hover:text-[#ff6600] dark:hover:text-[#ff6600] transition-colors"
-                      >
-                        <span>Explorar Programa</span>
-                        <div className="w-8 h-[1px] bg-current group-hover/btn:w-12 transition-all"></div>
-                        <ArrowRight className="w-3 h-3" />
-                      </button>
-                    ) : (
-                      <span className="text-[10px] text-gray-400 uppercase tracking-widest italic">Programação em breve</span>
-                    )}
+                    <button 
+                      onClick={() => program && onNavigateToProgram(program)}
+                      className="w-full bg-[#ff6600] text-white py-5 px-6 text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-3 hover:bg-black dark:hover:bg-white dark:hover:text-black transition-all group/btn"
+                    >
+                      <span>Ver Programa</span>
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -132,18 +125,18 @@ const PresentersPage: React.FC<PresentersPageProps> = ({ onNavigateToProgram }) 
           })}
         </div>
 
-        {/* Call to Action Final */}
-        <div className="mt-32 py-24 border-t border-gray-100 dark:border-white/5 flex flex-col items-center text-center">
-           <h4 className="text-5xl md:text-7xl font-medium uppercase tracking-tighter dark:text-white mb-8">Não perca o horário</h4>
-           <p className="text-gray-500 max-w-xl font-light uppercase tracking-tight text-base mb-12">
-             Confira nossa grade completa para saber exatamente quando sintonizar em seus apresentadores favoritos.
+        {/* Footer de Programação */}
+        <div className="mt-32 bg-gray-50 dark:bg-[#080808] p-12 md:p-24 flex flex-col items-center text-center border-4 border-black dark:border-white">
+           <h4 className="text-5xl md:text-6xl font-black uppercase tracking-tighter dark:text-white mb-8 italic">Grade de Programação 2026</h4>
+           <p className="text-gray-500 dark:text-gray-400 max-w-xl font-bold uppercase tracking-widest text-[10px] mb-12 leading-relaxed">
+             [cite_start]Acompanhe a Praise FM Brasil de segunda a domingo e não perca nenhum momento da nossa programação oficial[cite: 3, 4].
            </p>
            <button 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} // Ou redirecionamento de rota
-              className="border border-black dark:border-white text-black dark:text-white px-16 py-6 text-[11px] font-bold uppercase tracking-[0.4em] hover:bg-[#ff6600] hover:border-[#ff6600] hover:text-white transition-all"
+              onClick={() => window.location.hash = '#/schedule'}
+              className="bg-black dark:bg-white text-white dark:text-black px-16 py-6 text-[12px] font-black uppercase tracking-[0.3em] hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all shadow-[8px_8px_0px_#ff6600] active:translate-y-1 active:shadow-none"
             >
-              Grade de Programação
-            </button>
+              [cite_start]Ver Programação Completa [cite: 3]
+           </button>
         </div>
       </div>
     </div>

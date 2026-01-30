@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Zap, Flame, Heart, Share2, Loader2 } from 'lucide-react';
+import { Play, Pause, Zap, Flame, Calendar, Plus, Heart, Share2, Loader2 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,17 +15,17 @@ interface Release {
 const NEW_RELEASES_DATA: Release[] = [
   {
     id: 'nr1',
-    artist: 'Gabriela Rocha',
-    title: 'Me Atraiu',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp',
+    artist: 'Fernandinho',
+    title: 'Eis-me Aqui',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp',
     previewUrl: '',
     isHot: true
   },
   {
     id: 'nr2',
-    artist: 'Fernandinho',
-    title: 'Único',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Fernandinho_lwc71w.webp',
+    artist: 'Gabriela Rocha',
+    title: 'Me Atraiu',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Gabriela_Rocha_u1ipb5.webp',
     previewUrl: '',
     isHot: true
   },
@@ -39,23 +38,23 @@ const NEW_RELEASES_DATA: Release[] = [
   },
   {
     id: 'nr4',
-    artist: 'Morada',
-    title: 'Emaús',
-    image: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/44/9b/64/449b640e-7d2d-0a8b-4b2a-79659f8a3962/886449176162.jpg/800x800bb.jpg',
+    artist: 'Aline Barros',
+    title: 'Jeová Jireh',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp',
     previewUrl: ''
   },
   {
     id: 'nr5',
-    artist: 'Theo Rubia',
-    title: 'Pode Morar Aqui',
-    image: 'https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/31/58/01/31580138-080c-0435-01e4-6a84c688849b/22UMGIM73983.rgb.jpg/800x800bb.jpg',
+    artist: 'Morada',
+    title: 'É Tudo Sobre Você',
+    image: 'https://images.unsplash.com/photo-1514525253361-bee8718a300a?auto=format&fit=crop&q=80&w=800',
     previewUrl: ''
   },
   {
     id: 'nr6',
-    artist: 'Aline Barros',
-    title: 'Jeová Jireh',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769214957/Aline_Barros_k6euug.webp',
+    artist: 'Casa Worship',
+    title: 'A Casa É Sua',
+    image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80&w=800',
     previewUrl: ''
   }
 ];
@@ -76,21 +75,18 @@ const NewReleasesPage: React.FC = () => {
           const res = await fetch(`https://itunes.apple.com/search?term=${searchTerm}&media=music&entity=song&limit=1`);
           
           if (res.ok) {
-            const text = await res.text();
-            if (text && text.trim().length > 0) {
-              const json = JSON.parse(text);
-              if (json.results && json.results.length > 0) {
-                const track = json.results[0];
-                return { 
-                  ...item, 
-                  previewUrl: track.previewUrl || item.previewUrl,
-                  image: track.artworkUrl100 ? track.artworkUrl100.replace("100x100", "800x800") : item.image
-                };
-              }
+            const json = await res.json();
+            if (json.results && json.results.length > 0) {
+              const track = json.results[0];
+              return { 
+                ...item, 
+                previewUrl: track.previewUrl || item.previewUrl,
+                image: track.artworkUrl100 ? track.artworkUrl100.replace("100x100", "800x800") : item.image
+              };
             }
           }
         } catch (e) {
-          console.debug("Silent fallback for:", item.title);
+          console.debug("Falha ao buscar preview para:", item.title);
         }
         return item;
       }));
@@ -130,136 +126,130 @@ const NewReleasesPage: React.FC = () => {
     <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300">
       <audio ref={audioRef} onEnded={() => setActivePreview(null)} />
       
-      <div className="bg-black text-white relative overflow-hidden h-[70vh] flex items-center">
-        <div className="absolute inset-0 opacity-40">
+      {/* Hero Section - A Nova Onda */}
+      <div className="bg-black text-white relative overflow-hidden h-[75vh] flex items-center">
+        <div className="absolute inset-0 opacity-50">
           <img 
             src={mainHighlight.image} 
-            className="w-full h-full object-cover grayscale" 
+            className="w-full h-full object-cover grayscale blur-[2px]" 
             alt=""
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1514525253361-bee8718a300a?auto=format&fit=crop&q=80&w=1200';
-            }}
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
         
         <div className="max-w-7xl mx-auto px-4 relative z-10 w-full">
-          <div className="inline-flex items-center space-x-2 bg-[#ff6600] text-black px-4 py-1.5 mb-8">
+          <div className="inline-flex items-center space-x-2 bg-[#ff6600] text-white px-4 py-2 mb-8">
             <Zap className="w-4 h-4 fill-current" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em]">Single da Semana</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Single da Semana</span>
           </div>
-          <h1 className="text-7xl md:text-[10rem] font-medium uppercase tracking-tighter leading-[0.8] mb-8">Nova<br />Onda</h1>
+          <h1 className="text-7xl md:text-[11rem] font-black uppercase tracking-tighter leading-[0.8] mb-8 italic">A Nova<br />Onda</h1>
           <div className="flex flex-col md:flex-row md:items-end gap-12">
             <div>
-              <p className="text-[#ff6600] text-xl font-medium uppercase tracking-widest mb-2">{mainHighlight.artist}</p>
-              <h2 className="text-4xl md:text-5xl font-medium uppercase tracking-tight">{mainHighlight.title}</h2>
+              <p className="text-[#ff6600] text-2xl font-black uppercase tracking-widest mb-2">{mainHighlight.artist}</p>
+              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tight">{mainHighlight.title}</h2>
             </div>
             <button 
               onClick={() => togglePlay(mainHighlight.id, mainHighlight.previewUrl)}
-              className="bg-white text-black h-20 w-20 rounded-full flex items-center justify-center hover:bg-[#ff6600] hover:text-white transition-all transform hover:scale-105"
+              className="bg-[#ff6600] text-white h-24 w-24 rounded-none flex items-center justify-center hover:bg-white hover:text-black transition-all transform hover:scale-105 shadow-[10px_10px_0px_rgba(255,102,0,0.3)]"
             >
-              {activePreview === mainHighlight.id ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
+              {activePreview === mainHighlight.id ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current ml-1" />}
             </button>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-24">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-16 border-b-2 border-black dark:border-white pb-8">
-          <div className="flex items-center space-x-4 mb-6 md:mb-0">
-            <h3 className="text-4xl font-medium uppercase tracking-tighter dark:text-white">Esta Semana</h3>
-            <span className="text-gray-400 font-normal uppercase tracking-widest text-sm pt-2">Jan 2026</span>
+        {/* Filtros e Título */}
+        <div className="flex flex-col md:flex-row items-center justify-between mb-16 border-b-4 border-black dark:border-white pb-10">
+          <div className="flex items-center space-x-6 mb-8 md:mb-0">
+            <h3 className="text-5xl font-black uppercase tracking-tighter dark:text-white italic">Esta Semana</h3>
+            <span className="bg-black dark:bg-white text-white dark:text-black px-3 py-1 font-black uppercase tracking-widest text-[10px]">Jan 2026</span>
           </div>
-          <div className="flex space-x-4">
-             <button className="bg-black dark:bg-white text-white dark:text-black px-6 py-2 text-[10px] font-black uppercase tracking-widest border border-transparent">Lançamentos</button>
-             <button className="bg-transparent text-gray-400 px-6 py-2 text-[10px] font-black uppercase tracking-widest border border-gray-200 dark:border-white/10 hover:border-black dark:hover:border-white transition-colors">Arquivo</button>
+          <div className="flex space-x-2">
+             <button className="bg-[#ff6600] text-white px-8 py-3 text-[11px] font-black uppercase tracking-widest shadow-[4px_4px_0px_black] dark:shadow-[4px_4px_0px_white]">Recentes</button>
+             <button className="bg-transparent text-gray-400 px-8 py-3 text-[11px] font-black uppercase tracking-widest border border-gray-200 dark:border-white/10 hover:text-black dark:hover:text-white transition-colors">Arquivo</button>
           </div>
         </div>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-40">
-            <Loader2 className="w-12 h-12 text-[#ff6600] animate-spin mb-4" />
-            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gray-400">Escaneando novos hinos...</p>
+            <Loader2 className="w-16 h-16 text-[#ff6600] animate-spin mb-6" />
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400">Escaneando novos hinos...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-100 dark:bg-white/5 border border-gray-100 dark:border-white/5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-gray-200 dark:bg-white/10 border-x border-b border-gray-200 dark:border-white/10">
             {releases.map((release) => (
-              <div key={release.id} className="bg-white dark:bg-[#111] group relative">
+              <div key={release.id} className="bg-white dark:bg-[#080808] group relative overflow-hidden">
                 <div className="aspect-square relative overflow-hidden">
                   <img 
                     src={release.image} 
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" 
                     alt={release.title} 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://picsum.photos/seed/${encodeURIComponent(release.artist + release.title)}/800/800`;
-                    }}
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all"></div>
                   
                   {release.isHot && (
-                    <div className="absolute top-6 left-6 bg-[#ff6600] text-white p-2 flex items-center space-x-2">
+                    <div className="absolute top-0 right-0 bg-red-600 text-white px-4 py-2 flex items-center space-x-2 z-20">
                       <Flame className="w-4 h-4 fill-current" />
-                      <span className="text-[9px] font-black uppercase tracking-widest">Em Alta</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Em Alta</span>
                     </div>
                   )}
 
-                  <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-black/80 backdrop-blur-md">
-                    <div className="flex items-center justify-between mb-4">
+                  {/* Overlay de Ações ao passar o mouse */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center backdrop-blur-sm">
+                    <button 
+                      onClick={() => togglePlay(release.id, release.previewUrl)}
+                      className="bg-[#ff6600] text-white p-6 mb-6 hover:scale-110 transition-transform"
+                    >
+                      {activePreview === release.id ? <Pause className="w-8 h-8 fill-current" /> : <Play className="w-8 h-8 fill-current ml-1" />}
+                    </button>
+                    <div className="flex space-x-3">
                       <button 
-                        onClick={() => togglePlay(release.id, release.previewUrl)}
-                        className="bg-[#ff6600] text-white p-4 rounded-full"
+                        onClick={(e) => handleFavorite(e, release)}
+                        className={`p-4 border ${isFavorite(release.id) ? 'bg-red-600 border-red-600 text-white' : 'border-white/20 text-white hover:bg-white hover:text-black'}`}
                       >
-                        {activePreview === release.id ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-1" />}
+                        <Heart className={`w-5 h-5 ${isFavorite(release.id) ? 'fill-current' : ''}`} />
                       </button>
-                      <div className="flex space-x-2">
-                        <button 
-                          onClick={(e) => handleFavorite(e, release)}
-                          className={`p-3 rounded-full border ${isFavorite(release.id) ? 'bg-red-500 border-red-500 text-white' : 'border-white/20 text-white hover:bg-white hover:text-black'}`}
-                        >
-                          <Heart className={`w-4 h-4 ${isFavorite(release.id) ? 'fill-current' : ''}`} />
-                        </button>
-                        <button className="p-3 rounded-full border border-white/20 text-white hover:bg-white hover:text-black">
-                          <Share2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <button className="p-4 border border-white/20 text-white hover:bg-white hover:text-black">
+                        <Share2 className="w-5 h-5" />
+                      </button>
                     </div>
-                    <p className="text-[#ff6600] text-[10px] font-black uppercase tracking-[0.2em] mb-1">{release.artist}</p>
-                    <h4 className="text-white text-xl font-medium uppercase tracking-tight truncate">{release.title}</h4>
                   </div>
                 </div>
                 
-                <div className="p-8 group-hover:bg-[#ff6600] transition-colors duration-500">
-                  <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2 group-hover:text-black/60">{release.artist}</p>
-                  <h4 className="text-black dark:text-white text-2xl font-medium uppercase tracking-tighter truncate group-hover:text-black">{release.title}</h4>
+                {/* Info Card */}
+                <div className="p-10 group-hover:bg-[#ff6600] transition-colors duration-500 min-h-[160px] flex flex-col justify-center">
+                  <p className="text-[#ff6600] text-[11px] font-black uppercase tracking-[0.2em] mb-2 group-hover:text-black/50">{release.artist}</p>
+                  <h4 className="text-black dark:text-white text-3xl font-black uppercase tracking-tighter leading-none group-hover:text-black">{release.title}</h4>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        <div className="mt-32 border-t border-gray-100 dark:border-white/10 pt-16 flex flex-col md:flex-row items-start gap-20">
-           <div className="w-full md:w-1/3">
-             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-[#ff6600] mb-6">Sobre a Curadoria</h4>
-             <p className="text-gray-500 dark:text-gray-400 text-sm font-normal leading-relaxed uppercase tracking-tight">
-               Toda semana, nossa equipe editorial vasculha milhares de envios independentes e de grandes gravadoras para trazer apenas o que realmente impacta o cenário worship nacional.
+        {/* Estatísticas de Curadoria */}
+        <div className="mt-40 border-t-4 border-black dark:border-white pt-20 flex flex-col lg:flex-row items-start gap-24">
+           <div className="w-full lg:w-1/3">
+             <h4 className="text-[11px] font-black uppercase tracking-[0.5em] text-[#ff6600] mb-8">Sobre Nossa Curadoria</h4>
+             <p className="text-gray-500 dark:text-gray-400 text-lg font-bold leading-tight uppercase tracking-tighter">
+                Toda semana, nossa equipe editorial analisa centenas de lançamentos para entregar apenas o que realmente importa para sua adoração.
              </p>
            </div>
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 flex-grow">
-              <div className="space-y-2">
-                <p className="text-3xl font-medium uppercase tracking-tighter dark:text-white">12k+</p>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Músicas Avaliadas</p>
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-12 flex-grow w-full">
+              <div className="space-y-3">
+                <p className="text-5xl font-black uppercase tracking-tighter dark:text-white italic">12k+</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Músicas<br />Avaliadas</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-3xl font-medium uppercase tracking-tighter dark:text-white">50</p>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Novidades Semanais</p>
+              <div className="space-y-3">
+                <p className="text-5xl font-black uppercase tracking-tighter dark:text-white italic">50</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Novas Entradas<br />Semanais</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-3xl font-medium uppercase tracking-tighter dark:text-white">100%</p>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Foco na Fé</p>
+              <div className="space-y-3">
+                <p className="text-5xl font-black uppercase tracking-tighter dark:text-white italic">100%</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Foco em<br />Adoração</p>
               </div>
-              <div className="space-y-2">
-                <p className="text-3xl font-medium uppercase tracking-tighter dark:text-white">24/7</p>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Descoberta Global</p>
+              <div className="space-y-3">
+                <p className="text-5xl font-black uppercase tracking-tighter dark:text-white italic">24/7</p>
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Descoberta<br />Global</p>
               </div>
            </div>
         </div>

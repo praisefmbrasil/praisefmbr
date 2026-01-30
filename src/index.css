@@ -1,68 +1,72 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --accent: #ff6600;
   }
-  a:hover {
-    color: #747bff;
+
+  /* Suaviza a transição de cores ao alternar entre light/dark mode */
+  html {
+    @apply transition-colors duration-300 scroll-smooth;
   }
-  button {
-    background-color: #f9f9f9;
+
+  body {
+    @apply antialiased text-black bg-[#f3f3f3] dark:bg-[#000] dark:text-white;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
+}
+
+@layer components {
+  /* Estilo de Botão Brutalista Customizado */
+  .btn-brutalist {
+    @apply relative border-4 border-black dark:border-white bg-[#ff6600] 
+           text-white font-black uppercase italic tracking-tighter 
+           px-8 py-4 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#fff]
+           active:translate-y-1 active:shadow-none transition-all;
+  }
+
+  /* Inputs Brutalistas */
+  .input-brutalist {
+    @apply w-full border-4 border-black dark:border-white bg-white dark:bg-black/20 
+           px-6 py-4 font-black italic uppercase tracking-tighter text-lg
+           focus:border-[#ff6600] focus:ring-0 outline-none transition-all;
+  }
+}
+
+@layer utilities {
+  /* Utilitário para o efeito de Invert no Logo dependendo do tema */
+  .dark-invert {
+    @apply dark:invert dark:brightness-200;
+  }
+
+  /* Animação de entrada para os alertas e erros */
+  .animate-in {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: forwards;
+  }
+}
+
+/* Customização da Scrollbar para o estilo Dark */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-[#f3f3f3] dark:bg-[#080808];
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-black dark:bg-white border-2 border-[#f3f3f3] dark:border-[#080808];
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-[#ff6600];
+}
+
+/* Ajuste para o Player de Áudio não aparecer visualmente mas funcionar via Ref */
+audio {
+  display: none;
 }

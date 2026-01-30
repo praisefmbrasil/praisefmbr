@@ -1,13 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import { AuthProvider } from './contexts/AuthContext';
+import './index.css'; // Estilos globais e Tailwind
 import App from './App';
+import { registerSW } from './registerSW'; // Suporte para PWA
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Registra o Service Worker para permitir funcionamento offline e instalação
+registerSW();
+
+// Captura o elemento root com tratamento de erro básico
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error("Elemento root não encontrado no arquivo HTML.");
+}
+
+// Inicialização do React 18
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    {/* O App já gerencia o AuthProvider, Router e as rotas da Praise FM Brasil */}
+    <App />
   </React.StrictMode>
 );
