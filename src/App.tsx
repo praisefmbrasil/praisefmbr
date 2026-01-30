@@ -1,5 +1,13 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import {
+  HashRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useNavigate
+} from 'react-router-dom';
+
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -43,10 +51,14 @@ const getBrazilTime = () => {
     dom: 0, seg: 1, ter: 2, qua: 3, qui: 4, sex: 5, sáb: 6
   };
 
-  const dayLabel = parts.find(p => p.type === 'weekday')?.value.slice(0,3).toLowerCase();
-  const day = weekdayMap[dayLabel ?? 'seg'];
+  const dayLabel = parts.find(p => p.type === 'weekday')?.value
+    ?.slice(0, 3)
+    .toLowerCase();
 
-  return { day, totalMinutes: hour * 60 + minute };
+  return {
+    day: weekdayMap[dayLabel ?? 'seg'],
+    totalMinutes: hour * 60 + minute
+  };
 };
 
 /* =======================
@@ -54,7 +66,9 @@ const getBrazilTime = () => {
 ======================= */
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
   return null;
 };
 
@@ -88,29 +102,64 @@ const AppContent: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  /* 🌙 THEME REAL */
+  /* 🌙 THEME */
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('praise-theme', theme);
   }, [theme]);
 
-  /* 🎧 AUDIO */
+  /* 🎧 AUDIO INIT */
   useEffect(() => {
     audioRef.current = new Audio(STREAM_URL);
     audioRef.current.crossOrigin = 'anonymous';
+    audioRef.current.volume = 0.8;
+
     return () => {
       audioRef.current?.pause();
       audioRef.current = null;
     };
   }, []);
 
-  const togglePlayback = () => {
+  /* 🔊 FADE ENGINE (BBC STYLE) */
+  const fadeAudio = (
+    audio: HTMLAudioElement,
+    from: number,
+    to: number,
+    duration = 400
+  ) => {
+    const steps = 20;
+    const stepTime = duration / steps;
+    const delta = (to - from) / steps;
+    let current = from;
+
+    const interval = setInterval(() => {
+      current += delta;
+      audio.volume = Math.min(1, Math.max(0, current));
+
+      if (
+        (delta > 0 && current >= to) ||
+        (delta < 0 && current <= to)
+      ) {
+        audio.volume = to;
+        clearInterval(interval);
+      }
+    }, stepTime);
+  };
+
+  const togglePlayback = async () => {
     if (!audioRef.current) return;
-    if (isPlaying) audioRef.current.pause();
-    else {
-      audioRef.current.src = STREAM_URL;
-      audioRef.current.play().catch(console.error);
+    const audio = audioRef.current;
+
+    if (isPlaying) {
+      fadeAudio(audio, audio.volume, 0);
+      setTimeout(() => audio.pause(), 450);
+    } else {
+      audio.src = STREAM_URL;
+      audio.volume = 0;
+      await audio.play();
+      fadeAudio(audio, 0, 0.8);
     }
+
     setIsPlaying(p => !p);
   };
 
@@ -121,9 +170,11 @@ const AppContent: React.FC = () => {
     const index = schedule.findIndex(p => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
+
       const start = sH * 60 + sM;
       let end = eH * 60 + eM;
       if (end <= start) end += 1440;
+
       return clock.totalMinutes >= start && clock.totalMinutes < end;
     });
 
@@ -133,14 +184,15 @@ const AppContent: React.FC = () => {
     };
   }, [clock]);
 
-  const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
+  const activeTab =
+    location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
 
   return (
     <div className="min-h-screen flex flex-col pb-[120px] bg-white dark:bg-black transition-colors">
       <Navbar
         activeTab={activeTab}
         theme={theme}
-        onToggleTheme={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
+        onToggleTheme={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
       />
 
       <main className="flex-grow">
@@ -148,33 +200,56 @@ const AppContent: React.FC = () => {
           <ProgramDetail
             program={selectedProgram}
             onBack={() => setSelectedProgram(null)}
-            onViewSchedule={() => { setSelectedProgram(null); navigate('/schedule'); }}
+            onViewSchedule={() => {
+              setSelectedProgram(null);
+              navigate('/schedule');
+            }}
             onListenClick={togglePlayback}
             isPlaying={isPlaying}
           />
         ) : (
           <Routes>
-            <Route path="/" element={
-              <>
-                <Hero
-             program={currentProgram}
-             currentMinutes={clock.totalMinutes}
-            onListenClick={togglePlayback}
-            isPlaying={isPlaying}
-            onNavigateToProgram={setSelectedProgram}
-           />
-
-                <RecentlyPlayed tracks={[]} />
-              </>
-            } />
+            <Route
+              path="/"
+              element={
+                <>
+                  <Hero
+                    program={currentProgram}
+                    currentMinutes={clock.totalMinutes}
+                    onListenClick={togglePlayback}
+                    isPlaying={isPlaying}
+                    onNavigateToProgram={setSelectedProgram}
+                  />
+                  <RecentlyPlayed tracks={[]} />
+                </>
+              }
+            />
             <Route path="/music" element={<Playlist />} />
-            <Route path="/schedule" element={<ScheduleList onNavigateToProgram={setSelectedProgram} onBack={() => navigate('/')} />} />
-            <Route path="/presenters" element={<PresentersPage onNavigateToProgram={setSelectedProgram} />} />
+            <Route
+              path="/schedule"
+              element={
+                <ScheduleList
+                  onNavigateToProgram={setSelectedProgram}
+                  onBack={() => navigate('/')}
+                />
+              }
+            />
+            <Route
+              path="/presenters"
+              element={<PresentersPage onNavigateToProgram={setSelectedProgram} />}
+            />
             <Route path="/devotional" element={<DevotionalPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
-            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         )}
@@ -182,14 +257,14 @@ const AppContent: React.FC = () => {
 
       <Footer />
 
-       {currentProgram && (
-       <LivePlayerBar
-       isPlaying={isPlaying}
-       onTogglePlayback={togglePlayback}
-       program={currentProgram}
-       queue={queue}
-       audioRef={audioRef}
-       />
+      {currentProgram && (
+        <LivePlayerBar
+          isPlaying={isPlaying}
+          onTogglePlayback={togglePlayback}
+          program={currentProgram}
+          queue={queue}
+          audioRef={audioRef}
+        />
       )}
     </div>
   );
