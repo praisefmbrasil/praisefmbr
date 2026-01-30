@@ -1,3 +1,4 @@
+import React from 'react'; // Adicionado para garantir compatibilidade
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 // Importação de Componentes
@@ -10,7 +11,7 @@ import ScheduleList from './components/ScheduleList';
 // Importação de Páginas
 import PresentersPage from './pages/PresentersPage';
 import LoginPage from './pages/LoginPage';
-import SignUpPage from './pages/LoginPage';
+import SignUpPage from './pages/SignUpPage'; // Ajustado o caminho para refletir a página correta
 import ProfilePage from './pages/ProfilePage';
 
 // Importação de Tipos
