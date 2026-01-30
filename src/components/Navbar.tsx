@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Home,
   Music,
@@ -11,7 +11,7 @@ import {
   User as UserIcon,
   Library,
   Settings,
-  Ticket,
+  Ticket
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,33 +23,26 @@ interface NavbarProps {
   onToggleTheme: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({
-  activeTab,
-  theme,
-  onToggleTheme,
-}) => {
+const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
   const navigate = useNavigate();
-  const { user } = useAuth(); // ✅ CORRIGIDO
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return;
+    if (user) {
+      const fetchAvatar = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single();
 
-    const fetchAvatar = async () => {
-      const { data } = await supabase
-        .from('profiles')
-        .select('avatar_url')
-        .eq('id', user.id)
-        .single();
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      };
 
-      if (data?.avatar_url) {
-        setAvatarUrl(data.avatar_url);
-      }
-    };
-
-    fetchAvatar();
+      fetchAvatar();
+    }
   }, [user]);
 
   const navItems = [
@@ -57,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({
     { id: 'music', label: 'Músicas', icon: Music, path: '/music' },
     { id: 'schedule', label: 'Programação', icon: Calendar, path: '/schedule' },
     { id: 'events', label: 'Eventos', icon: Ticket, path: '/events' },
-    { id: 'devotional', label: 'Devocional', icon: Radio, path: '/devotional' },
+    { id: 'devotional', label: 'Devocional', icon: Radio, path: '/devotional' }
   ];
 
   return (
@@ -78,7 +71,7 @@ const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <nav className="hidden md:flex items-center space-x-8 h-full">
-            {navItems.map(item => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
 
@@ -86,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => navigate(item.path)}
-                  className={`flex items-center space-x-2 text-[13px] font-bold h-full border-b-2 px-1 uppercase tracking-wider transition-all ${
+                  className={`flex items-center space-x-2 text-[13px] font-bold h-full border-b-2 px-1 uppercase tracking-wider ${
                     isActive
                       ? 'text-black dark:text-white border-[#ff6600]'
                       : 'text-gray-500 border-transparent hover:text-black dark:hover:text-white'
@@ -105,7 +98,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
             <button
               onClick={() => navigate('/my-sounds')}
-              className={`flex items-center space-x-2 text-[13px] font-bold h-full border-b-2 px-1 uppercase tracking-wider transition-all ${
+              className={`flex items-center space-x-2 text-[13px] font-bold h-full border-b-2 px-1 uppercase tracking-wider ${
                 activeTab === 'my-sounds'
                   ? 'text-black dark:text-white border-[#ff6600]'
                   : 'text-gray-500 border-transparent hover:text-black dark:hover:text-white'
@@ -120,7 +113,7 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center">
           <button
             onClick={onToggleTheme}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 transition-colors text-gray-600 dark:text-gray-400 mr-4 md:mr-8"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 mr-4 md:mr-8"
           >
             {theme === 'light' ? (
               <Moon className="w-4 h-4" />
@@ -131,25 +124,27 @@ const Navbar: React.FC<NavbarProps> = ({
 
           <div className="flex items-center space-x-4">
             {user ? (
-              <button
-                onClick={() => navigate('/profile')}
-                className="hidden md:flex items-center space-x-3 group"
-              >
-                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 flex items-center justify-center border border-transparent group-hover:border-[#ff6600] transition-all">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt="Usuário"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <UserIcon className="w-4 h-4 text-gray-500" />
-                  )}
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-black dark:group-hover:text-white">
-                  Perfil
-                </span>
-              </button>
+              <div className="hidden md:flex items-center space-x-4">
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center space-x-3 group"
+                >
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100 dark:bg-white/10 flex items-center justify-center">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Usuário"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <UserIcon className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500 group-hover:text-black dark:group-hover:text-white">
+                    Perfil
+                  </span>
+                </button>
+              </div>
             ) : (
               <button
                 onClick={() => navigate('/login')}
@@ -160,51 +155,18 @@ const Navbar: React.FC<NavbarProps> = ({
             )}
 
             <button
-              onClick={() => setIsMobileMenuOpen(prev => !prev)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 md:hidden text-gray-800 dark:text-white"
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
       </div>
-
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 top-16 bg-white dark:bg-[#0b0b0b] z-40 md:hidden p-6 overflow-y-auto">
-          <nav className="flex flex-col space-y-2">
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  navigate(item.path);
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`flex items-center space-x-4 p-4 rounded-xl text-lg font-bold uppercase tracking-tighter ${
-                  activeTab === item.id
-                    ? 'bg-[#ff6600]/10 text-[#ff6600]'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                <span>{item.label}</span>
-              </button>
-            ))}
-
-            <div className="mt-4 pt-8 border-t border-gray-100 dark:border-white/5">
-              <button
-                onClick={() => {
-                  navigate(user ? '/profile' : '/login');
-                  setIsMobileMenuOpen(false);
-                }}
-                className="flex items-center space-x-4 p-4 rounded-xl text-lg font-bold text-[#ff6600] uppercase tracking-tighter"
-              >
-                {user ? <Settings className="w-5 h-5" /> : <UserIcon className="w-5 h-5" />}
-                <span>{user ? 'Configurações' : 'Entrar / Criar Conta'}</span>
-              </button>
-            </div>
-          </nav>
-        </div>
-      )}
     </header>
   );
 };
