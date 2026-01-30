@@ -1,13 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import {
-  HashRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  useNavigate
-} from 'react-router-dom';
-
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 import Navbar from './components/Navbar';
@@ -36,7 +28,6 @@ const STREAM_URL = 'https://stream.zeno.fm/olisuxy9v3vtv';
 ======================= */
 const getBrazilTime = () => {
   const now = new Date();
-
   const parts = new Intl.DateTimeFormat('pt-BR', {
     timeZone: 'America/Sao_Paulo',
     hour: '2-digit',
@@ -51,27 +42,15 @@ const getBrazilTime = () => {
     dom: 0, seg: 1, ter: 2, qua: 3, qui: 4, sex: 5, sáb: 6
   };
 
-  const dayLabel = parts.find(p => p.type === 'weekday')?.value
-    ?.slice(0, 3)
-    .toLowerCase();
+  const dayLabel = parts.find(p => p.type === 'weekday')?.value.slice(0, 3).toLowerCase();
+  const day = weekdayMap[dayLabel ?? 'seg'];
 
-  return {
-    day: weekdayMap[dayLabel ?? 'seg'],
-    totalMinutes: hour * 60 + minute
-  };
+  return { day, totalMinutes: hour * 60 + minute };
 };
 
 /* =======================
-   UTILS
+   ROUTE GUARD
 ======================= */
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-  return null;
-};
-
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen bg-black" />;
@@ -94,87 +73,49 @@ const AppContent: React.FC = () => {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  /* ⏱️ CLOCK LOOP */
+  /* CLOCK */
   useEffect(() => {
-    const interval = setInterval(() => {
-      setClock(getBrazilTime());
-    }, 30_000);
+    const interval = setInterval(() => setClock(getBrazilTime()), 30000);
     return () => clearInterval(interval);
   }, []);
 
-  /* 🌙 THEME */
+  /* THEME */
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('praise-theme', theme);
   }, [theme]);
 
-  /* 🎧 AUDIO INIT */
+  /* AUDIO */
   useEffect(() => {
     audioRef.current = new Audio(STREAM_URL);
     audioRef.current.crossOrigin = 'anonymous';
-    audioRef.current.volume = 0.8;
-
     return () => {
       audioRef.current?.pause();
       audioRef.current = null;
     };
   }, []);
 
-  /* 🔊 FADE ENGINE (BBC STYLE) */
-  const fadeAudio = (
-    audio: HTMLAudioElement,
-    from: number,
-    to: number,
-    duration = 400
-  ) => {
-    const steps = 20;
-    const stepTime = duration / steps;
-    const delta = (to - from) / steps;
-    let current = from;
-
-    const interval = setInterval(() => {
-      current += delta;
-      audio.volume = Math.min(1, Math.max(0, current));
-
-      if (
-        (delta > 0 && current >= to) ||
-        (delta < 0 && current <= to)
-      ) {
-        audio.volume = to;
-        clearInterval(interval);
-      }
-    }, stepTime);
-  };
-
-  const togglePlayback = async () => {
+  const togglePlayback = () => {
     if (!audioRef.current) return;
-    const audio = audioRef.current;
-
     if (isPlaying) {
-      fadeAudio(audio, audio.volume, 0);
-      setTimeout(() => audio.pause(), 450);
+      audioRef.current.pause();
     } else {
-      audio.src = STREAM_URL;
-      audio.volume = 0;
-      await audio.play();
-      fadeAudio(audio, 0, 0.8);
+      audioRef.current.src = STREAM_URL;
+      audioRef.current.play().catch(console.error);
     }
-
     setIsPlaying(p => !p);
   };
 
-  /* 📻 PROGRAMAÇÃO */
+  /* PROGRAMAÇÃO */
   const { currentProgram, queue } = useMemo(() => {
     const schedule = SCHEDULES[clock.day] || SCHEDULES[1];
 
     const index = schedule.findIndex(p => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
-
       const start = sH * 60 + sM;
       let end = eH * 60 + eM;
       if (end <= start) end += 1440;
-
       return clock.totalMinutes >= start && clock.totalMinutes < end;
     });
 
@@ -184,18 +125,18 @@ const AppContent: React.FC = () => {
     };
   }, [clock]);
 
-  const activeTab =
-    location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
+  const activeTab = location.pathname === '/' ? 'home' : location.pathname.split('/')[1];
 
   return (
-    <div className="min-h-screen flex flex-col pb-[120px] bg-white dark:bg-black transition-colors">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-black">
       <Navbar
         activeTab={activeTab}
         theme={theme}
         onToggleTheme={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
       />
 
-      <main className="flex-grow">
+      {/* 🔥 pt-20 = altura do header fixo */}
+      <main className="flex-grow pt-20">
         {selectedProgram ? (
           <ProgramDetail
             program={selectedProgram}
@@ -213,43 +154,27 @@ const AppContent: React.FC = () => {
               path="/"
               element={
                 <>
-                  <Hero
-                    program={currentProgram}
-                    currentMinutes={clock.totalMinutes}
-                    onListenClick={togglePlayback}
-                    isPlaying={isPlaying}
-                    onNavigateToProgram={setSelectedProgram}
-                  />
+                  {currentProgram && (
+                    <Hero
+                      program={currentProgram}
+                      currentMinutes={clock.totalMinutes}
+                      onListenClick={togglePlayback}
+                      isPlaying={isPlaying}
+                      onNavigateToProgram={setSelectedProgram}
+                    />
+                  )}
                   <RecentlyPlayed tracks={[]} />
                 </>
               }
             />
             <Route path="/music" element={<Playlist />} />
-            <Route
-              path="/schedule"
-              element={
-                <ScheduleList
-                  onNavigateToProgram={setSelectedProgram}
-                  onBack={() => navigate('/')}
-                />
-              }
-            />
-            <Route
-              path="/presenters"
-              element={<PresentersPage onNavigateToProgram={setSelectedProgram} />}
-            />
+            <Route path="/schedule" element={<ScheduleList onNavigateToProgram={setSelectedProgram} onBack={() => navigate('/')} />} />
+            <Route path="/presenters" element={<PresentersPage onNavigateToProgram={setSelectedProgram} />} />
             <Route path="/devotional" element={<DevotionalPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignUpPage />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         )}
@@ -257,7 +182,8 @@ const AppContent: React.FC = () => {
 
       <Footer />
 
-      {currentProgram && (
+      {/* 🔊 MINI PLAYER — só aparece após tocar */}
+      {isPlaying && currentProgram && (
         <LivePlayerBar
           isPlaying={isPlaying}
           onTogglePlayback={togglePlayback}
@@ -277,7 +203,6 @@ export default function App() {
   return (
     <AuthProvider>
       <HashRouter>
-        <ScrollToTop />
         <AppContent />
       </HashRouter>
     </AuthProvider>
