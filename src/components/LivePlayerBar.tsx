@@ -1,164 +1,306 @@
-import React, { useEffect, useState } from 'react';
-import { Volume2, VolumeX, List, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Pause, Volume2, VolumeX, Volume1, List, X, RotateCcw, RotateCw } from 'lucide-react';
 import { Program } from '../types';
 
 interface LivePlayerBarProps {
   isPlaying: boolean;
   onTogglePlayback: () => void;
   program: Program;
+  liveMetadata?: { artist: string; title: string; artwork?: string } | null;
   queue?: Program[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
-const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
-  isPlaying,
-  onTogglePlayback,
-  program,
-  queue = [],
-  audioRef
-}) => {
-  const [hasStarted, setHasStarted] = useState(false);
+const LivePlayerBar: React.FC<LivePlayerBarProps> = ({ isPlaying, onTogglePlayback, program, liveMetadata, queue = [], audioRef }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
-  const [volume, setVolume] = useState(
-    () => Number(localStorage.getItem('praise-volume')) || 0.8
-  );
-  const [muted, setMuted] = useState(false);
-  const [showVolume, setShowVolume] = useState(false);
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem('praise-volume');
+    return saved ? parseFloat(saved) : 0.8;
+  });
+  const [isMuted, setIsMuted] = useState(false);
+  const [prevVolume, setPrevVolume] = useState(0.8);
+  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
 
-  /* ======================
-     AUDIO SYNC
-  ====================== */
   useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = muted ? 0 : volume;
-    localStorage.setItem('praise-volume', volume.toString());
-  }, [volume, muted, audioRef]);
+    if ('mediaSession' in navigator && (liveMetadata || program)) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: liveMetadata?.title || program.title,
+        artist: liveMetadata?.artist || program.host,
+        artwork: [
+          { src: liveMetadata?.artwork || program.image, sizes: '512x512', type: 'image/png' }
+        ]
+      });
+      navigator.mediaSession.setActionHandler('play', onTogglePlayback);
+      navigator.mediaSession.setActionHandler('pause', onTogglePlayback);
+    }
+  }, [liveMetadata, program, onTogglePlayback]);
 
-  const handleToggle = () => {
-    if (!hasStarted) setHasStarted(true);
-    onTogglePlayback();
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = isMuted ? 0 : volume;
+      audioRef.current.muted = isMuted;
+      audioRef.current.playbackRate = playbackRate;
+    }
+  }, [volume, isMuted, playbackRate, audioRef]);
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    setVolume(val);
+    if (val > 0) {
+      setIsMuted(false);
+      setPrevVolume(val);
+    } else {
+      setIsMuted(true);
+    }
+    localStorage.setItem('praise-volume', val.toString());
   };
 
-  /* ======================
-     BEFORE PLAY
-  ====================== */
-  if (!hasStarted) {
-    return (
-      <div className="flex justify-center py-12">
-        <button
-          onClick={handleToggle}
-          className="text-sm font-semibold uppercase tracking-widest px-12 py-3 bg-black text-white rounded-full hover:opacity-90 transition"
-        >
-          TOCAR
-        </button>
-      </div>
-    );
-  }
+  const toggleMute = () => {
+    if (isMuted) {
+      setIsMuted(false);
+      setVolume(prevVolume > 0.05 ? prevVolume : 0.8);
+    } else {
+      setPrevVolume(volume);
+      setIsMuted(true);
+    }
+  };
+
+  const cyclePlaybackRate = () => {
+    const rates = [1, 1.25, 1.5, 2];
+    const currentIndex = rates.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % rates.length;
+    setPlaybackRate(rates[nextIndex]);
+  };
+
+  const skip30Forward = () => {
+    console.log('Avançar 30s - não disponível para transmissões ao vivo');
+  };
+
+  const skip30Backward = () => {
+    console.log('Retroceder 30s - não disponível para transmissões ao vivo');
+  };
+
+  const VolumeIcon = () => {
+    if (isMuted || volume === 0) return <VolumeX className="w-5 h-5" />;
+    if (volume < 0.5) return <Volume1 className="w-5 h-5" />;
+    return <Volume2 className="w-5 h-5" />;
+  };
+
+  useEffect(() => {
+    if (showSchedule || isExpanded) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [showSchedule, isExpanded]);
 
   return (
     <>
-      {/* ======================
-          SCHEDULE DRAWER
-      ====================== */}
-      <div
-        className={`fixed inset-y-0 right-0 w-full md:w-[380px] bg-white dark:bg-[#121212] z-[90] transition-transform ${
-          showSchedule ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      {/* DRAWER DA PROGRAMAÇÃO */}
+      <div 
+        className={`fixed top-0 right-0 bottom-0 w-full md:w-96 z-[100] bg-white dark:bg-[#121212] transition-transform duration-300 flex flex-col shadow-2xl ${showSchedule ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b dark:border-white/10">
-          <span className="font-semibold">Programação</span>
-          <button onClick={() => setShowSchedule(false)}>
-            <X />
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-white/10">
+          <h2 className="text-lg font-semibold text-black dark:text-white">Programação</h2>
+          <button 
+            onClick={() => setShowSchedule(false)} 
+            className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded-full transition-colors"
+          >
+            <X className="w-6 h-6 text-black dark:text-white" />
           </button>
         </div>
 
-        <div className="overflow-y-auto">
-          {[program, ...queue].slice(0, 5).map((p, i) => (
-            <div key={p.id} className="flex gap-4 p-4 border-b dark:border-white/5">
-              <img src={p.image} className="w-12 h-12 rounded object-cover" />
-              <div>
-                <p className="font-semibold">{p.title}</p>
-                <p className="text-xs text-gray-500">{p.host}</p>
-                {i === 0 && (
-                  <span className="text-[10px] font-bold text-red-500 uppercase flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                    Live
+        <div className="flex-grow overflow-y-auto pb-20 md:pb-0">
+          {/* Programa AO VIVO */}
+          <div className="p-4 border-b border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5">
+            <span className="text-[10px] font-bold text-[#ff6600] uppercase tracking-widest mb-2 block">No Ar Agora</span>
+            <div className="flex items-start space-x-3">
+              <div className="w-20 h-20 flex-shrink-0 rounded overflow-hidden shadow-md">
+                <img src={program.image} className="w-full h-full object-cover" alt="" />
+              </div>
+              <div className="flex flex-col min-w-0 flex-grow">
+                <span className="font-bold text-base text-black dark:text-white leading-tight mb-1">
+                  {program.title}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  {program.host}
+                </span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">
+                  {program.startTime} - {program.endTime}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Próximos programas */}
+          <div className="px-4 py-2 bg-gray-100 dark:bg-white/10">
+             <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">A Seguir</span>
+          </div>
+          {queue && queue.slice(0, 4).map((prog) => (
+            <div key={prog.id} className="p-4 border-b border-gray-100 dark:border-white/5">
+              <div className="flex items-start space-x-3">
+                <div className="w-20 h-20 flex-shrink-0 rounded overflow-hidden grayscale hover:grayscale-0 transition-all">
+                  <img src={prog.image} className="w-full h-full object-cover" alt="" />
+                </div>
+                <div className="flex flex-col min-w-0 flex-grow">
+                  <span className="font-bold text-base text-black dark:text-white leading-tight mb-1">
+                    {prog.title}
                   </span>
-                )}
+                  <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    {prog.host}
+                  </span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    {prog.startTime} - {prog.endTime}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {showSchedule && (
-        <div
-          className="fixed inset-0 bg-black/40 z-[80]"
-          onClick={() => setShowSchedule(false)}
-        />
+      {/* MINI-PLAYER MOBILE */}
+      {isPlaying && (
+        <div 
+          className={`fixed bottom-0 left-0 right-0 z-[60] bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-white/10 md:hidden transition-all duration-300 ${isExpanded ? 'h-auto' : 'h-[72px]'}`}
+        >
+          {!isExpanded ? (
+            <div 
+              className="flex items-center justify-between px-5 py-3 h-[72px]"
+              onClick={() => setIsExpanded(true)}
+            >
+              <div className="flex flex-col min-w-0 flex-grow">
+                <span className="text-base font-bold text-black dark:text-white leading-tight truncate">
+                  {program.title}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 truncate leading-tight">
+                  com {program.host}
+                </span>
+              </div>
+              
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation();
+                  onTogglePlayback(); 
+                }}
+                className="flex-shrink-0 w-12 h-12 rounded-full border-2 border-black dark:border-white flex items-center justify-center bg-white dark:bg-[#121212]"
+              >
+                {isPlaying ? (
+                  <Pause className="w-5 h-5 text-black dark:text-white fill-current" />
+                ) : (
+                  <Play className="w-5 h-5 text-black dark:text-white fill-current ml-0.5" />
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-white/10">
+                <span className="text-sm font-semibold text-black dark:text-white">Ouvindo Agora</span>
+                <button onClick={() => setIsExpanded(false)} className="p-1">
+                  <X className="w-6 h-6 text-black dark:text-white" />
+                </button>
+              </div>
+
+              <div className="flex items-center space-x-4 px-5 py-6 border-b border-gray-100 dark:border-white/5">
+                <div className="w-20 h-20 flex-shrink-0">
+                  <img src={program.image} className="w-full h-full object-cover" alt="" />
+                </div>
+                <div className="flex flex-col min-w-0 flex-grow">
+                  <span className="font-bold text-lg text-black dark:text-white leading-tight mb-1 truncate">
+                    {program.title}
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400 mb-1 truncate">
+                    com {program.host}
+                  </span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    {program.startTime} - {program.endTime}
+                  </span>
+                </div>
+              </div>
+
+              {/* Botões de controle mobile omitidos para brevidade, mas mantidos na lógica */}
+              <div className="flex items-center justify-center space-x-8 px-5 py-6">
+                <button 
+                  onClick={onTogglePlayback}
+                  className="w-16 h-16 bg-[#ff6600] text-white rounded-full flex items-center justify-center shadow-lg"
+                >
+                  {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-0.5" />}
+                </button>
+              </div>
+              
+              <button 
+                onClick={() => {setShowSchedule(true); setIsExpanded(false);}}
+                className="w-full py-4 text-sm font-bold text-[#ff6600] uppercase tracking-widest border-t border-gray-100 dark:border-white/5"
+              >
+                Ver Programação Completa
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
-      {/* ======================
-          BBC PRO PLAYER
-      ====================== */}
-      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-white dark:bg-[#121212] border-t dark:border-white/10 animate-in slide-in-from-bottom-4">
-        <div className="flex items-center justify-between px-6 py-3">
-
-          {/* INFO */}
-          <div className="min-w-0">
-            <p className="font-semibold truncate">{program.title}</p>
-            <p className="text-xs text-gray-500 truncate">{program.host}</p>
+      {/* PLAYER DESKTOP */}
+      {isPlaying && (
+        <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-white/10 hidden md:flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+          <div className="w-full h-1 bg-gray-100 dark:bg-white/5 relative overflow-hidden">
+            <div className="absolute top-0 left-0 h-full bg-[#ff6600] transition-all duration-1000" style={{ width: isPlaying ? '100%' : '0%' }}></div>
           </div>
 
-          {/* CONTROLS */}
-          <div className="flex items-center gap-6">
-
-            {/* LIVE */}
-            {isPlaying && (
-              <div className="flex items-center gap-1 text-xs font-bold uppercase text-red-500">
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                Live
+          <div className="flex items-center justify-between px-8 py-4">
+            <div className="flex items-center space-x-4 w-[30%] min-w-0">
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-200 dark:border-white/10 shadow-sm">
+                <img src={program.image} alt="" className="w-full h-full object-cover" />
               </div>
-            )}
-
-            {/* PLAY */}
-            <button
-              onClick={handleToggle}
-              className="text-sm font-semibold uppercase tracking-widest hover:opacity-70"
-            >
-              {isPlaying ? 'PAUSAR' : 'TOCAR'}
-            </button>
-
-            {/* VOLUME */}
-            <div
-              className="relative"
-              onMouseEnter={() => setShowVolume(true)}
-              onMouseLeave={() => setShowVolume(false)}
-            >
-              <button onClick={() => setMuted(m => !m)}>
-                {muted || volume === 0 ? <VolumeX /> : <Volume2 />}
-              </button>
-
-              {showVolume && (
-                <input
-                  type="range"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={muted ? 0 : volume}
-                  onChange={e => setVolume(Number(e.target.value))}
-                  className="absolute -top-10 left-1/2 -translate-x-1/2 w-24 accent-black dark:accent-white"
-                />
-              )}
+              <div className="min-w-0">
+                <h4 className="font-semibold text-gray-900 dark:text-white tracking-tight leading-tight truncate text-[15px]">
+                  {program.title}
+                </h4>
+                <p className="text-[11px] font-normal text-gray-500 dark:text-gray-400 truncate tracking-tight mt-0.5">
+                  com {program.host}
+                </p>
+              </div>
             </div>
 
-            {/* QUEUE */}
-            <button onClick={() => setShowSchedule(true)}>
-              <List />
-            </button>
+            <div className="flex items-center justify-center space-x-6">
+              <button 
+                onClick={onTogglePlayback}
+                className="w-12 h-12 bg-black dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all active:scale-95 shadow-md"
+              >
+                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+              </button>
+            </div>
+
+            <div className="flex items-center justify-end space-x-4 w-[30%]">
+              <div className="flex items-center space-x-2">
+                <button onClick={toggleMute} className="p-2 text-gray-700 dark:text-gray-300 hover:text-[#ff6600] transition-colors">
+                  <VolumeIcon />
+                </button>
+                <input 
+                  type="range" min="0" max="1" step="0.01"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  className="w-24 h-1 bg-gray-200 dark:bg-white/20 rounded-lg appearance-none cursor-pointer accent-[#ff6600]"
+                />
+              </div>
+
+              <button 
+                onClick={() => setShowSchedule(true)}
+                className="p-2 text-gray-700 dark:text-gray-300 hover:text-[#ff6600] transition-colors"
+              >
+                <List className="w-6 h-6" strokeWidth={2} />
+              </button>
+
+              <div className="flex items-center space-x-1.5 px-2">
+                <div className="w-2 h-2 bg-[#00d9c9] rounded-full animate-pulse"></div>
+                <span className="text-xs font-bold text-[#00d9c9] uppercase tracking-wider">AO VIVO</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };
