@@ -6,7 +6,6 @@ interface LivePlayerBarProps {
   isPlaying: boolean;
   onTogglePlayback: () => void;
   program: Program;
-  liveMetadata?: { artist: string; title: string; artwork?: string } | null;
   queue?: Program[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }
@@ -15,12 +14,11 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
   isPlaying,
   onTogglePlayback,
   program,
-  liveMetadata,
   queue = [],
   audioRef
 }) => {
   const [showSchedule, setShowSchedule] = useState(false);
-  const [volume, setVolume] = useState(
+  const [volume, setVolume] = useState<number>(
     () => Number(localStorage.getItem('praise-volume')) || 0.8
   );
   const [muted, setMuted] = useState(false);
@@ -31,51 +29,70 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
   useEffect(() => {
     if (!audioRef.current) return;
     audioRef.current.volume = muted ? 0 : volume;
+    localStorage.setItem('praise-volume', volume.toString());
   }, [volume, muted, audioRef]);
 
   /* ======================
-     MEDIA SESSION
+     MEDIA SESSION (USA)
   ====================== */
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
 
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: liveMetadata?.title || program.title,
-      artist: liveMetadata?.artist || program.host,
-      artwork: [{ src: program.image, sizes: '512x512', type: 'image/png' }]
+      title: program.title,
+      artist: program.host,
+      artwork: [
+        { src: program.image, sizes: '512x512', type: 'image/png' }
+      ]
     });
 
     navigator.mediaSession.setActionHandler('play', onTogglePlayback);
     navigator.mediaSession.setActionHandler('pause', onTogglePlayback);
-  }, [program, liveMetadata, onTogglePlayback]);
+  }, [program, onTogglePlayback]);
 
   return (
     <>
-      {/* SCHEDULE DRAWER */}
+      {/* ======================
+          SCHEDULE DRAWER
+      ====================== */}
       <div
         className={`fixed inset-y-0 right-0 w-full md:w-[380px] bg-white dark:bg-[#121212] z-[90] transition-transform duration-300 ${
           showSchedule ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b dark:border-white/10">
-          <span className="font-semibold">Programação</span>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-white/10">
+          <span className="font-semibold text-black dark:text-white">
+            Programação
+          </span>
           <button onClick={() => setShowSchedule(false)}>
-            <X />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="overflow-y-auto">
           {[program, ...queue].slice(0, 5).map((p, i) => (
-            <div key={p.id} className="flex gap-4 p-4 border-b dark:border-white/5">
-              <img src={p.image} className="w-16 h-16 object-cover" />
-              <div>
-                <p className="font-bold">{p.title}</p>
-                <p className="text-sm text-gray-500">{p.host}</p>
+            <div
+              key={p.id}
+              className="flex gap-4 p-4 border-b border-gray-100 dark:border-white/5"
+            >
+              <img
+                src={p.image}
+                className="w-16 h-16 object-cover rounded"
+              />
+              <div className="min-w-0">
+                <p className="font-bold truncate text-black dark:text-white">
+                  {p.title}
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {p.host}
+                </p>
                 <p className="text-xs text-gray-400">
                   {p.startTime} – {p.endTime}
                 </p>
                 {i === 0 && (
-                  <span className="text-xs font-bold text-[#00d9c9]">AO VIVO</span>
+                  <span className="text-xs font-bold text-[#00d9c9]">
+                    AO VIVO
+                  </span>
                 )}
               </div>
             </div>
@@ -90,8 +107,10 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
         />
       )}
 
-      {/* PLAYER BAR */}
-      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-white dark:bg-[#121212] border-t dark:border-white/10">
+      {/* ======================
+          PLAYER BAR (ALWAYS ON)
+      ====================== */}
+      <div className="fixed bottom-0 left-0 right-0 z-[70] bg-white dark:bg-[#121212] border-t border-gray-200 dark:border-white/10">
         <div className="flex items-center justify-between px-5 py-3">
 
           {/* INFO */}
@@ -101,7 +120,9 @@ const LivePlayerBar: React.FC<LivePlayerBarProps> = ({
               className="w-10 h-10 rounded-full object-cover"
             />
             <div className="min-w-0">
-              <p className="font-semibold truncate">{program.title}</p>
+              <p className="font-semibold truncate text-black dark:text-white">
+                {program.title}
+              </p>
               <p className="text-xs text-gray-500 truncate">
                 {program.host}
               </p>
