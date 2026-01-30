@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -21,27 +21,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [favorites, setFavorites] = useState<any[]>([]);
 
-  // Busca favoritos do banco de dados
-  const fetchFavorites = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('*')
-        .eq('user_id', userId);
-      
-      if (error) throw error;
-      setFavorites(data || []);
-    } catch (error: any) {
-      if (error.code === 'PGRST103') {
-        console.warn("Tabela 'favorites' não encontrada no Supabase.");
-      } else {
-        console.error("Erro ao buscar favoritos:", error.message);
-      }
-    }
-  };
-
   useEffect(() => {
-    // 1. Estado inicial: verifica se já existe uma sessão ativa
+    // Busca sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -49,33 +30,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // 2. Listener de mudanças de autenticação (Login, Logout, Refresh)
-    // ✅ CORREÇÃO: Estrutura correta para extrair subscription no Supabase v2
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      setSession(currentSession);
-      const currentUser = currentSession?.user ?? null;
+    // Escuta mudanças no estado de autenticação (Login/Logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      const currentUser = session?.user ?? null;
       setUser(currentUser);
       
       if (currentUser) {
-        await fetchFavorites(currentUser.id);
+        fetchFavorites(currentUser.id);
       } else {
         setFavorites([]);
       }
-
-      if (event === 'SIGNED_OUT') {
-        window.location.hash = '#/login'; // Redirecionamento simples
-      }
       
+      if (event === 'SIGNED_OUT') {
+        window.location.hash = '#/login';
+      }
       setLoading(false);
     });
 
-    // Cleanup: Remove o ouvinte quando o componente é desmontado
     return () => subscription.unsubscribe();
   }, []);
 
+  const fetchFavorites = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('*')
+        .eq('user_id', userId);
+      
+      if (error) {
+        if (error.code === 'PGRST103') {
+          console.warn("Aviso Praise FM: Tabela 'favorites' não encontrada no banco de dados.");
+        } else {
+          console.error("Erro ao buscar favoritos:", error.message);
+        }
+        return;
+      }
+      setFavorites(data || []);
+    } catch (e: any) {
+      console.error("Erro inesperado:", e.message);
+    }
+  };
+
+  const refreshFavorites = async () => {
+    if (user) await fetchFavorites(user.id);
+  };
+
   const toggleFavorite = async (item: any) => {
     if (!user) {
-      alert("Você precisa estar logado para favoritar.");
+      alert("Por favor, faça login para favoritar este conteúdo.");
       return;
     }
 
@@ -98,23 +101,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           user_id: user.id,
           item_id: itemIdString,
           item_type: item.type || 'track',
-          title: item.title || 'Sem título',
-          subtitle: item.host || item.author || item.subtitle || '',
-          image: item.image || '',
+          title: item.title,
+          subtitle: item.host || item.artist || item.subtitle || '',
+          image: item.image || item.artwork,
         };
         
         const { data, error } = await supabase
           .from('favorites')
           .insert([newItem])
-          .select()
-          .single();
+          .select();
           
         if (error) throw error;
-        if (data) setFavorites(prev => [...prev, data]);
+        if (data) setFavorites(prev => [...prev, data[0]]);
       }
     } catch (err: any) {
-      console.error("Erro na operação de favoritos:", err.message);
-      alert("Erro ao atualizar favoritos. Verifique a tabela no banco de dados.");
+      console.error("Erro ao atualizar favoritos:", err.message);
+      if (err.code === 'PGRST103') {
+        alert("Configuração necessária: A tabela de favoritos ainda não foi criada no Supabase.");
+      }
     }
   };
 
@@ -123,17 +127,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  const refreshFavorites = async () => {
-    if (user) await fetchFavorites(user.id);
+    try {
+      await supabase.auth.signOut();
+    } catch (e: any) {
+      console.error("Erro ao sair:", e.message);
+    } finally {
+      setUser(null);
+      setSession(null);
+      setFavorites([]);
+      window.location.hash = '#/login';
+    }
   };
 
   return (
     <AuthContext.Provider value={{ 
-      user, session, loading, favorites, 
-      toggleFavorite, isFavorite, signOut, refreshFavorites 
+      user, 
+      session, 
+      loading, 
+      favorites, 
+      toggleFavorite, 
+      isFavorite, 
+      signOut,
+      refreshFavorites 
     }}>
       {!loading && children}
     </AuthContext.Provider>
