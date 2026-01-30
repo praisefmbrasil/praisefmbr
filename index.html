@@ -1,84 +1,52 @@
-<!DOCTYPE html>
-<html lang="pt-BR" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Praise FM Brasil - Música Worship e Adoração ao Vivo</title>
-    
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#ff6600" />
-    <meta name="description" content="A rádio que toca o seu coração com o melhor do Worship e Louvor." />
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: { 
-              praise: { 
-                accent: '#ff6600' 
-              } 
-            },
-            fontFamily: { 
-              sans: ['Inter', 'sans-serif'] 
-            }
-          }
-        }
-      }
-    </script>
-
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
-      
-      :root {
-        --praise-orange: #ff6600;
-      }
-
-      body { 
-        font-family: 'Inter', sans-serif; 
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-      }
-
-      /* Custom Scrollbar Estilo BBC */
-      .no-scrollbar::-webkit-scrollbar { 
-        display: none; 
-      }
-      
-      .bbc-section-title { 
-        border-bottom: 2px solid currentColor; 
-        display: inline-block; 
-        padding-bottom: 4px; 
-        margin-bottom: 2rem; 
-        font-weight: 500; 
-        text-transform: uppercase; 
-        letter-spacing: 0.1em;
-      }
-
-      /* Transições Suaves */
-      * {
-        transition: background-color 0.3s ease, border-color 0.3s ease;
-      }
-    </style>
-
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18.2.0",
-        "react-dom": "https://esm.sh/react-dom@18.2.0",
-        "react-router-dom": "https://esm.sh/react-router-dom@6.22.0",
-        "lucide-react": "https://esm.sh/lucide-react@0.344.0",
-        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.7"
-      }
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Primary Meta Tags -->
+  <title>Praise FM Brasil | Rádio Cristã 24h - Música Gospel e Adoração</title>
+  <meta name="description" content="Ouça a Praise FM Brasil, rádio cristã 24h com música gospel, adoração, programas inspiradores e a palavra de Deus. Transmissão online para todo o Brasil.">
+  <meta name="keywords" content="rádio cristã, música gospel, adoração, rádio evangélica, Praise FM, louvor, música cristã, rádio online Brasil, palavra de Deus, rádio gospel">
+  <meta name="author" content="Praise FM Brasil">
+  <meta name="robots" content="index, follow">
+  <meta http-equiv="Content-Language" content="pt-BR">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://praisefmradio.vercel.app/">
+  <meta property="og:title" content="Praise FM Brasil - Rádio Cristã 24h">
+  <meta property="og:description" content="Ouça música gospel e adoração 24h por dia. Sua rádio cristã online!">
+  <meta property="og:image" content="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp">
+  
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://praisefmradio.vercel.app/">
+  <meta property="twitter:title" content="Praise FM Brasil - Rádio Cristã 24h">
+  <meta property="twitter:description" content="Ouça música gospel e adoração 24h por dia. Sua rádio cristã online!">
+  <meta property="twitter:image" content="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp">
+  
+  <!-- Canonical -->
+  <link rel="canonical" href="https://praisefmradio.vercel.app">
+  
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1e40af">
+  
+  <!-- Schema.org markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "RadioStation",
+    "name": "Praise FM Brasil",
+    "description": "Rádio cristã online 24h com música gospel e programação inspiradora",
+    "url": "https://praisefmradio.vercel.app",
+    "genre": ["Gospel", "Música Cristã", "Adoração"],
+    "broadcastFrequency": "Online",
+    "areaServed": "Brasil",
+    "availableChannel": {
+      "@type": "BroadcastService",
+      "name": "Streaming Online"
     }
-    </script>
-  </head>
-
-  <body class="bg-white dark:bg-black text-gray-900 dark:text-white transition-colors duration-300">
-    <div id="root"></div>
-
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+  }
+  </script>
+</head>
