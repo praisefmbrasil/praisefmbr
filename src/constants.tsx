@@ -8,20 +8,18 @@ export const COLORS = {
 
 const IMAGES = {
   // Apresentadores e Programas - Praise FM Brasil
-  SAMUEL_ANDRADE: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp',
-  LUCAS_MARTINS: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp',
-  RAFAEL_COSTA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp',
-  ANA_PAULA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp',
-  BRUNO_ALMEIDA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp',
-  RODRIGO_VERAS: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp',
-  FELIPE_SANTOS: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp',
-  THIAGO_MOREIRA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp',
+  SAMUEL_ANDRADE: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/samuel_andrade_k3botd.webp',
+  LUCAS_MARTINS: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/lucas_martins_qmdc5s.webp',
+  RAFAEL_COSTA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rafael_costa_qxzwrf.webp',
+  ANA_PAULA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/ana_paula_wjuwju.webp',
+  BRUNO_ALMEIDA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/bruno_almeida_hfmekk.webp',
+  RODRIGO_VERAS: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rodrigo_veras_esognm.webp',
+  FELIPE_SANTOS: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/patick_silva_r4lpvp.webp',
+  THIAGO_MOREIRA: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/cesar_brum_auudhy.webp',
   
   // Imagens de Programas Genéricos
-  WORSHIP_BR: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Praise_FM_Worship_jv3c0c.webp',
-  NON_STOP_BR: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_FM_Non_Stop_jzk8wz.webp',
-  LIVE_SHOW_BR: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Praise_Fm_Live_Show_blfy7o.webp',
-  PREGACAO: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Prega%C3%A7%C3%A3o_da_Palavra_zdphb4.webp'
+  WORSHIP_BR: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/worship_pck4vy.webp',
+  PREGACAO: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/pregacao_da_palavra_leapde.webp'
 };
 
 const commonDaily: Program[] = [
