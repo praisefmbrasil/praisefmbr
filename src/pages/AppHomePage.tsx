@@ -1,232 +1,89 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Play, Pause, ChevronRight, Home, Music, Calendar, User } from 'lucide-react';
-import { useNavigate, NavLink } from 'react-router-dom';
-import { SCHEDULES } from '../constants';
-import { Program } from '../types';
+type Program = { image: string; title: string; [key: string]: unknown };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-const getBrasiliaTime = () => {
-  const d = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
-  return { day: d.getDay(), totalMinutes: d.getHours() * 60 + d.getMinutes() };
-};
-
-const isLive = (prog: Program, nowMinutes: number) => {
-  const [sH, sM] = prog.startTime.split(':').map(Number);
-  const [eH, eM] = prog.endTime.split(':').map(Number);
-  const start = sH * 60 + sM;
-  let end = eH * 60 + eM;
-  if (end === 0 || end <= start) end = 24 * 60;
-  return nowMinutes >= start && nowMinutes < end;
-};
-
-const getProgress = (prog: Program, nowMinutes: number) => {
-  const [sH, sM] = prog.startTime.split(':').map(Number);
-  const [eH, eM] = prog.endTime.split(':').map(Number);
-  const start = sH * 60 + sM;
-  let end = eH * 60 + eM;
-  if (end === 0 || end <= start) end = 24 * 60;
-  return Math.min(Math.max((nowMinutes - start) / (end - start), 0), 1);
-};
-
-// ---------------------------------------------------------------------------
-// Anel de progresso do hero
-// ---------------------------------------------------------------------------
-
-const HeroRing: React.FC<{ program: Program; nowMinutes: number }> = ({ program, nowMinutes }) => {
-  const SIZE = 200;
-  const SW = 4;
-  const r = SIZE / 2 - SW / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - getProgress(program, nowMinutes) * circ;
+const HeroRing: React.FC<{ program: Program; nowMinutes: number }> = ({
+  program,
+  nowMinutes,
+}) => {
+  const SIZE = 210;
+  const STROKE = 8;
+  const radius = 96;
+  const circumference = 2 * Math.PI * radius;
+  const offset =
+    circumference - getProgress(program, nowMinutes) * circumference;
 
   return (
-    <div className="relative flex-shrink-0" style={{ width: SIZE, height: SIZE }}>
-      <div className="absolute inset-0 rounded-full overflow-hidden">
-        <img src={program.image} alt={program.title} className="w-full h-full object-cover" />
-      </div>
-      <svg width={SIZE} height={SIZE} className="absolute inset-0 -rotate-90 pointer-events-none">
-        <circle cx={SIZE/2} cy={SIZE/2} r={r} stroke="rgba(255,255,255,0.15)" strokeWidth={SW} fill="none" />
+    <div
+      className="relative flex-shrink-0"
+      style={{ width: SIZE, height: SIZE }}
+    >
+      <svg
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        className="absolute inset-0 -rotate-90"
+      >
         <circle
-          cx={SIZE/2} cy={SIZE/2} r={r}
-          stroke="#ff6600" strokeWidth={SW} fill="none"
-          strokeDasharray={circ} strokeDashoffset={offset}
-          strokeLinecap="butt" className="transition-all duration-1000"
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={radius}
+          stroke="#252525"
+          strokeWidth={STROKE}
+          fill="none"
+        />
+
+        <circle
+          cx={SIZE / 2}
+          cy={SIZE / 2}
+          r={radius}
+          stroke="#ff6600"
+          strokeWidth={STROKE}
+          fill="none"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          className="transition-all duration-1000"
         />
       </svg>
-      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-[#ff6600] text-black text-[9px] font-black px-3 py-0.5 rounded-sm tracking-widest whitespace-nowrap">
-        NO AR
+
+      <div className="absolute inset-[14px] rounded-full overflow-hidden bg-black">
+        <img
+          src={program.image}
+          alt={program.title}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="absolute bottom-1 right-1 w-[62px] h-[62px] rounded-full bg-black border-[4px] border-white flex items-center justify-center shadow-xl z-10">
+        <span className="text-white text-[26px] font-black leading-none">
+          1
+        </span>
       </div>
     </div>
   );
 };
 
-// ---------------------------------------------------------------------------
-// Card da fila "A seguir"
-// ---------------------------------------------------------------------------
+function getProgress(program: Program, nowMinutes: number): number {
+  const start =
+    typeof program.start === "number"
+      ? program.start
+      : typeof program.startMinutes === "number"
+      ? program.startMinutes
+      : typeof program.from === "number"
+      ? program.from
+      : 0;
 
-const NextCard: React.FC<{ program: Program; onClick: () => void }> = ({ program, onClick }) => (
-  <div
-    onClick={onClick}
-    className="flex items-center space-x-3 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 transition-colors cursor-pointer px-4 py-3 rounded-sm flex-shrink-0 w-64"
-  >
-    <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-white/10">
-      <img src={program.image} alt={program.title} className="w-full h-full object-cover grayscale" />
-    </div>
-    <div className="min-w-0">
-      <p className="text-[10px] text-[#ff6600] font-black uppercase tracking-widest mb-0.5">
-        {program.startTime} – {program.endTime}
-      </p>
-      <p className="text-sm font-bold text-black dark:text-white truncate">{program.title}</p>
-      {program.host && program.host !== 'Praise FM' && (
-        <p className="text-[11px] text-gray-400 truncate">{program.host}</p>
-      )}
-    </div>
-  </div>
-);
+  const end =
+    typeof program.end === "number"
+      ? program.end
+      : typeof program.endMinutes === "number"
+      ? program.endMinutes
+      : typeof program.to === "number"
+      ? program.to
+      : start;
 
-// ---------------------------------------------------------------------------
-// Componente principal
-// ---------------------------------------------------------------------------
+  const duration = end - start;
+  if (duration <= 0) {
+    return 0;
+  }
 
-const AppHomePage: React.FC = () => {
-  const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(getBrasiliaTime());
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(getBrasiliaTime()), 30_000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const todaySchedule = useMemo(
-    () => SCHEDULES[currentTime.day] ?? SCHEDULES[1],
-    [currentTime.day]
-  );
-
-  const currentIndex = useMemo(
-    () => todaySchedule.findIndex((p) => isLive(p, currentTime.totalMinutes)),
-    [todaySchedule, currentTime]
-  );
-
-  const currentProgram = currentIndex >= 0 ? todaySchedule[currentIndex] : todaySchedule[0];
-  const nextPrograms = todaySchedule.slice(currentIndex + 1, currentIndex + 4);
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-black text-black dark:text-white pb-24">
-
-      {/* Header */}
-      <header className="border-b border-gray-200 dark:border-white/10 py-4 px-6 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <div className="bg-[#ff6600] text-black px-2 py-1 rounded font-black italic text-sm">PRAISE FM</div>
-          <span className="text-[10px] font-bold uppercase opacity-50 tracking-widest">Brasil</span>
-        </div>
-        <button
-          onClick={() => navigate('/my-sounds')}
-          className="w-9 h-9 rounded-full bg-[#ff6600] text-black flex items-center justify-center font-bold text-sm"
-        >
-          P
-        </button>
-      </header>
-
-      {/* Hero */}
-      <section className="px-6 pt-10 pb-6">
-        <div className="flex items-center space-x-2 mb-5">
-          <span className="text-[#ff6600] text-[11px] font-black uppercase tracking-[0.2em]">AO VIVO</span>
-          {currentProgram && (
-            <span className="text-gray-400 text-[11px]">
-              {currentProgram.startTime} – {currentProgram.endTime}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-6">
-          {currentProgram && (
-            <HeroRing program={currentProgram} nowMinutes={currentTime.totalMinutes} />
-          )}
-
-          <div className="flex-1 min-w-0">
-            <h1
-              className="text-2xl font-black uppercase tracking-tight text-black dark:text-white leading-tight mb-1 cursor-pointer hover:text-[#ff6600] transition-colors"
-              onClick={() => navigate('/schedule')}
-            >
-              {currentProgram?.title ?? 'Praise FM Brasil'}
-              <ChevronRight className="inline w-5 h-5 ml-1 text-[#ff6600]" />
-            </h1>
-            {currentProgram?.host && currentProgram.host !== 'Praise FM' ? (
-              <p className="text-gray-400 text-sm mb-4">{currentProgram.host}</p>
-            ) : (
-              <p className="text-gray-400 text-sm mb-4">{currentProgram?.description}</p>
-            )}
-            <button
-              onClick={() => setIsPlaying((p) => !p)}
-              className="flex items-center space-x-2 bg-[#ff6600] text-black px-6 py-3 font-black uppercase text-xs tracking-widest rounded-sm hover:bg-orange-500 transition-colors"
-            >
-              {isPlaying
-                ? <Pause className="w-4 h-4 fill-current" />
-                : <Play className="w-4 h-4 fill-current" />}
-              <span>{isPlaying ? 'Pausar' : 'Ouvir'}</span>
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* A seguir */}
-      {nextPrograms.length > 0 && (
-        <section className="px-6 pb-6">
-          <div className="border-t border-gray-100 dark:border-white/10 pt-5 mb-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">A seguir</p>
-          </div>
-          <div className="flex space-x-3 overflow-x-auto no-scrollbar pb-1">
-            {nextPrograms.map((prog) => (
-              <NextCard key={prog.id} program={prog} onClick={() => navigate('/schedule')} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Player fixo */}
-      {isPlaying && (
-        <div className="fixed bottom-20 left-4 right-4 bg-[#ff6600] text-black p-4 flex items-center justify-between rounded-sm shadow-2xl z-50">
-          <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="w-2 h-2 bg-black rounded-full animate-ping flex-shrink-0" />
-            <div className="truncate">
-              <p className="font-black text-xs uppercase truncate">{currentProgram?.title}</p>
-              <p className="text-[10px] font-bold opacity-70">AO VIVO • PRAISE FM BRASIL</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setIsPlaying(false)}
-            className="w-10 h-10 rounded-full border-2 border-black flex items-center justify-center flex-shrink-0"
-          >
-            <Pause className="w-4 h-4 fill-current" />
-          </button>
-        </div>
-      )}
-
-      {/* Nav inferior */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-black border-t border-gray-100 dark:border-white/5 flex justify-around py-3 z-50">
-        <NavItem to="/app"       icon={<Home size={22} />}     label="Início" />
-        <NavItem to="/music"     icon={<Music size={22} />}    label="Música" />
-        <NavItem to="/schedule"  icon={<Calendar size={22} />} label="Agenda" />
-        <NavItem to="/my-sounds" icon={<User size={22} />}     label="Perfil" />
-      </nav>
-    </div>
-  );
-};
-
-const NavItem = ({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) => (
-  <NavLink
-    to={to}
-    className={({ isActive }) =>
-      `flex flex-col items-center space-y-1 ${isActive ? 'text-[#ff6600]' : 'text-gray-400'}`
-    }
-  >
-    {icon}
-    <span className="text-[9px] font-bold uppercase tracking-widest">{label}</span>
-  </NavLink>
-);
-
-export default AppHomePage;
+  const progress = (nowMinutes - start) / duration;
+  return Math.min(Math.max(progress, 0), 1);
+}
