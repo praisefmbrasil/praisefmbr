@@ -23,13 +23,6 @@ const parseTime = (time24: string) => {
   return { h, m }
 }
 
-const format12h = (time24: string) => {
-  const { h, m } = parseTime(time24)
-  const period = h >= 12 ? 'PM' : 'AM'
-  const displayH = h % 12 || 12
-  return `${displayH}:${m.toString().padStart(2, '0')} ${period}`
-}
-
 interface HeroProps {
   onListenClick: () => void
   isPlaying: boolean
@@ -161,6 +154,8 @@ const Hero: React.FC<HeroProps> = ({
 
           <div className="flex-grow pt-4 text-center md:text-left">
             <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
+              <span className="text-[#ff6600] font-black uppercase tracking-[0.2em]">AO VIVO</span>
+              <span>·</span>
               <span>
                 {currentProgram.startTime} - {currentProgram.endTime}
               </span>
@@ -170,7 +165,7 @@ const Hero: React.FC<HeroProps> = ({
               className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center"
               onClick={() => onNavigateToProgram(currentProgram)}
             >
-              {currentProgram.title}
+              {currentProgram.title} com {currentProgram.host}
               <ChevronRight className="w-6 h-6 ml-1 text-[#ff6600]" />
             </h2>
 
@@ -296,7 +291,7 @@ const Hero: React.FC<HeroProps> = ({
                 </>
               ) : (
                 <>
-                  Ver mais <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" />
+                  Ver mais detalhes <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" />
                 </>
               )}
             </button>
