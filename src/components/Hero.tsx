@@ -23,6 +23,13 @@ const parseTime = (time24: string) => {
   return { h, m }
 }
 
+const format12h = (time24: string) => {
+  const { h, m } = parseTime(time24)
+  const period = h >= 12 ? 'PM' : 'AM'
+  const displayH = h % 12 || 12
+  return `${displayH}:${m.toString().padStart(2, '0')} ${period}`
+}
+
 interface HeroProps {
   onListenClick: () => void
   isPlaying: boolean
@@ -95,10 +102,10 @@ const Hero: React.FC<HeroProps> = ({
 
   if (!currentProgram) return null
 
-  const circleSize = 210
-  const strokeWidth = 8
+  const circleSize = 192
+  const strokeWidth = 4
   const center = circleSize / 2
-  const radius = 96
+  const radius = center - strokeWidth / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - progress * circumference
 
@@ -108,58 +115,52 @@ const Hero: React.FC<HeroProps> = ({
         <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
           <div
             className="relative flex-shrink-0 group cursor-pointer"
-            style={{ width: circleSize, height: circleSize }}
             onClick={() => onNavigateToProgram(currentProgram)}
           >
-            <svg
-              viewBox={`0 0 ${circleSize} ${circleSize}`}
-              className="absolute inset-0 -rotate-90 pointer-events-none"
+            <div
+              className="relative rounded-full overflow-hidden"
+              style={{ width: circleSize, height: circleSize }}
             >
-              <circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#252525"
-                strokeWidth={strokeWidth}
-                fill="none"
-                className="dark:stroke-white/10"
-              />
-
-              <circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#ff6600"
-                strokeWidth={strokeWidth}
-                fill="none"
-                strokeDasharray={circumference}
-                strokeDashoffset={offset}
-                strokeLinecap="round"
-                className="transition-all duration-1000"
-              />
-            </svg>
-
-            <div className="absolute inset-[14px] rounded-full overflow-hidden bg-black">
               <img
                 src={currentProgram.image}
                 alt={currentProgram.title}
                 className="w-full h-full object-cover"
               />
+              <svg
+                width={circleSize}
+                height={circleSize}
+                className="absolute inset-0 -rotate-90 pointer-events-none"
+              >
+                <circle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#dbdbdb"
+                  strokeWidth={strokeWidth}
+                  fill="transparent"
+                  className="dark:stroke-white/10"
+                />
+                <circle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#ff6600"
+                  strokeWidth={strokeWidth}
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={offset}
+                  strokeLinecap="butt"
+                />
+              </svg>
             </div>
 
-            <div className="absolute bottom-1 right-1 w-[62px] h-[62px] rounded-full bg-black border-[4px] border-white dark:border-black flex items-center justify-center shadow-xl z-10">
-              <span className="text-white text-[26px] font-black leading-none">
-                2
-              </span>
+            <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white dark:border-black shadow-lg">
+              <span className="text-white text-2xl font-bold">2</span>
             </div>
           </div>
 
           <div className="flex-grow pt-4 text-center md:text-left">
             <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
-              <span className="text-[#ff6600] font-black uppercase tracking-[0.2em]">
-                AO VIVO
-              </span>
-              <span>·</span>
               <span>
                 {currentProgram.startTime} - {currentProgram.endTime}
               </span>
