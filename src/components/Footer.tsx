@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
               <li>
                 {/* 3. Link do Instagram atualizado (ajustar se tiver um @ específico para o Brasil) */}
                 <a 
-                  href="https://www.instagram.com/fmpraise.usa/" 
+                  href="https://www.instagram.com/praisefm.brasil/"
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="hover:text-[#ff6600] transition-colors"
