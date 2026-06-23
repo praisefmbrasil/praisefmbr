@@ -27,7 +27,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
             <img
               src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206553/LOGO_HEADER_uygoqx.webp"
               alt="Praise FM Brasil"
-              className="h-10 w-auto"
+              className="h-10 w-auto dark:invert"
             />
           </Link>
 
