@@ -117,10 +117,10 @@ const Hero: React.FC<HeroProps> = ({
               <div
                 className="rounded-full overflow-hidden absolute"
                 style={{
-                  top: strokeWidth * 2,
-                  left: strokeWidth * 2,
-                  width: circleSize - strokeWidth * 4,
-                  height: circleSize - strokeWidth * 4,
+                  top: strokeWidth + 2,
+                  left: strokeWidth + 2,
+                  width: circleSize - (strokeWidth + 2) * 2,
+                  height: circleSize - (strokeWidth + 2) * 2,
                 }}
               >
                 <img
