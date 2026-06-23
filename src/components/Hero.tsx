@@ -111,21 +111,22 @@ const Hero: React.FC<HeroProps> = ({
             onClick={() => onNavigateToProgram(currentProgram)}
           >
             <div
-              className="relative rounded-full overflow-hidden"
+              className="relative"
               style={{ width: circleSize, height: circleSize }}
             >
-              <img
-                src={currentProgram.image}
-                alt={currentProgram.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
+              <div className="rounded-full overflow-hidden w-full h-full">
+                <img
+                  src={currentProgram.image}
+                  alt={currentProgram.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-            <svg
-              width={circleSize}
-              height={circleSize}
-              className="absolute inset-0 -rotate-90 pointer-events-none"
-            >
+              <svg
+                width={circleSize}
+                height={circleSize}
+                className="absolute inset-0 -rotate-90 pointer-events-none"
+              >
               <circle
                 cx={center}
                 cy={center}
@@ -146,10 +147,11 @@ const Hero: React.FC<HeroProps> = ({
                 strokeDashoffset={offset}
                 strokeLinecap="butt"
               />
-            </svg>
+              </svg>
 
-            <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white dark:border-black shadow-lg">
-              <span className="text-white text-2xl font-bold">2</span>
+              <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white dark:border-black shadow-lg">
+                <span className="text-white text-2xl font-bold">2</span>
+              </div>
             </div>
           </div>
 
