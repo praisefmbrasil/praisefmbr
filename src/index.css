@@ -23,7 +23,7 @@
   /* Estilo de Botão Brutalista Customizado */
   .btn-brutalist {
     @apply relative border-4 border-black dark:border-white bg-[#ff6600] 
-           text-white font-black uppercase italic tracking-tighter 
+           text-white font-black uppercase not-italic tracking-normal 
            px-8 py-4 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#fff]
            active:translate-y-1 active:shadow-none transition-all;
   }
