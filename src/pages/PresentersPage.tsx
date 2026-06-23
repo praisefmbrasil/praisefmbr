@@ -11,7 +11,7 @@ const PRESENTERS_DATA = [
   {
     name: 'Samuel Andrade',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp',
-    bio: 'Samuel conduz o "Madrugada com Cristo", trazendo uma palavra de paz e adoração profunda para quem busca a presença de Deus nas primeiras horas do dia.',
+    bio: 'Samuel conduz o "Madrugada com Cristo", com adoração profunda para quem busca a presença de Deus nas primeiras horas do dia.',
     programTitle: 'Madrugada com Cristo'
   },
   {
@@ -23,7 +23,7 @@ const PRESENTERS_DATA = [
   {
     name: 'Rafael Costa',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp',
-    bio: 'O apresentador do "Tarde Gospel", selecionando as melhores músicas para acompanhar sua rotina com alegria e mensagens de fé.',
+    bio: 'O apresentador do "Tarde Gospel", selecionando as melhores músicas para acompanhar sua rotina com alegria.',
     programTitle: 'Tarde Gospel'
   },
   {
