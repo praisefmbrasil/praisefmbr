@@ -7,10 +7,6 @@ interface ScheduleListProps {
   onBack?: () => void;
 }
 
-// ---------------------------------------------------------------------------
-// Imagens
-// ---------------------------------------------------------------------------
-
 const IMG = {
   SAMUEL_ANDRADE: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/samuel_andrade_k3botd.webp',
   LUCAS_MARTINS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/lucas_martins_qmdc5s.webp',
@@ -25,60 +21,46 @@ const IMG = {
   PREGACAO:       'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/pregacao_da_palavra_leapde.webp',
 };
 
-// ---------------------------------------------------------------------------
-// Programação Praise FM Brasil 2026
-// ---------------------------------------------------------------------------
-
 const SCHEDULE_BRASIL: Record<number, Program[]> = {
-  // Domingo (0)
   0: [
     { id: 'br-d-1',  title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'A presença de Deus na madrugada.',              image: IMG.SAMUEL_ANDRADE },
-    { id: 'br-d-2',  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.',            image: IMG.WORSHIP_BR },
+    { id: 'br-d-2',  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
     { id: 'br-d-3',  title: 'Domingo com Cristo',   host: 'Janaina Costa',  startTime: '07:00', endTime: '12:00', description: 'Um domingo abençoado para toda a família.',     image: IMG.JANAINA_COSTA },
-    { id: 'br-d-4',  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.',            image: IMG.WORSHIP_BR },
+    { id: 'br-d-4',  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
     { id: 'br-d-5',  title: 'Tarde Gospel',         host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel na tarde de domingo.',       image: IMG.RAFAEL_COSTA },
-    { id: 'br-d-6',  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '16:00', endTime: '17:00', description: 'Rock cristão de alto impacto.',                 image: IMG.CESAR_BRUM },
+    { id: 'br-d-6',  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '16:00', endTime: '17:00', description: 'Rock cristão de alto impacto.',                image: IMG.CESAR_BRUM },
     { id: 'br-d-7',  title: 'Nova Geração',         host: 'Ana Paula',      startTime: '17:00', endTime: '18:00', description: 'Música e mensagem para a nova geração.',        image: IMG.ANA_PAULA },
-    { id: 'br-d-8',  title: 'Worship',              host: '',               startTime: '18:00', endTime: '20:00', description: 'Louvor e adoração sem interrupção.',            image: IMG.WORSHIP_BR },
-    { id: 'br-d-9',  title: 'Pregação da Palavra',  host: '',               startTime: '20:00', endTime: '21:00', description: 'A Palavra de Deus para edificação da sua vida.',image: IMG.PREGACAO },
+    { id: 'br-d-8',  title: 'Worship',              host: '',               startTime: '18:00', endTime: '20:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
+    { id: 'br-d-9',  title: 'Pregação da Palavra',  host: '',               startTime: '20:00', endTime: '21:00', description: 'A Palavra de Deus para edificação da sua vida.', image: IMG.PREGACAO },
     { id: 'br-d-10', title: 'Clássicos',            host: 'Rodrigo Veras',  startTime: '21:00', endTime: '22:00', description: 'Os maiores clássicos do gospel nacional.',      image: IMG.RODRIGO_VERAS },
-    { id: 'br-d-11', title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.',            image: IMG.WORSHIP_BR },
+    { id: 'br-d-11', title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
   ],
-  // Segunda a Sábado (1–6) — mesma grade
   ...Object.fromEntries(
     [1, 2, 3, 4, 5, 6].map((day) => [
       day,
       [
         { id: `br-${day}-1`,  title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'A presença de Deus na madrugada.',              image: IMG.SAMUEL_ANDRADE },
-        { id: `br-${day}-2`,  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.',            image: IMG.WORSHIP_BR },
-        { id: `br-${day}-3`,  title: 'Manhã com Cristo',     host: 'Lucas Martins',  startTime: '07:00', endTime: '12:00', description: 'Comece seu dia com fé e alegria.',              image: IMG.LUCAS_MARTINS },
-        { id: `br-${day}-4`,  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.',            image: IMG.WORSHIP_BR },
+        { id: `br-${day}-2`,  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
+        { id: `br-${day}-3`,  title: 'Manhã com Cristo',     host: 'Lucas Martins',  startTime: '07:00', endTime: '12:00', description: 'Comece seu dia com fé e alegria.',             image: IMG.LUCAS_MARTINS },
+        { id: `br-${day}-4`,  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
         { id: `br-${day}-5`,  title: 'Tarde Gospel',         host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel na sua tarde.',              image: IMG.RAFAEL_COSTA },
         { id: `br-${day}-6`,  title: 'Nova Geração',         host: 'Ana Paula',      startTime: '16:00', endTime: '17:00', description: 'Música e mensagem para a nova geração.',        image: IMG.ANA_PAULA },
-        { id: `br-${day}-7`,  title: 'Praise FM Flow',       host: 'Patrick Silva',  startTime: '17:00', endTime: '18:00', description: 'O flow do gospel contemporâneo.',               image: IMG.PATRICK_SILVA },
+        { id: `br-${day}-7`,  title: 'Praise FM Flow',       host: 'Patrick Silva',  startTime: '17:00', endTime: '18:00', description: 'O flow do gospel contemporâneo.',              image: IMG.PATRICK_SILVA },
         { id: `br-${day}-8`,  title: 'De Carona',            host: 'Bruno Almeida',  startTime: '18:00', endTime: '20:00', description: 'Sua trilha sonora no caminho para casa.',       image: IMG.BRUNO_ALMEIDA },
-        { id: `br-${day}-9`,  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '20:00', endTime: '21:00', description: 'Rock cristão de alto impacto.',                 image: IMG.CESAR_BRUM },
+        { id: `br-${day}-9`,  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '20:00', endTime: '21:00', description: 'Rock cristão de alto impacto.',                image: IMG.CESAR_BRUM },
         { id: `br-${day}-10`, title: 'Clássicos',            host: 'Rodrigo Veras',  startTime: '21:00', endTime: '22:00', description: 'Os maiores clássicos do gospel nacional.',      image: IMG.RODRIGO_VERAS },
-        { id: `br-${day}-11`, title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.',            image: IMG.WORSHIP_BR },
+        { id: `br-${day}-11`, title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
       ] as Program[],
     ])
   ),
 };
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const getBrasiliaDate = (base: Date = new Date()) =>
   new Date(base.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
 
-const format24h = (time: string) => time; // Já está em 24h
+const format24h = (time: string) => time;
 
 const DAY_ABBR = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-
-// ---------------------------------------------------------------------------
-// Progress ring (sem foto — usa ícone genérico quando image está vazio)
-// ---------------------------------------------------------------------------
 
 const ProgramProgressRing: React.FC<{
   program: Program;
@@ -96,25 +78,40 @@ const ProgramProgressRing: React.FC<{
   }, [program, isActive, nowMinutes]);
 
   const innerSize = 96;
-  const strokeWidth = 3;
+  const strokeWidth = 6;
+  const gap = 4;
+  const photoSize = innerSize - (strokeWidth + gap) * 2;
   const radius = innerSize / 2 - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - progress * circumference;
 
   return (
     <div className="relative flex-shrink-0 flex items-center justify-center bg-[#f2f2f2] dark:bg-[#1a1a1a] p-3 group-hover:scale-105 transition-transform duration-500">
-      <div className="relative rounded-full overflow-hidden" style={{ width: innerSize, height: innerSize }}>
-        {program.image ? (
-          <img
-            src={program.image}
-            alt={program.title}
-            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-[#222] text-[#ff6600] text-2xl font-black select-none">
-            {program.title.charAt(0)}
-          </div>
-        )}
+      <div className="relative" style={{ width: innerSize, height: innerSize }}>
+        {/* Foto recuada para dar espaço ao anel */}
+        <div
+          className="absolute rounded-full overflow-hidden"
+          style={{
+            top: strokeWidth + gap,
+            left: strokeWidth + gap,
+            width: photoSize,
+            height: photoSize,
+          }}
+        >
+          {program.image ? (
+            <img
+              src={program.image}
+              alt={program.title}
+              className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 dark:bg-[#222] text-[#ff6600] text-2xl font-black select-none">
+              {program.title.charAt(0)}
+            </div>
+          )}
+        </div>
+
+        {/* SVG do anel fora do overflow-hidden */}
         <svg
           width={innerSize}
           height={innerSize}
@@ -134,10 +131,6 @@ const ProgramProgressRing: React.FC<{
     </div>
   );
 };
-
-// ---------------------------------------------------------------------------
-// Componente principal
-// ---------------------------------------------------------------------------
 
 const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack }) => {
   const [now, setNow] = useState(getBrasiliaDate());
@@ -236,7 +229,6 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
           </button>
         )}
 
-        {/* Cabeçalho */}
         <div className="mb-10">
           <div className="flex flex-col md:flex-row md:items-baseline md:space-x-4 mb-6 border-b-4 border-black dark:border-white pb-6">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none">
@@ -247,7 +239,6 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
             </p>
           </div>
 
-          {/* Seletor de dias */}
           <div className="bg-[#1a1f22] overflow-x-auto mb-10">
             <div className="flex min-w-max border-b border-white/10">
               {weekDays.map((day) => {
@@ -271,7 +262,6 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
           </div>
         </div>
 
-        {/* Navegação por período */}
         <div className="mb-12">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.25em] text-gray-400">
             <span className="text-gray-300 dark:text-gray-600">Ir para</span>
@@ -289,7 +279,6 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
           </div>
         </div>
 
-        {/* Seções por período */}
         {(Object.entries(sections) as [string, Program[]][]).map(([key, items]) =>
           items.length > 0 ? (
             <div key={key} id={key} className="mb-20 scroll-mt-32">
@@ -311,7 +300,6 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
                           : 'border-b border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5'
                       }`}
                     >
-                      {/* Horário */}
                       <div className="w-32 flex-shrink-0 flex flex-col mb-6 md:mb-0 pt-1">
                         <span
                           className={`text-2xl font-bold tracking-tight ${
@@ -329,12 +317,10 @@ const ScheduleList: React.FC<ScheduleListProps> = ({ onNavigateToProgram, onBack
                         )}
                       </div>
 
-                      {/* Anel de progresso */}
                       <div className="md:mx-8">
                         <ProgramProgressRing program={prog} isActive={active} nowMinutes={nowMinutes} />
                       </div>
 
-                      {/* Detalhes */}
                       <div className="flex-grow min-w-0 pt-1">
                         <h4 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white group-hover:text-[#ff6600] leading-tight tracking-tight mb-2 transition-all duration-300">
                           {prog.title}
