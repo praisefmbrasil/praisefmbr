@@ -37,6 +37,7 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
     const currentIndex = schedule.findIndex((p) => {
       const [sH, sM] = p.startTime.split(':').map(Number);
       const [eH, eM] = p.endTime.split(':').map(Number);
+
       const start = sH * 60 + sM;
       let end = eH * 60 + eM;
 
@@ -56,6 +57,7 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
 
     const [sH, sM] = currentProgram.startTime.split(':').map(Number);
     const [eH, eM] = currentProgram.endTime.split(':').map(Number);
+
     const start = sH * 60 + sM;
     let end = eH * 60 + eM;
 
@@ -78,7 +80,6 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
 
-          {/* Foto circular com anel de progresso igual ao USA */}
           <div
             className="relative flex-shrink-0 group cursor-pointer"
             onClick={() => onNavigateToProgram(currentProgram)}
@@ -127,7 +128,6 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
             </div>
           </div>
 
-          {/* Texto e botão */}
           <div className="flex-grow pt-4 text-center md:text-left">
             <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
               <span className="text-[#ff6600] font-black uppercase tracking-[0.2em]">AO VIVO</span>
@@ -159,8 +159,6 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
 
         {showDetails && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-
-            {/* A seguir — cards horizontais com foto redonda pequena */}
             <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
               <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
                 {upNextPrograms.map((prog) => (
@@ -189,7 +187,6 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
               </div>
             </div>
 
-            {/* Alerta novidades */}
             <div
               className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50"
               onClick={() => navigate('/new-releases')}
@@ -214,7 +211,6 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
           </div>
         )}
 
-        {/* Rodapé */}
         <div className="mt-12 pt-6">
           <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-medium tracking-widest mb-4">
             Produzido por PRAISE FM BRASIL.
