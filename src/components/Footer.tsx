@@ -11,9 +11,9 @@ const Footer: React.FC = () => {
           <div className="col-span-2">
             <div className="flex items-center mb-6 cursor-pointer" onClick={() => navigate('/')}>
               {/* 1. Logo atualizado para a versão Brasil */}
-              <img 
-                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206554/LOGOBRASL_aigm87.webp" 
-                alt="Praise FM Brasil Logo" 
+              <img
+                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206553/LOGO_HEADER_uygoqx.webp"
+                alt="Praise FM Brasil Logo"
                 className="h-10 w-auto object-contain"
               />
             </div>
