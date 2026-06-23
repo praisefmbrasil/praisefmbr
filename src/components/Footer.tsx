@@ -10,14 +10,12 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-12">
           <div className="col-span-2">
             <div className="flex items-center mb-6 cursor-pointer" onClick={() => navigate('/')}>
-              {/* 1. Logo atualizado para a versão Brasil */}
               <img
-                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206553/LOGO_HEADER_uygoqx.webp"
+                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1782196185/white-logo_loqfwz.png"
                 alt="Praise FM Brasil Logo"
                 className="h-10 w-auto object-contain"
               />
             </div>
-            {/* 2. Descrição traduzida e adaptada */}
             <p className="text-gray-400 text-sm leading-relaxed max-sm font-normal">
               O seu lugar para a melhor música worship do mundo, conteúdo devocional exclusivo e a nova geração de artistas de fé. Curadoria diária para o seu espírito.
             </p>
@@ -26,33 +24,24 @@ const Footer: React.FC = () => {
             <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Música</h4>
             <ul className="space-y-4 text-sm font-normal text-gray-400">
               <li>
-                <button 
-                  onClick={() => navigate('/music')} 
-                  className="hover:text-[#ff6600] transition-colors text-left"
-                >
+                <button onClick={() => navigate('/music')} className="hover:text-[#ff6600] transition-colors text-left">
                   Playlist Praise FM
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => navigate('/new-releases')} 
-                  className="hover:text-[#ff6600] transition-colors text-left"
-                >
+                <button onClick={() => navigate('/new-releases')} className="hover:text-[#ff6600] transition-colors text-left">
                   Lançamentos
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => navigate('/artists')} 
-                  className="hover:text-[#ff6600] transition-colors text-left"
-                >
+                <button onClick={() => navigate('/artists')} className="hover:text-[#ff6600] transition-colors text-left">
                   Artistas em Destaque
                 </button>
               </li>
             </ul>
           </div>
           <div>
-             <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Rádio</h4>
+            <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Rádio</h4>
             <ul className="space-y-4 text-sm font-normal text-gray-400">
               <li><button onClick={() => navigate('/schedule')} className="hover:text-[#ff6600] transition-colors text-left">Grade Completa</button></li>
               <li><button onClick={() => navigate('/presenters')} className="hover:text-[#ff6600] transition-colors text-left">Nossos Locutores</button></li>
@@ -60,7 +49,7 @@ const Footer: React.FC = () => {
             </ul>
           </div>
           <div>
-             <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Suporte</h4>
+            <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Suporte</h4>
             <ul className="space-y-4 text-sm font-normal text-gray-400">
               <li><button onClick={() => navigate('/help')} className="hover:text-[#ff6600] transition-colors text-left">Central de Ajuda</button></li>
               <li><button onClick={() => navigate('/feedback')} className="hover:text-[#ff6600] transition-colors text-left">Feedback & Suporte</button></li>
@@ -68,14 +57,13 @@ const Footer: React.FC = () => {
             </ul>
           </div>
           <div>
-             <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Siga-nos</h4>
+            <h4 className="font-medium uppercase text-[11px] tracking-widest mb-6 text-white/50">Siga-nos</h4>
             <ul className="space-y-4 text-sm font-normal text-gray-400">
               <li>
-                {/* 3. Link do Instagram atualizado (ajustar se tiver um @ específico para o Brasil) */}
-                <a 
+                <a
                   href="https://www.instagram.com/praisefm.brasil/"
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-[#ff6600] transition-colors"
                 >
                   Instagram
@@ -85,7 +73,6 @@ const Footer: React.FC = () => {
           </div>
         </div>
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] font-normal text-gray-500 uppercase tracking-widest">
-          {/* 4. Direitos autorais atualizados */}
           <p>© 2026 PRAISE FM BRASIL. INSPIRADOS PELA EXCELÊNCIA.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <button onClick={() => navigate('/privacy-policy')} className="hover:text-white transition-colors">Privacidade</button>
