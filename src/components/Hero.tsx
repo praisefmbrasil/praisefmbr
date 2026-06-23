@@ -154,7 +154,7 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
               className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50"
               onClick={() => navigate('/new-releases')}
             >
-              <div className="flex items-center space-x-6 mb-6 md:mb-0">
+              <div className="flex items-center space-x-10">
                 <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center relative">
                   <Zap className="w-6 h-6 text-[#ff6600] fill-current animate-pulse" />
                   <div className="absolute inset-0 rounded-full border-2 border-[#ff6600] scale-110 animate-ping opacity-20"></div>
