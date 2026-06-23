@@ -65,8 +65,8 @@ const Hero: React.FC<HeroProps> = ({
     const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0]
     const next =
       currentIndex !== -1
-        ? schedule.slice(currentIndex + 1, currentIndex + 3)
-        : schedule.slice(1, 3)
+        ? schedule.slice(currentIndex + 1, currentIndex + 4)
+        : schedule.slice(1, 4)
 
     return {
       currentProgram: current || null,
@@ -202,43 +202,33 @@ const Hero: React.FC<HeroProps> = ({
 
         {showDetails && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="mt-16 pt-8 border-t border-gray-100 dark:border-white/5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {upNextPrograms.map((prog) => (
-                  <div
-                    key={prog.id}
-                    className="flex items-start space-x-5 group cursor-pointer"
-                    onClick={() => onNavigateToProgram(prog)}
-                  >
-                    <div className="w-24 h-24 flex-shrink-0 bg-gray-100 overflow-hidden">
-                      <img
-                        src={prog.image}
-                        alt={prog.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                    </div>
-
-                    <div className="flex flex-col">
-                      <div className="text-[11px] font-normal mb-1">
-                        <span className="text-[#ff6600] uppercase tracking-widest font-semibold mr-2">
-                          A SEGUIR
-                        </span>
-                        <span className="text-gray-400 font-normal">
-                          {prog.startTime} - {prog.endTime}
-                        </span>
-                      </div>
-
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1 group-hover:text-[#ff6600] transition-colors">
-                        {prog.title}
-                      </h3>
-
-                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-snug">
-                        {prog.description}
-                      </p>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-8 border-b border-gray-300 dark:border-white/10">
+              {upNextPrograms.map((prog) => (
+                <button
+                  key={prog.id}
+                  className="flex gap-4 text-left group items-center bg-gray-100 dark:bg-[#1A1A1A] hover:bg-gray-200 dark:hover:bg-[#252525] p-4 transition-colors w-full rounded-2xl"
+                  onClick={() => onNavigateToProgram(prog)}
+                >
+                  <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl">
+                    <img
+                      src={prog.image}
+                      alt={prog.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
-                ))}
-              </div>
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-black text-orange-500 uppercase tracking-wide mb-0.5">
+                      {prog.startTime} - {prog.endTime}
+                    </p>
+                    <h3 className="text-sm font-bold leading-tight group-hover:text-orange-500 transition-colors truncate">
+                      {prog.title}
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                      {prog.host}
+                    </p>
+                  </div>
+                </button>
+              ))}
             </div>
 
             <div
