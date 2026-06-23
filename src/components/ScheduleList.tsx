@@ -8,40 +8,58 @@ interface ScheduleListProps {
 }
 
 // ---------------------------------------------------------------------------
+// Imagens
+// ---------------------------------------------------------------------------
+
+const IMG = {
+  SAMUEL_ANDRADE: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/samuel_andrade_k3botd.webp',
+  LUCAS_MARTINS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/lucas_martins_qmdc5s.webp',
+  RAFAEL_COSTA:   'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rafael_costa_qxzwrf.webp',
+  ANA_PAULA:      'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/ana_paula_wjuwju.webp',
+  BRUNO_ALMEIDA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/bruno_almeida_hfmekk.webp',
+  RODRIGO_VERAS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rodrigo_veras_esognm.webp',
+  PATRICK_SILVA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/patick_silva_r4lpvp.webp',
+  CESAR_BRUM:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/cesar_brum_auudhy.webp',
+  JANAINA_COSTA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/ana_paula_wjuwju.webp',
+  WORSHIP_BR:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/worship_pck4vy.webp',
+  PREGACAO:       'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/pregacao_da_palavra_leapde.webp',
+};
+
+// ---------------------------------------------------------------------------
 // Programação Praise FM Brasil 2026
 // ---------------------------------------------------------------------------
 
 const SCHEDULE_BRASIL: Record<number, Program[]> = {
   // Domingo (0)
   0: [
-    { id: 'br-d-1',  title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'A presença de Deus na madrugada.', image: '' },
-    { id: 'br-d-2',  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.', image: '' },
-    { id: 'br-d-3',  title: 'Domingo com Cristo',   host: 'Janaina Costa',  startTime: '07:00', endTime: '12:00', description: 'Um domingo abençoado para toda a família.', image: '' },
-    { id: 'br-d-4',  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.', image: '' },
-    { id: 'br-d-5',  title: 'Tarde Gospel',         host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel na tarde de domingo.', image: '' },
-    { id: 'br-d-6',  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '16:00', endTime: '17:00', description: 'Rock cristão de alto impacto.', image: '' },
-    { id: 'br-d-7',  title: 'Nova Geração',         host: 'Ana Paula',      startTime: '17:00', endTime: '18:00', description: 'Música e mensagem para a nova geração.', image: '' },
-    { id: 'br-d-8',  title: 'Worship',              host: '',               startTime: '18:00', endTime: '20:00', description: 'Louvor e adoração sem interrupção.', image: '' },
-    { id: 'br-d-9',  title: 'Pregação da Palavra',  host: '',               startTime: '20:00', endTime: '21:00', description: 'A Palavra de Deus para edificação da sua vida.', image: '' },
-    { id: 'br-d-10', title: 'Clássicos',            host: 'Rodrigo Veras',  startTime: '21:00', endTime: '22:00', description: 'Os maiores clássicos do gospel nacional.', image: '' },
-    { id: 'br-d-11', title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.', image: '' },
+    { id: 'br-d-1',  title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'A presença de Deus na madrugada.',              image: IMG.SAMUEL_ANDRADE },
+    { id: 'br-d-2',  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
+    { id: 'br-d-3',  title: 'Domingo com Cristo',   host: 'Janaina Costa',  startTime: '07:00', endTime: '12:00', description: 'Um domingo abençoado para toda a família.',     image: IMG.JANAINA_COSTA },
+    { id: 'br-d-4',  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
+    { id: 'br-d-5',  title: 'Tarde Gospel',         host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel na tarde de domingo.',       image: IMG.RAFAEL_COSTA },
+    { id: 'br-d-6',  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '16:00', endTime: '17:00', description: 'Rock cristão de alto impacto.',                image: IMG.CESAR_BRUM },
+    { id: 'br-d-7',  title: 'Nova Geração',         host: 'Ana Paula',      startTime: '17:00', endTime: '18:00', description: 'Música e mensagem para a nova geração.',        image: IMG.ANA_PAULA },
+    { id: 'br-d-8',  title: 'Worship',              host: '',               startTime: '18:00', endTime: '20:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
+    { id: 'br-d-9',  title: 'Pregação da Palavra',  host: '',               startTime: '20:00', endTime: '21:00', description: 'A Palavra de Deus para edificação da sua vida.', image: IMG.PREGACAO },
+    { id: 'br-d-10', title: 'Clássicos',            host: 'Rodrigo Veras',  startTime: '21:00', endTime: '22:00', description: 'Os maiores clássicos do gospel nacional.',      image: IMG.RODRIGO_VERAS },
+    { id: 'br-d-11', title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
   ],
   // Segunda a Sábado (1–6) — mesma grade
   ...Object.fromEntries(
     [1, 2, 3, 4, 5, 6].map((day) => [
       day,
       [
-        { id: `br-${day}-1`,  title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'A presença de Deus na madrugada.', image: '' },
-        { id: `br-${day}-2`,  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.', image: '' },
-        { id: `br-${day}-3`,  title: 'Manhã com Cristo',     host: 'Lucas Martins',  startTime: '07:00', endTime: '12:00', description: 'Comece seu dia com fé e alegria.', image: '' },
-        { id: `br-${day}-4`,  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.', image: '' },
-        { id: `br-${day}-5`,  title: 'Tarde Gospel',         host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel na sua tarde.', image: '' },
-        { id: `br-${day}-6`,  title: 'Nova Geração',         host: 'Ana Paula',      startTime: '16:00', endTime: '17:00', description: 'Música e mensagem para a nova geração.', image: '' },
-        { id: `br-${day}-7`,  title: 'Praise FM Flow',       host: 'Patrick Silva',  startTime: '17:00', endTime: '18:00', description: 'O flow do gospel contemporâneo.', image: '' },
-        { id: `br-${day}-8`,  title: 'De Carona',            host: 'Bruno Almeida',  startTime: '18:00', endTime: '20:00', description: 'Sua trilha sonora no caminho para casa.', image: '' },
-        { id: `br-${day}-9`,  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '20:00', endTime: '21:00', description: 'Rock cristão de alto impacto.', image: '' },
-        { id: `br-${day}-10`, title: 'Clássicos',            host: 'Rodrigo Veras',  startTime: '21:00', endTime: '22:00', description: 'Os maiores clássicos do gospel nacional.', image: '' },
-        { id: `br-${day}-11`, title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.', image: '' },
+        { id: `br-${day}-1`,  title: 'Madrugada com Cristo', host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'A presença de Deus na madrugada.',              image: IMG.SAMUEL_ANDRADE },
+        { id: `br-${day}-2`,  title: 'Worship',              host: '',               startTime: '06:00', endTime: '07:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
+        { id: `br-${day}-3`,  title: 'Manhã com Cristo',     host: 'Lucas Martins',  startTime: '07:00', endTime: '12:00', description: 'Comece seu dia com fé e alegria.',             image: IMG.LUCAS_MARTINS },
+        { id: `br-${day}-4`,  title: 'Worship',              host: '',               startTime: '12:00', endTime: '13:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
+        { id: `br-${day}-5`,  title: 'Tarde Gospel',         host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'O melhor do gospel na sua tarde.',              image: IMG.RAFAEL_COSTA },
+        { id: `br-${day}-6`,  title: 'Nova Geração',         host: 'Ana Paula',      startTime: '16:00', endTime: '17:00', description: 'Música e mensagem para a nova geração.',        image: IMG.ANA_PAULA },
+        { id: `br-${day}-7`,  title: 'Praise FM Flow',       host: 'Patrick Silva',  startTime: '17:00', endTime: '18:00', description: 'O flow do gospel contemporâneo.',              image: IMG.PATRICK_SILVA },
+        { id: `br-${day}-8`,  title: 'De Carona',            host: 'Bruno Almeida',  startTime: '18:00', endTime: '20:00', description: 'Sua trilha sonora no caminho para casa.',       image: IMG.BRUNO_ALMEIDA },
+        { id: `br-${day}-9`,  title: 'Praise FM Rock',       host: 'Cesar Brum',     startTime: '20:00', endTime: '21:00', description: 'Rock cristão de alto impacto.',                image: IMG.CESAR_BRUM },
+        { id: `br-${day}-10`, title: 'Clássicos',            host: 'Rodrigo Veras',  startTime: '21:00', endTime: '22:00', description: 'Os maiores clássicos do gospel nacional.',      image: IMG.RODRIGO_VERAS },
+        { id: `br-${day}-11`, title: 'Worship',              host: '',               startTime: '22:00', endTime: '00:00', description: 'Louvor e adoração sem interrupção.',             image: IMG.WORSHIP_BR },
       ] as Program[],
     ])
   ),
