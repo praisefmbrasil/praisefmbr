@@ -1,223 +1,440 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Volume2, Clock, ArrowLeft, Calendar, Music, Activity, History as HistoryIcon, Loader2 } from 'lucide-react';
-import { Program } from '../types';
-import { SCHEDULES } from '../constants';
-import { supabase } from '../lib/supabaseClient';
+import React, { useMemo } from 'react'
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Headphones,
+  Music,
+  Pause,
+  Play,
+  Radio,
+  UserRound
+} from 'lucide-react'
+import { Program } from '../types'
+import { SCHEDULES } from '../constants'
 
-// --- INTERFACES (O que o TS não estava encontrando) ---
-interface PlayedTrack {
-  artist: string;
-  title: string;
-  label: string;
-  image: string;
-  isLive?: boolean;
-  timestamp: number;
-}
-
-interface DailyHistory {
-  [date: string]: PlayedTrack[];
+interface LiveMetadata {
+  artist: string
+  title: string
+  playedAt?: Date
+  isMusic?: boolean
 }
 
 interface ProgramDetailProps {
-  program: Program;
-  onBack: () => void;
-  onViewSchedule: () => void;
-  onListenClick: () => void;
-  isPlaying: boolean;
+  program: Program
+  onBack: () => void
+  onViewSchedule: () => void
+  onListenClick: () => void
+  isPlaying: boolean
+  liveMetadata?: LiveMetadata | null
+  trackHistory?: LiveMetadata[]
 }
 
-// --- CONFIGURAÇÕES E UTILS ---
-const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/smulrig6orwvv';
+const DEFAULT_COVER = '/logo.png'
 
-const getBrasiliaTotalMinutes = () => {
-  const now = new Date();
-  const brasiliaDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
-  return brasiliaDate.getHours() * 60 + brasiliaDate.getMinutes();
-};
+const getProgramImage = (program?: Program) => {
+  const p = program as any
+  return (
+    p?.image ||
+    p?.cover ||
+    p?.presenterImage ||
+    p?.presenter?.image ||
+    DEFAULT_COVER
+  )
+}
 
-const getLocalDateString = () => {
-  return new Date().toISOString().split('T')[0];
-};
+const formatRange = (start?: string, end?: string) => {
+  if (!start || !end) return '24/7'
+  return `${start} - ${end}`
+}
 
-const format24h = (time24: string) => {
-  const [h, m] = time24.split(':').map(Number);
-  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
-};
+const getBrazilDayAndTotalMinutes = () => {
+  const now = new Date()
 
-// --- COMPONENTE PRINCIPAL ---
-const ProgramDetail: React.FC<ProgramDetailProps> = ({ 
-  program, 
-  onBack, 
-  onViewSchedule, 
-  onListenClick, 
-  isPlaying 
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Sao_Paulo',
+    weekday: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+
+  const parts = formatter.formatToParts(now)
+
+  const weekday = parts.find((p) => p.type === 'weekday')?.value || 'Mon'
+  const hour = Number(parts.find((p) => p.type === 'hour')?.value || 0)
+  const minute = Number(parts.find((p) => p.type === 'minute')?.value || 0)
+
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6
+  }
+
+  return {
+    day: dayMap[weekday] ?? 1,
+    total: hour * 60 + minute
+  }
+}
+
+const isProgramLive = (program: Program) => {
+  const { total } = getBrazilDayAndTotalMinutes()
+
+  const [sH, sM] = program.startTime.split(':').map(Number)
+  const [eH, eM] = program.endTime.split(':').map(Number)
+
+  const start = sH * 60 + sM
+  let end = eH * 60 + eM
+
+  if (end === 0 || end <= start) {
+    end = 24 * 60
+  }
+
+  return total >= start && total < end
+}
+
+const getNextProgram = (program: Program) => {
+  const { day } = getBrazilDayAndTotalMinutes()
+  const schedule = SCHEDULES[day] || SCHEDULES[1]
+
+  const currentIndex = schedule.findIndex((p) => p.id === program.id)
+
+  if (currentIndex === -1) return null
+
+  if (currentIndex < schedule.length - 1) {
+    return schedule[currentIndex + 1]
+  }
+
+  const tomorrow = SCHEDULES[(day + 1) % 7] || schedule
+  return tomorrow[0] || null
+}
+
+const getTrackTime = (track: LiveMetadata) => {
+  if (!track.playedAt) return 'Agora'
+
+  return new Date(track.playedAt).toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const getTrackImage = (artist: string, title: string) => {
+  return `https://picsum.photos/seed/${encodeURIComponent(
+    `${artist}-${title}`
+  )}/160/160`
+}
+
+const ProgramDetail: React.FC<ProgramDetailProps> = ({
+  program,
+  onBack,
+  onViewSchedule,
+  onListenClick,
+  isPlaying,
+  liveMetadata,
+  trackHistory = []
 }) => {
-  const [nowMinutes, setNowMinutes] = useState(getBrasiliaTotalMinutes());
-  const [loadingHistory, setLoadingHistory] = useState(true);
-  const eventSourceRef = useRef<EventSource | null>(null);
-  
-  const [historyGroups, setHistoryGroups] = useState<DailyHistory>(() => {
-    const storageKey = `history_v2_${program.id}`;
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { return {}; }
+  const programImage = getProgramImage(program)
+  const isLive = isProgramLive(program)
+  const nextProgram = getNextProgram(program)
+
+  const tracks = useMemo(() => {
+    const unique = new Map<string, LiveMetadata>()
+
+    if (liveMetadata?.artist && liveMetadata?.title) {
+      unique.set(`${liveMetadata.artist}-${liveMetadata.title}`, liveMetadata)
     }
-    return {};
-  });
 
-  // Carregar histórico do Supabase
-  useEffect(() => {
-    const loadSavedHistory = async () => {
-      setLoadingHistory(true);
-      try {
-        const { data } = await supabase
-          .from('program_history')
-          .select('*')
-          .eq('program_id', program.id)
-          .order('played_at', { ascending: false })
-          .limit(100);
+    trackHistory.forEach((track) => {
+      if (!track.artist || !track.title) return
+      unique.set(`${track.artist}-${track.title}`, track)
+    })
 
-        if (data && data.length > 0) {
-          const grouped: DailyHistory = {};
-          data.forEach((item: any) => {
-            const date = item.played_at.split('T')[0];
-            if (!grouped[date]) grouped[date] = [];
-            grouped[date].push({
-              artist: item.artist,
-              title: item.title,
-              label: item.label || "TOCADA ANTERIORMENTE",
-              image: item.image_url,
-              timestamp: new Date(item.played_at).getTime(),
-              isLive: false
-            });
-          });
-          setHistoryGroups(grouped);
-          localStorage.setItem(`history_v2_${program.id}`, JSON.stringify(grouped));
-        }
-      } catch (err) {
-        console.error("Erro ao buscar histórico:", err);
-      } finally {
-        setLoadingHistory(false);
-      }
-    };
-
-    loadSavedHistory();
-  }, [program.id]);
-
-  // Atualizar relógio interno
-  useEffect(() => {
-    const timer = setInterval(() => setNowMinutes(getBrasiliaTotalMinutes()), 30000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Lógica de "No Ar" e Próximo Programa
-  const { isCurrentlyLive, nextProgram } = useMemo(() => {
-    const [sH, sM] = program.startTime.split(':').map(Number);
-    const [eH, eM] = program.endTime.split(':').map(Number);
-    const start = sH * 60 + sM;
-    let end = eH * 60 + eM;
-    if (end === 0 || end <= start) end = 24 * 60;
-    
-    const live = nowMinutes >= start && nowMinutes < end;
-    const now = new Date();
-    const brasiliaDay = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' })).getDay();
-    const daySchedule = SCHEDULES[brasiliaDay] || SCHEDULES[1];
-    const currentIndex = daySchedule.findIndex(p => p.id === program.id);
-    const next = currentIndex !== -1 && currentIndex < daySchedule.length - 1 
-      ? daySchedule[currentIndex + 1] 
-      : (currentIndex === daySchedule.length - 1 ? (SCHEDULES[(brasiliaDay + 1) % 7] || daySchedule)[0] : null);
-
-    return { isCurrentlyLive: live, nextProgram: next };
-  }, [program, nowMinutes]);
-
-  // Renderização do componente...
-  const sortedDateKeys = useMemo(() => Object.keys(historyGroups).sort((a, b) => b.localeCompare(a)), [historyGroups]);
+    return Array.from(unique.values()).slice(0, 12)
+  }, [liveMetadata, trackHistory])
 
   return (
-    <div className="bg-[#121212] min-h-screen text-white font-sans">
-      <div className="max-w-7xl mx-auto px-4 pt-8 pb-4">
-        <button 
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
-            onBack();
-          }} 
-          className="flex items-center text-gray-400 hover:text-white transition-colors group mb-6"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-[11px] font-bold uppercase tracking-[0.2em]">Voltar ao Início</span>
-        </button>
-        <h1 className="text-4xl md:text-6xl font-bold uppercase tracking-tighter leading-tight mb-8">
-          {program.title}
-        </h1>
-      </div>
-
-      <div className="bg-[#1a1a1a] border-b border-white/5 sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <button className="py-4 text-[#ff6600] border-b-2 border-[#ff6600] font-bold text-[11px] uppercase tracking-widest">Sobre</button>
-          <button onClick={onViewSchedule} className="flex items-center text-[#ff6600] space-x-2 hover:underline font-bold text-[11px] py-4 uppercase tracking-widest">
-             <Calendar className="w-4 h-4" />
-             <span>Ver Programação</span>
-          </button>
+    <div className="min-h-[100dvh] bg-white dark:bg-[#0f0f0f] text-gray-950 dark:text-white">
+      <section className="relative overflow-hidden border-b border-black/10 dark:border-white/10">
+        <div className="absolute inset-0">
+          <img
+            src={programImage}
+            alt={program.title}
+            className="w-full h-full object-cover opacity-20 blur-2xl scale-110"
+            onError={(e) => {
+              e.currentTarget.src = DEFAULT_COVER
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white to-white dark:from-black/50 dark:via-[#0f0f0f] dark:to-[#0f0f0f]" />
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8">
-            <div className="relative aspect-video overflow-hidden mb-12 shadow-2xl bg-[#000]">
-              <img src={program.image} alt={program.title} className="w-full h-full object-cover" />
-              {isCurrentlyLive && (
-                <button onClick={onListenClick} className="absolute bottom-8 left-8 bg-[#ff6600] hover:bg-white text-black px-8 py-4 flex items-center space-x-4 transition-all">
-                  <Volume2 className={`w-8 h-8 ${isPlaying ? 'animate-pulse' : ''}`} />
-                  <span className="text-2xl font-bold uppercase tracking-tighter">{isPlaying ? 'No Ar Agora' : 'Ouvir Ao Vivo'}</span>
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 pt-8 pb-12 md:pb-16">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-orange-500 transition mb-8"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Voltar
+          </button>
+
+          <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-8 lg:gap-12 items-center">
+            <div className="relative">
+              <div className="aspect-square rounded-[2rem] overflow-hidden bg-gray-200 dark:bg-[#1a1a1a] shadow-2xl">
+                <img
+                  src={programImage}
+                  alt={program.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = DEFAULT_COVER
+                  }}
+                />
+              </div>
+
+              <div className="absolute -bottom-5 left-6 bg-black text-white dark:bg-white dark:text-black px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+                <Radio className="w-5 h-5 text-orange-500" />
+                <span className="text-xs font-black uppercase tracking-widest">
+                  {isLive ? 'Ao Vivo' : 'On Demand'}
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-6 lg:pt-0">
+              <div className="flex flex-wrap items-center gap-3 mb-5">
+                <span className="inline-flex items-center gap-2 bg-orange-500 text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                  {isLive ? 'Ao Vivo' : 'Programa'}
+                </span>
+
+                <span className="inline-flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm font-semibold">
+                  <Clock className="w-4 h-4" />
+                  {formatRange(program.startTime, program.endTime)}
+                </span>
+              </div>
+
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95] mb-5">
+                {program.title}
+              </h1>
+
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 max-w-3xl leading-relaxed mb-6">
+                {program.description}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-4 mb-8">
+                <div className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                  <UserRound className="w-5 h-5 text-orange-500" />
+                  <span className="font-bold">{program.host || 'Praise FM Brasil'}</span>
+                </div>
+
+                {liveMetadata?.artist && (
+                  <div className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                    <Headphones className="w-5 h-5 text-orange-500" />
+                    <span className="font-bold">{liveMetadata.artist}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={onListenClick}
+                  className="inline-flex items-center justify-center gap-3 bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black text-lg transition active:scale-95 shadow-xl shadow-orange-500/20"
+                >
+                  {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="currentColor" />}
+                  {isPlaying ? 'Pausar' : 'Ouvir Agora'}
                 </button>
+
+                <button
+                  onClick={onViewSchedule}
+                  className="inline-flex items-center justify-center gap-3 bg-gray-100 hover:bg-gray-200 dark:bg-[#1b1b1b] dark:hover:bg-[#252525] px-8 py-4 rounded-2xl font-black text-lg transition"
+                >
+                  <Calendar className="w-5 h-5 text-orange-500" />
+                  Programação
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
+          <div className="space-y-8">
+            <div className="bg-gray-100 dark:bg-[#171717] rounded-[2rem] p-6 md:p-8 border border-black/5 dark:border-white/5">
+              <div className="flex items-center justify-between gap-4 mb-6">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-500 mb-2">
+                    Praise FM Brasil
+                  </p>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+                    Sobre o programa
+                  </h2>
+                </div>
+              </div>
+
+              <p className="text-gray-600 dark:text-gray-300 text-lg leading-relaxed">
+                {program.description}
+              </p>
+            </div>
+
+            <div className="bg-gray-100 dark:bg-[#171717] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/5">
+              <div className="p-6 md:p-8 border-b border-black/5 dark:border-white/10 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-500 mb-2">
+                    Recentemente
+                  </p>
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+                    Músicas Tocadas
+                  </h2>
+                </div>
+
+                <Music className="w-8 h-8 text-orange-500" />
+              </div>
+
+              {tracks.length > 0 ? (
+                <div className="divide-y divide-black/5 dark:divide-white/10">
+                  {tracks.map((track, index) => {
+                    const isCurrent =
+                      liveMetadata?.artist === track.artist &&
+                      liveMetadata?.title === track.title
+
+                    return (
+                      <div
+                        key={`${track.artist}-${track.title}-${index}`}
+                        className={`flex items-center gap-4 p-4 md:p-5 transition ${
+                          isCurrent
+                            ? 'bg-orange-500/10'
+                            : 'hover:bg-white/70 dark:hover:bg-white/5'
+                        }`}
+                      >
+                        <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl overflow-hidden bg-gray-300 dark:bg-[#222] flex-shrink-0">
+                          <img
+                            src={getTrackImage(track.artist, track.title)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {isCurrent && (
+                              <span className="text-[10px] font-black uppercase tracking-widest text-orange-500">
+                                Tocando Agora
+                              </span>
+                            )}
+                          </div>
+
+                          <h3 className="font-black text-base md:text-lg truncate">
+                            {track.title}
+                          </h3>
+
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            {track.artist}
+                          </p>
+                        </div>
+
+                        <div className="hidden sm:block text-right text-xs font-bold text-gray-400 uppercase tracking-widest">
+                          {getTrackTime(track)}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="p-10 md:p-14 text-center">
+                  <div className="w-16 h-16 rounded-full bg-white dark:bg-[#222] mx-auto mb-5 flex items-center justify-center">
+                    <Music className="w-7 h-7 text-orange-500" />
+                  </div>
+
+                  <h3 className="text-xl font-black mb-2">
+                    Nenhuma música ainda
+                  </h3>
+
+                  <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    Continue ouvindo — as músicas tocadas na Praise FM Brasil aparecerão aqui.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <aside className="space-y-6">
+            <div className="bg-gray-100 dark:bg-[#171717] rounded-[2rem] p-6 border border-black/5 dark:border-white/5">
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-500 mb-4">
+                Apresentador
+              </p>
+
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gray-300 dark:bg-[#222]">
+                  <img
+                    src={programImage}
+                    alt={program.host || program.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="text-xl font-black leading-tight">
+                    {program.host || 'Praise FM Brasil'}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Apresentador
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-100 dark:bg-[#171717] rounded-[2rem] p-6 border border-black/5 dark:border-white/5">
+              <p className="text-xs font-black uppercase tracking-[0.25em] text-orange-500 mb-4">
+                A Seguir
+              </p>
+
+              {nextProgram ? (
+                <div>
+                  <h3 className="text-2xl font-black tracking-tight mb-2">
+                    {nextProgram.title}
+                  </h3>
+
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    {nextProgram.host}
+                  </p>
+
+                  <div className="inline-flex items-center gap-2 bg-white dark:bg-[#222] px-4 py-2 rounded-full text-sm font-black">
+                    <Clock className="w-4 h-4 text-orange-500" />
+                    {nextProgram.startTime}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-500">Fim da programação</p>
               )}
             </div>
 
-            <div className="mb-12">
-              <h2 className="text-3xl font-bold mb-6 tracking-tighter uppercase">Sobre</h2>
-              <p className="text-lg text-gray-300 leading-relaxed mb-8">{program.description}</p>
-            </div>
+            <div className="bg-orange-500 rounded-[2rem] p-6 text-white">
+              <p className="text-xs font-black uppercase tracking-[0.25em] opacity-80 mb-4">
+                Rádio Ao Vivo
+              </p>
 
-            <div className="bg-white text-black max-w-lg shadow-2xl">
-              <div className="px-6 py-6 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-2xl font-bold uppercase tracking-tighter">Músicas Tocadas</h3>
-                {isCurrentlyLive && <Activity className="w-4 h-4 text-[#ff6600] animate-pulse" />}
-              </div>
-              
-              <div className="divide-y divide-gray-100 max-h-[600px] overflow-y-auto">
-                {loadingHistory ? (
-                   <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-[#ff6600]" /></div>
-                ) : sortedDateKeys.map(date => (
-                  <div key={date}>
-                    <div className="bg-gray-50 px-6 py-2">
-                      <span className="text-[9px] font-bold uppercase text-gray-400">{date}</span>
-                    </div>
-                    {historyGroups[date].map((track, i) => (
-                      <div key={i} className="flex items-center p-5 hover:bg-gray-50">
-                        <img src={track.image} className="w-14 h-14 object-cover mr-5" alt="" />
-                        <div>
-                          <h4 className="font-bold uppercase text-sm">{track.artist}</h4>
-                          <p className="text-gray-500 text-xs">{track.title}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+              <h3 className="text-2xl font-black tracking-tight mb-3">
+                Praise FM Brasil
+              </h3>
 
-          <div className="lg:col-span-4 space-y-12">
-            <div className="bg-[#1a1a1a] p-8 border-l-4 border-[#ff6600]">
-               <h3 className="text-[10px] font-bold uppercase text-gray-500 mb-4">Apresentador</h3>
-               <p className="text-white font-bold text-2xl uppercase tracking-tighter">{program.host}</p>
+              <p className="text-white/85 text-sm leading-relaxed mb-5">
+                Adoração, gospel e músicas cristãs inspirando vidas 24 horas por dia.
+              </p>
+
+              <button
+                onClick={onListenClick}
+                className="w-full bg-white text-black hover:bg-black hover:text-white transition rounded-2xl px-5 py-4 font-black inline-flex items-center justify-center gap-2"
+              >
+                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="currentColor" />}
+                {isPlaying ? 'Pausar' : 'Ouvir Agora'}
+              </button>
             </div>
-          </div>
+          </aside>
         </div>
-      </div>
+      </section>
     </div>
-  );
-};
+  )
+}
 
-export default ProgramDetail;
+export default ProgramDetail
