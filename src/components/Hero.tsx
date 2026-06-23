@@ -58,8 +58,8 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
 
   if (!currentProgram) return null;
 
-  const circleSize = 192;
-  const strokeWidth = 4;
+  const circleSize = 210;
+  const strokeWidth = 8;
   const center = circleSize / 2;
   const radius = center - strokeWidth / 2;
   const circumference = 2 * Math.PI * radius;
@@ -75,15 +75,15 @@ const Hero: React.FC<HeroProps> = ({ onListenClick, isPlaying, liveMetadata, onN
             className="relative flex-shrink-0 group cursor-pointer"
             onClick={() => onNavigateToProgram(currentProgram)}
           >
-            <div className="relative rounded-full overflow-hidden" style={{ width: circleSize, height: circleSize }}>
+            <div className="relative rounded-full overflow-hidden border-[10px] border-black dark:border-[#050505]" style={{ width: circleSize, height: circleSize }}>
               <img src={currentProgram.image} alt={currentProgram.title} className="w-full h-full object-cover" />
               <svg width={circleSize} height={circleSize} className="absolute inset-0 -rotate-90 pointer-events-none">
-                <circle cx={center} cy={center} r={radius} stroke="#dbdbdb" strokeWidth={strokeWidth} fill="transparent" className="dark:stroke-white/10" />
+                <circle cx={center} cy={center} r={radius} stroke="#2a2a2a" strokeWidth={strokeWidth} fill="transparent" className="dark:stroke-white/10" />
                 <circle
                   cx={center} cy={center} r={radius}
                   stroke="#ff6600" strokeWidth={strokeWidth} fill="transparent"
                   strokeDasharray={circumference} strokeDashoffset={offset}
-                  strokeLinecap="butt"
+                  strokeLinecap="round"
                 />
               </svg>
             </div>
