@@ -96,7 +96,7 @@ const Hero: React.FC<HeroProps> = ({
   if (!currentProgram) return null
 
   const circleSize = 192
-  const strokeWidth = 4
+  const strokeWidth = 8
   const center = circleSize / 2
   const radius = center - strokeWidth / 2
   const circumference = 2 * Math.PI * radius
