@@ -117,7 +117,7 @@ const Hero: React.FC<HeroProps> = ({
             </div>
             
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center" onClick={() => onNavigateToProgram(currentProgram)}>
-              {currentProgram.title} com {currentProgram.host}
+              {currentProgram.title}
               <ChevronRight className="w-6 h-6 ml-1 text-[#ff6600]" />
             </h2>
             
