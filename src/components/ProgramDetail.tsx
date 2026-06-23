@@ -27,7 +27,7 @@ interface ProgramDetailProps {
 }
 
 // --- CONFIGURAÇÕES E UTILS ---
-const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/hvwifp8ezc6tv';
+const METADATA_URL = 'https://api.zeno.fm/mounts/metadata/subscribe/smulrig6orwvv';
 
 const getBrasiliaTotalMinutes = () => {
   const now = new Date();
