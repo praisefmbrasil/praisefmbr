@@ -114,7 +114,15 @@ const Hero: React.FC<HeroProps> = ({
               className="relative"
               style={{ width: circleSize, height: circleSize }}
             >
-              <div className="rounded-full overflow-hidden w-full h-full">
+              <div
+                className="rounded-full overflow-hidden absolute"
+                style={{
+                  top: strokeWidth * 2,
+                  left: strokeWidth * 2,
+                  width: circleSize - strokeWidth * 4,
+                  height: circleSize - strokeWidth * 4,
+                }}
+              >
                 <img
                   src={currentProgram.image}
                   alt={currentProgram.title}
