@@ -149,7 +149,7 @@ const Hero: React.FC<HeroProps> = ({
               />
               </svg>
 
-              <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white dark:border-black shadow-lg">
+              <div className="absolute bottom-2 right-2 w-12 h-12 bg-black rounded-full flex items-center justify-center border-[3px] border-white shadow-lg">
                 <span className="text-white text-2xl font-bold">2</span>
               </div>
             </div>
