@@ -117,7 +117,7 @@ const ProgramProgressRing: React.FC<{
           height={innerSize}
           className="absolute inset-0 -rotate-90 pointer-events-none"
         >
-          <circle cx={innerSize / 2} cy={innerSize / 2} r={radius} stroke="#2a2a2a" strokeWidth={strokeWidth} fill="transparent" className="dark:stroke-white/10" />
+          <circle cx={innerSize / 2} cy={innerSize / 2} r={radius} stroke="#dbdbdb" strokeWidth={strokeWidth} fill="transparent" className="dark:stroke-white/10" />
           {isActive && (
             <circle
               cx={innerSize / 2} cy={innerSize / 2} r={radius}
