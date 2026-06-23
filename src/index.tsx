@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+// @ts-ignore: Ignore missing type declarations for CSS imports in this project setup
 import './index.css'; // Importação crucial dos estilos global e Tailwind
 
 // Referência ao elemento root do seu index.html
