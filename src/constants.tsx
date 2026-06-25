@@ -30,7 +30,7 @@ const commonDaily: Program[] = [
   { id: '4',  title: 'Worship Brasil',        host: 'Praise FM',      startTime: '12:00', endTime: '13:00', description: 'Momento de adoração ao meio-dia.',               image: IMAGES.WORSHIP_BR     },
   { id: '5',  title: 'Tarde Gospel',          host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'A trilha sonora perfeita para a sua tarde.',     image: IMAGES.RAFAEL_COSTA   },
   { id: '6',  title: 'Nova Geração',          host: 'Ana Paula',      startTime: '16:00', endTime: '17:00', description: 'Descubra os novos talentos da música cristã.',   image: IMAGES.ANA_PAULA      },
-  { id: '7',  title: 'Praise FM Flow',        host: 'Patrick Silva',  startTime: '17:00', endTime: '18:00', description: 'O melhor do hip hop no flow.',                   image: IMAGES.PATRICK_SILVA  },
+  { id: '7',  title: 'Praise FM Flow',        host: 'Dj Patrick',     startTime: '17:00', endTime: '18:00', description: 'O melhor do hip hop no flow.',                   image: IMAGES.PATRICK_SILVA  },
   { id: '8',  title: 'De Carona',             host: 'Bruno Almeida',  startTime: '18:00', endTime: '20:00', description: 'Sua companhia no trânsito e na volta para casa.',image: IMAGES.BRUNO_ALMEIDA  },
   { id: '9',  title: 'Praise FM Rock',        host: 'Cesar Brum',     startTime: '20:00', endTime: '21:00', description: 'Rock cristão de alta qualidade.',                image: IMAGES.CESAR_BRUM     },
   { id: '10', title: 'Praise FM Clássicos',   host: 'Rodrigo Veras',  startTime: '21:00', endTime: '22:00', description: 'Hinos e louvores que marcaram gerações.',        image: IMAGES.RODRIGO_VERAS  },
