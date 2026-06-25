@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Play, Pause, ChevronRight, Zap, ArrowRight } from 'lucide-react'
+import { Play, Pause, ChevronRight } from 'lucide-react'
 import { SCHEDULES } from '../constants'
 import { Program } from '../types'
 import { useNavigate } from 'react-router-dom'
@@ -37,7 +37,6 @@ const Hero: React.FC<HeroProps> = ({
   onNavigateToProgram,
 }) => {
   const [tick, setTick] = useState(0)
-  const [showDetails, setShowDetails] = useState(true)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -103,9 +102,11 @@ const Hero: React.FC<HeroProps> = ({
   const offset = circumference - progress * circumference
 
   return (
-    <section className="bg-white dark:bg-[#000000] py-10 transition-colors duration-300">
+    <section className="bg-white dark:bg-[#000000] pt-10 pb-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center md:items-start gap-12">
+        
+        {/* Bloco do Ao Vivo */}
+        <div className="flex flex-col md:flex-row items-center md:items-center gap-12 mb-10">
           <div
             className="relative flex-shrink-0 group cursor-pointer"
             onClick={() => onNavigateToProgram(currentProgram)}
@@ -135,26 +136,26 @@ const Hero: React.FC<HeroProps> = ({
                 height={circleSize}
                 className="absolute inset-0 -rotate-90 pointer-events-none"
               >
-              <circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#dbdbdb"
-                strokeWidth={strokeWidth}
-                fill="transparent"
-                className="dark:stroke-white/10"
-              />
-              <circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#ff6600"
-                strokeWidth={strokeWidth}
-                fill="transparent"
-                strokeDasharray={circumference}
-                strokeDashoffset={offset}
-                strokeLinecap="butt"
-              />
+                <circle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#dbdbdb"
+                  strokeWidth={strokeWidth}
+                  fill="transparent"
+                  className="dark:stroke-white/10"
+                />
+                <circle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#ff6600"
+                  strokeWidth={strokeWidth}
+                  fill="transparent"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={offset}
+                  strokeLinecap="butt"
+                />
               </svg>
 
               <div className="absolute bottom-0 right-0 w-14 h-14 bg-black rounded-full flex items-center justify-center border-[3px] border-[#1a1a1a] shadow-[0_0_0_1px_rgba(255,255,255,0.15)]">
@@ -163,8 +164,8 @@ const Hero: React.FC<HeroProps> = ({
             </div>
           </div>
 
-          <div className="flex-grow pt-4 text-center md:text-left">
-            <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-1 flex items-center justify-center md:justify-start space-x-2">
+          <div className="flex-grow text-center md:text-left">
+            <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-2 flex items-center justify-center md:justify-start space-x-2">
               <span className="text-[#ff6600] font-black uppercase tracking-[0.2em]">AO VIVO</span>
               <span>·</span>
               <span>
@@ -173,20 +174,20 @@ const Hero: React.FC<HeroProps> = ({
             </div>
 
             <h2
-              className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center"
+              className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-2 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center"
               onClick={() => onNavigateToProgram(currentProgram)}
             >
               {currentProgram.title}
-              <ChevronRight className="w-6 h-6 ml-1 text-[#ff6600]" />
+              <ChevronRight className="w-8 h-8 ml-1 text-[#ff6600]" />
             </h2>
 
-            <p className="text-lg text-gray-600 dark:text-gray-400 font-normal mb-6">
-              {currentProgram.description}
+            <p className="text-lg text-gray-600 dark:text-gray-400 font-normal mb-6 max-w-xl">
+              {liveMetadata?.title ? `${liveMetadata.artist} - ${liveMetadata.title}` : currentProgram.description}
             </p>
 
             <button
               onClick={onListenClick}
-              className="bg-[#ff6600] text-white px-10 py-3.5 flex items-center justify-center space-x-3 hover:bg-[#e65c00] transition-all active:scale-95 mx-auto md:mx-0 rounded-sm shadow-md"
+              className="bg-[#ff6600] text-white px-10 py-3.5 flex items-center justify-center space-x-3 hover:bg-[#e65c00] transition-all active:scale-95 mx-auto md:mx-0 rounded-md shadow-md"
             >
               {isPlaying ? (
                 <Pause className="fill-current w-5 h-5" />
@@ -200,151 +201,41 @@ const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {showDetails && (
-          <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-8 border-b border-gray-300 dark:border-white/10">
-              {upNextPrograms.map((prog) => (
-                <button
-                  key={prog.id}
-                  className="flex gap-4 text-left group items-center bg-gray-100 dark:bg-[#1A1A1A] hover:bg-gray-200 dark:hover:bg-[#252525] p-4 transition-colors w-full rounded-2xl"
-                  onClick={() => onNavigateToProgram(prog)}
-                >
-                  <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl">
-                    <img
-                      src={prog.image}
-                      alt={prog.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-black text-orange-500 uppercase tracking-wide mb-0.5">
-                      {prog.startTime} - {prog.endTime}
-                    </p>
-                    <h3 className="text-sm font-bold leading-tight group-hover:text-orange-500 transition-colors truncate">
-                      {prog.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                      {prog.host}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <div
-              className="mt-12 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/5 p-8 flex flex-col md:flex-row items-center justify-between group cursor-pointer transition-all hover:border-[#ff6600]/50"
-              onClick={() => navigate('/new-releases')}
-            >
-              <div className="flex items-center space-x-6 mb-6 md:mb-0">
-                <div className="w-14 h-14 bg-black dark:bg-white rounded-full flex items-center justify-center relative">
-                  <Zap className="w-6 h-6 text-[#ff6600] fill-current animate-pulse" />
-                  <div className="absolute inset-0 rounded-full border-2 border-[#ff6600] scale-110 animate-ping opacity-20" />
+        {/* Grade Horizontal de Próximos Programas (Substituindo 'Novidade na Praise') */}
+        {upNextPrograms.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+            {upNextPrograms.slice(0, 3).map((prog) => (
+              <button
+                key={prog.id}
+                className="flex gap-4 text-left group items-center bg-gray-100 dark:bg-[#1A1A1A] hover:bg-gray-200 dark:hover:bg-[#252525] p-4 transition-colors w-full rounded-2xl border border-transparent dark:border-zinc-900"
+                onClick={() => onNavigateToProgram(prog)}
+              >
+                <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-800">
+                  <img
+                    src={prog.image}
+                    alt={prog.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white uppercase tracking-tight leading-none mb-1">
-                    Novidade na Praise
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black text-[#ff6600] uppercase tracking-wide mb-0.5">
+                    {prog.startTime} - {prog.endTime}
+                  </p>
+                  <h3 className="text-sm font-bold leading-tight group-hover:text-[#ff6600] transition-colors truncate text-gray-900 dark:text-white">
+                    {prog.title}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 font-normal uppercase tracking-widest">
-                    Lançamentos que tocam a alma
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+                    {prog.host || "Praise FM Brasil"}
                   </p>
                 </div>
-              </div>
-
-              <button className="flex items-center space-x-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-black dark:text-white group-hover:text-[#ff6600] transition-colors">
-                <span>Explorar Tudo</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
               </button>
-            </div>
+            ))}
           </div>
         )}
 
-        <div className="mt-12 pt-6">
-          {showDetails && (
-            <>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 italic">
-                {currentProgram.description.split('.')[0]}.
-              </p>
-
-              <p className="text-[11px] text-gray-400 dark:text-gray-500 uppercase font-medium tracking-widest mb-4">
-                Produzido por PRAISE FM BRASIL.
-              </p>
-            </>
-          )}
-
-          <div className="flex flex-col space-y-3">
-            {showDetails && (
-              <button
-                onClick={() => onNavigateToProgram(currentProgram)}
-                className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit group"
-              >
-                Página do Programa <ExternalLinkIcon className="w-4 h-4 ml-2 text-[#ff6600]" />
-              </button>
-            )}
-
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="flex items-center text-sm font-semibold text-black dark:text-white hover:text-[#ff6600] transition-colors w-fit"
-            >
-              {showDetails ? (
-                <>
-                  Ver menos <ChevronUpIcon className="w-4 h-4 ml-1 text-[#ff6600]" />
-                </>
-              ) : (
-                <>
-                  Ver mais detalhes <ChevronDownIcon className="w-4 h-4 ml-1 text-[#ff6600]" />
-                </>
-              )}
-            </button>
-          </div>
-        </div>
       </div>
     </section>
   )
 }
-
-const ExternalLinkIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-    <polyline points="15 3 21 3 21 9" />
-    <line x1="10" y1="14" x2="21" y2="3" />
-  </svg>
-)
-
-const ChevronUpIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <polyline points="18 15 12 9 6 15" />
-  </svg>
-)
-
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="3.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
-)
 
 export default Hero
