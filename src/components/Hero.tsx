@@ -47,9 +47,13 @@ const Hero: React.FC<HeroProps> = ({
   const brazil = useMemo(() => getBrazilInfo(), [tick])
 
   const { currentProgram, upNextPrograms } = useMemo(() => {
-    const schedule = Array.isArray(SCHEDULES[brazil.day]) ? SCHEDULES[brazil.day] : SCHEDULES[1]
+    const currentDay = brazil.day
+    const nextDay = (currentDay + 1) % 7
 
-    const currentIndex = schedule.findIndex((p) => {
+    const scheduleToday = Array.isArray(SCHEDULES[currentDay]) ? SCHEDULES[currentDay] : SCHEDULES[1]
+    const scheduleTomorrow = Array.isArray(SCHEDULES[nextDay]) ? SCHEDULES[nextDay] : SCHEDULES[1]
+
+    const currentIndex = scheduleToday.findIndex((p) => {
       const startTime = parseTime(p.startTime)
       const endTime = parseTime(p.endTime)
 
@@ -61,15 +65,20 @@ const Hero: React.FC<HeroProps> = ({
       return brazil.totalMinutes >= start && brazil.totalMinutes < end
     })
 
-    const current = currentIndex !== -1 ? schedule[currentIndex] : schedule[0]
-    const next =
-      currentIndex !== -1
-        ? schedule.slice(currentIndex + 1, currentIndex + 4)
-        : schedule.slice(1, 4)
+    const current = currentIndex !== -1 ? scheduleToday[currentIndex] : scheduleToday[0]
+    
+    // LÓGICA CORRIGIDA: Junta o resto do dia de hoje com o dia de amanhã caso falte programas para preencher os 3 cards
+    let next: Program[] = []
+    if (currentIndex !== -1) {
+      const restOfToday = scheduleToday.slice(currentIndex + 1)
+      next = [...restOfToday, ...scheduleTomorrow].slice(0, 3)
+    } else {
+      next = scheduleToday.slice(1, 4)
+    }
 
     return {
       currentProgram: current || null,
-      upNextPrograms: Array.isArray(next) ? next : [],
+      upNextPrograms: next,
     }
   }, [brazil])
 
@@ -201,12 +210,12 @@ const Hero: React.FC<HeroProps> = ({
           </div>
         </div>
 
-        {/* Grade Horizontal de Próximos Programas (Substituindo 'Novidade na Praise') */}
+        {/* Grade Horizontal de Próximos Programas */}
         {upNextPrograms.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
-            {upNextPrograms.slice(0, 3).map((prog) => (
+            {upNextPrograms.map((prog, index) => (
               <button
-                key={prog.id}
+                key={prog.id || index}
                 className="flex gap-4 text-left group items-center bg-gray-100 dark:bg-[#1A1A1A] hover:bg-gray-200 dark:hover:bg-[#252525] p-4 transition-colors w-full rounded-2xl border border-transparent dark:border-zinc-900"
                 onClick={() => onNavigateToProgram(prog)}
               >
