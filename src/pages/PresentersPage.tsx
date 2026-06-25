@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, ArrowRight } from 'lucide-react';
+import { ArrowRight, Radio } from 'lucide-react';
 import { Program } from '../types';
 import { SCHEDULES } from '../constants';
 
@@ -10,137 +10,188 @@ interface PresentersPageProps {
 const PRESENTERS_DATA = [
   {
     name: 'Samuel Andrade',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Samuel_Andrade_vbvhtd.webp',
-    bio: 'Samuel conduz o "Madrugada com Cristo", com adoração profunda para quem busca a presença de Deus nas primeiras horas do dia.',
-    programTitle: 'Madrugada com Cristo'
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/samuel_andrade_k3botd.webp',
+    bio: 'Nas madrugadas, Samuel conduz um momento de paz e adoração profunda para quem busca a presença de Deus nas primeiras horas do dia.',
+    programTitle: 'Madrugada com Cristo',
+    tag: 'Madrugada · 00h–06h',
   },
   {
     name: 'Lucas Martins',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Lucas_Martins_weoryq.webp',
-    bio: 'Comanda o "Manhã com Cristo", trazendo energia, louvores inspiradores e a motivação necessária para começar o seu dia bem informado e abençoado.',
-    programTitle: 'Manhã com Cristo'
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/lucas_martins_qmdc5s.webp',
+    bio: 'Lucas traz energia, louvor e edificação para você começar bem o seu dia. A voz que aquece as manhãs da Praise FM Brasil.',
+    programTitle: 'Manhã com Cristo',
+    tag: 'Manhã · 07h–12h',
   },
   {
     name: 'Rafael Costa',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rafael_Costa_a7mlpu.webp',
-    bio: 'O apresentador do "Tarde Gospel", selecionando as melhores músicas para acompanhar sua rotina com alegria.',
-    programTitle: 'Tarde Gospel'
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rafael_costa_qxzwrf.webp',
+    bio: 'Rafael seleciona o melhor do gospel para acompanhar sua tarde com alegria e fé, de segunda a domingo.',
+    programTitle: 'Tarde Gospel',
+    tag: 'Tarde · 13h–16h',
   },
   {
     name: 'Ana Paula',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Ana_Paula_nqsvtl.webp',
-    bio: 'Ana Paula apresenta o "Praise FM Nova Geração", focando nos novos talentos e nas batidas que movem a juventude cristã no Brasil.',
-    programTitle: 'Praise FM Nova Geração'
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/ana_paula_wjuwju.webp',
+    bio: 'Ana Paula descobre e apresenta os novos talentos que estão moldando o futuro da música cristã no Brasil.',
+    programTitle: 'Nova Geração',
+    tag: 'Tarde · 16h–17h',
+  },
+  {
+    name: 'Dj Patrick',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/patick_silva_r4lpvp.webp',
+    bio: 'Dj Patrick comanda o Flow com o melhor do hip hop cristão — batidas que evangelizam e movem multidões.',
+    programTitle: 'Praise FM Flow',
+    tag: 'Flow · 17h–18h',
   },
   {
     name: 'Bruno Almeida',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Bruno_Almeida_xsixw6.webp',
-    bio: 'No comando do "De Carona com a Praise FM", Bruno traz dinamismo e os grandes sucessos para o seu trajeto, garantindo uma volta para casa abençoada.',
-    programTitle: 'De Carona com a Praise FM'
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/bruno_almeida_hfmekk.webp',
+    bio: 'Bruno é a companhia ideal no trânsito e na volta para casa, com músicas que abençoam o fim do seu dia.',
+    programTitle: 'De Carona',
+    tag: 'Noite · 18h–20h',
+  },
+  {
+    name: 'Cesar Brum',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/cesar_brum_auudhy.webp',
+    bio: 'Cesar apresenta o melhor do rock cristão nacional e internacional com intensidade e muita fé.',
+    programTitle: 'Praise FM Rock',
+    tag: 'Noite · 20h–21h',
   },
   {
     name: 'Rodrigo Veras',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Rodrigo_Veras_vpjwxi.webp',
-    bio: 'Rodrigo apresenta o "Praise FM Brasil Clássicos", revisitando os hinos e canções que marcaram gerações e construíram a história da música gospel.',
-    programTitle: 'Praise FM Brasil Clássicos'
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rodrigo_veras_esognm.webp',
+    bio: 'Rodrigo revisita os hinos e canções que marcaram gerações, resgatando a história viva da música gospel.',
+    programTitle: 'Praise FM Clássicos',
+    tag: 'Noite · 21h–22h',
   },
   {
-    name: 'Felipe Santos',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205840/Felipe_Santos_a2bdvs.webp',
-    bio: 'Responsável pelo "Domingo com Cristo", Felipe torna suas manhãs de domingo especiais com uma seleção de louvores que preparam o coração para a semana.',
-    programTitle: 'Domingo com Cristo'
+    name: 'Janaina Costa',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/ana_paula_wjuwju.webp',
+    bio: 'Janaina torna o domingo especial, com uma seleção de louvores que preparam o coração para uma nova semana.',
+    programTitle: 'Domingo com Cristo',
+    tag: 'Domingo · 07h–12h',
   },
-  {
-    name: 'Thiago Moreira',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1769205841/Thiago_Moreira_yicuhk.webp',
-    bio: 'Thiago apresenta o "Praise FM Pop", trazendo o melhor do cenário cristão contemporâneo em um ritmo acelerado e envolvente.',
-    programTitle: 'Praise FM Pop'
-  }
 ];
 
 const PresentersPage: React.FC<PresentersPageProps> = ({ onNavigateToProgram }) => {
-  
-  const findProgram = (title: string) => {
-    // Busca em todos os dias da semana no arquivo constants
+
+  const findProgram = (title: string): Program | null => {
     for (let day = 0; day <= 6; day++) {
       const daySchedule = SCHEDULES[day as keyof typeof SCHEDULES] || [];
-      const prog = daySchedule.find(p => p.title.toUpperCase() === title.toUpperCase());
+      const prog = daySchedule.find(
+        (p) => p.title.trim().toLowerCase() === title.trim().toLowerCase()
+      );
       if (prog) return prog;
     }
     return null;
   };
 
   return (
-    <div className="bg-white dark:bg-[#000] min-h-screen transition-colors duration-300">
-      {/* Header Estilo Brutalista */}
-      <div className="bg-black text-white py-24 border-b-4 border-[#ff6600] relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="flex items-center space-x-3 text-[#ff6600] mb-8 font-black uppercase tracking-[0.4em] text-[10px]">
-            <Users className="w-5 h-5 fill-current" />
-            <span>As Vozes da Praise FM Brasil</span>
+    <div className="bg-white dark:bg-[#0a0a0a] min-h-screen">
+
+      {/* Hero */}
+      <div className="relative overflow-hidden bg-[#0a0a0a] pt-24 pb-20 px-4">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg,#fff 0px,#fff 1px,transparent 1px,transparent 60px), repeating-linear-gradient(90deg,#fff 0px,#fff 1px,transparent 1px,transparent 60px)',
+          }}
+        />
+        <div className="relative max-w-7xl mx-auto">
+          <div className="inline-flex items-center gap-2 text-orange-500 text-[11px] font-black uppercase tracking-[0.3em] mb-6">
+            <Radio className="w-4 h-4" />
+            Praise FM Brasil
           </div>
-          <h1 className="text-7xl md:text-9xl font-black uppercase tracking-tighter leading-none mb-10 italic">Nossos<br />Locutores</h1>
-          <p className="text-xl text-gray-400 max-w-2xl font-bold uppercase tracking-tight leading-tight">
-            Conheça o time dedicado a levar a palavra de Deus e o melhor do louvor nacional até você.
+          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight leading-[0.9] mb-6">
+            Nossos<br />
+            <span className="text-orange-500">Locutores</span>
+          </h1>
+          <p className="text-gray-400 text-lg max-w-xl leading-relaxed">
+            As vozes que levam louvor, fé e o melhor do gospel direto para você — 24 horas por dia.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      {/* Grid */}
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {PRESENTERS_DATA.map((presenter, idx) => {
             const program = findProgram(presenter.programTitle);
-            
+
             return (
-              <div key={idx} className="flex flex-col group bg-white dark:bg-[#0f0f0f] border border-gray-100 dark:border-white/5 overflow-hidden transition-all duration-500 hover:shadow-[20px_20px_0px_#ff660026]">
-                <div className="relative aspect-[3/4] overflow-hidden bg-black">
-                  <img 
-                    src={presenter.image} 
-                    alt={presenter.name} 
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100" 
+              <div
+                key={idx}
+                className="group relative bg-gray-50 dark:bg-[#111] rounded-[2rem] overflow-hidden border border-black/5 dark:border-white/5 hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/5 flex flex-col"
+              >
+                {/* Foto */}
+                <div className="relative h-72 overflow-hidden bg-black">
+                  <img
+                    src={presenter.image}
+                    alt={presenter.name}
+                    className="w-full h-full object-cover object-top opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-90"></div>
-                  
-                  <div className="absolute bottom-8 left-8 right-8">
-                    <span className="text-[#ff6600] text-[10px] font-black uppercase tracking-[0.3em] mb-3 block">{presenter.programTitle}</span>
-                    <h2 className="text-4xl font-black text-white uppercase tracking-tighter leading-none italic">{presenter.name}</h2>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                  {/* Tag do horário */}
+                  <div className="absolute top-4 left-4">
+                    <span className="bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+                      {presenter.tag}
+                    </span>
+                  </div>
+
+                  {/* Nome sobre a foto */}
+                  <div className="absolute bottom-5 left-5 right-5">
+                    <h2 className="text-2xl font-black text-white leading-tight">
+                      {presenter.name}
+                    </h2>
+                    <p className="text-orange-400 text-xs font-bold uppercase tracking-wider mt-1">
+                      {presenter.programTitle}
+                    </p>
                   </div>
                 </div>
-                
-                <div className="p-10 flex-grow flex flex-col">
-                  <p className="text-gray-600 dark:text-gray-400 text-sm font-bold leading-relaxed mb-10 uppercase tracking-tight">
+
+                {/* Conteúdo */}
+                <div className="p-6 flex flex-col flex-grow">
+                  <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed flex-grow mb-6">
                     {presenter.bio}
                   </p>
-                  
-                  <div className="mt-auto">
-                    <button 
-                      onClick={() => program && onNavigateToProgram(program)}
-                      disabled={!program}
-                      className={`w-full py-5 px-6 text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center space-x-3 transition-all group/btn ${
-                        program 
-                        ? "bg-[#ff6600] text-white hover:bg-black dark:hover:bg-white dark:hover:text-black" 
-                        : "bg-gray-300 cursor-not-allowed text-gray-500"
-                      }`}
-                    >
-                      <span>{program ? 'Ver Programa' : 'Programa não encontrado'}</span>
-                      {program && <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />}
-                    </button>
-                  </div>
+
+                  <button
+                    onClick={() => program && onNavigateToProgram(program)}
+                    disabled={!program}
+                    className={`w-full py-3.5 px-5 rounded-xl text-sm font-black uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${
+                      program
+                        ? 'bg-black dark:bg-white text-white dark:text-black hover:bg-orange-500 dark:hover:bg-orange-500 dark:hover:text-white'
+                        : 'bg-gray-200 dark:bg-[#1a1a1a] text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {program ? (
+                      <>
+                        Ver Programa
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    ) : (
+                      'Programa não encontrado'
+                    )}
+                  </button>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Footer de Programação */}
-        <div className="mt-32 bg-gray-50 dark:bg-[#080808] p-12 md:p-24 flex flex-col items-center text-center border-4 border-black dark:border-white">
-          <h4 className="text-5xl md:text-6xl font-black uppercase tracking-tighter dark:text-white mb-8 italic">Grade de Programação 2026</h4>
-          <p className="text-gray-500 dark:text-gray-400 max-w-xl font-bold uppercase tracking-widest text-[10px] mb-12 leading-relaxed">
-            Acompanhe a Praise FM Brasil de segunda a domingo e não perca nenhum momento.
+        {/* CTA Programação */}
+        <div className="mt-20 rounded-[2rem] bg-orange-500 p-10 md:p-16 text-center text-white">
+          <h3 className="text-4xl md:text-5xl font-black tracking-tight mb-4">
+            Grade de Programação 2026
+          </h3>
+          <p className="text-white/80 max-w-lg mx-auto mb-8 text-sm leading-relaxed">
+            Acompanhe a Praise FM Brasil de segunda a domingo e não perca nenhum momento de louvor.
           </p>
-          <button 
-            onClick={() => window.location.hash = '#/schedule'}
-            className="bg-black dark:bg-white text-white dark:text-black px-16 py-6 text-[12px] font-black uppercase tracking-[0.3em] hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all shadow-[8px_8px_0px_#ff6600] active:translate-y-1 active:shadow-none"
+          <button
+            onClick={() => (window.location.hash = '#/schedule')}
+            className="bg-white text-black hover:bg-black hover:text-white transition-all px-10 py-4 rounded-2xl font-black text-sm uppercase tracking-wider"
           >
             Ver Programação Completa
           </button>
