@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -188,7 +187,6 @@ const AppContent: React.FC = () => {
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      // Force reload source to avoid stale buffer or 'no supported source' error on reconnection
       const savedVol = audioRef.current.volume;
       audioRef.current.src = STREAM_URL; 
       audioRef.current.volume = savedVol;
@@ -241,6 +239,8 @@ const AppContent: React.FC = () => {
             onViewSchedule={() => { setSelectedProgram(null); navigate('/schedule'); }} 
             onListenClick={togglePlayback}
             isPlaying={isPlaying}
+            liveMetadata={liveMetadata}
+            trackHistory={trackHistory}
           />
         ) : (
           <Routes>
