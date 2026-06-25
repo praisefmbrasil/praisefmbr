@@ -12,7 +12,7 @@ export default defineConfig({
         short_name: 'Praise FM',
         description: 'A rádio que toca a sua vida',
         theme_color: '#ff6600',
-        background_color: '#ffffff',
+        background_color: '#000000',
         display: 'standalone',
         icons: [
           {
