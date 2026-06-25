@@ -25,7 +25,6 @@ const Navbar: React.FC<NavbarProps> = ({ activeTab, theme, onToggleTheme }) => {
 
   const navItems = [
     { id: 'home', label: 'INÍCIO', icon: Home, path: '/' },
-    { id: 'programs', label: 'PROGRAMAS', icon: Headphones, path: '/programs' },
     { id: 'music', label: 'MÚSICA', icon: Music, path: '/music' },
     { id: 'schedule', label: 'PROGRAMAÇÃO', icon: Calendar, path: '/schedule' },
     { id: 'presenters', label: 'APRESENTADORES', icon: Users, path: '/presenters' },
