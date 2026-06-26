@@ -8,15 +8,15 @@ interface ScheduleListProps {
 }
 
 const IMG = {
-  SAMUEL_ANDRADE: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/samuel_andrade_k3botd.webp',
-  LUCAS_MARTINS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/lucas_martins_qmdc5s.webp',
-  RAFAEL_COSTA:   'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rafael_costa_qxzwrf.webp',
-  ANA_PAULA:      'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/ana_paula_wjuwju.webp',
-  BRUNO_ALMEIDA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/bruno_almeida_hfmekk.webp',
-  RODRIGO_VERAS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/rodrigo_veras_esognm.webp',
-  DJ_PATRICK:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892293/patick_silva_r4lpvp.webp',
-  CESAR_BRUM:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/cesar_brum_auudhy.webp',
-  JANAINA_COSTA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/ana_paula_wjuwju.webp',
+  SAMUEL_ANDRADE: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/samuel-andrade_v8u0vu.webp',
+  LUCAS_MARTINS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/lucas-martins_epzbga.webp',
+  RAFAEL_COSTA:   'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434156/rafael-costa_fbbc2s.webp',
+  ANA_PAULA:      'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/ana-paula_mm9ggw.webp',
+  BRUNO_ALMEIDA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/bruno-almeida_ulvwlr.webp',
+  RODRIGO_VERAS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434156/rodrigo-veras_sqivds.webp',
+  DJ_PATRICK:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434156/patrick-silva_mzkmpr.webp',
+  CESAR_BRUM:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/cesar-brum_wo3swb.webp',
+  JANAINA_COSTA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/janaina-costa_ibnrde.webp',
   WORSHIP_BR:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/worship_pck4vy.webp',
   PREGACAO:       'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/pregacao_da_palavra_leapde.webp',
 };
