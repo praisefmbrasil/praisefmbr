@@ -53,7 +53,7 @@ const HeroRing: React.FC<{ program: Program; nowMinutes: number }> = ({
 
       <div className="absolute bottom-1 right-1 w-[62px] h-[62px] rounded-full bg-black border-[4px] border-white flex items-center justify-center shadow-xl z-10">
         <span className="text-white text-[26px] font-black leading-none">
-          1
+          4
         </span>
       </div>
     </div>
