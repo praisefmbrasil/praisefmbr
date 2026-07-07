@@ -191,7 +191,7 @@ const Hero: React.FC<HeroProps> = ({
             </h2>
 
             <p className="text-lg text-gray-600 dark:text-gray-400 font-normal mb-6 max-w-xl">
-              {liveMetadata?.host ? `${liveMetadata.host} - ${liveMetadata.host}` : currentProgram.host}
+              {liveMetadata?.artist ? `${liveMetadata.artist} - ${liveMetadata.title}` : currentProgram.host}
             </p>
 
             <button
