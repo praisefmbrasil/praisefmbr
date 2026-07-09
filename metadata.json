@@ -1,6 +1,6 @@
 {
   "name": "Praise FM BRA - SAVE 3",
-  "description": "A melhor plataforma de rádio inspirada na excelência, com programação 24/7, música worship e podcasts devocionais para o Brasil.",
+  "description": "A melhor plataforma de rádio inspirada na excelência, com programação 24h",
   "requestFramePermissions": [
     "microphone"
   ]
