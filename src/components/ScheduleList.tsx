@@ -16,9 +16,9 @@ const IMG = {
   RODRIGO_VERAS:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434156/rodrigo-veras_sqivds.webp',
   DJ_PATRICK:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434156/patrick-silva_mzkmpr.webp',
   CESAR_BRUM:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/cesar-brum_wo3swb.webp',
-  JANAINA_COSTA:  'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/janaina-costa_ibnrde.webp',
-  WORSHIP_BR:     'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/worship_pck4vy.webp',
-  PREGACAO:       'https://res.cloudinary.com/dlcliu2cv/image/upload/v1778892292/pregacao_da_palavra_leapde.webp',
+  JANAINA_COSTA:  'https://res.cloudinary.com/dlcliu2/image/upcvload/v1782434155/janaina-costa_ibnrde.webp',
+  WORSHIP:        'https://res.cloudinary.com/dtecypmsh/image/upload/v1783132371/worship_jxoxce.webp',
+  PREGACAO:       'https://res.cloudinary.com/dtecypmsh/image/upload/v1781538248/sunday-service_xmj94r.webp',
 };
 
 const SCHEDULE_BRASIL: Record<number, Program[]> = {
