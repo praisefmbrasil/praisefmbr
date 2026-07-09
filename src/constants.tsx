@@ -25,7 +25,7 @@ const IMAGES = {
 
 const commonDaily: Program[] = [
   { id: '1',  title: 'Madrugada com Cristo',  host: 'Samuel Andrade', startTime: '00:00', endTime: '06:00', description: 'Música e paz para as suas madrugadas.',          image: IMAGES.SAMUEL_ANDRADE },
-  { id: '2',  title: 'Worship       ',        host: 'Praise FM',      startTime: '06:00', endTime: '07:00', description: 'O melhor da adoração nacional e internacional.', image: IMAGES.WORSHIP_BR     },
+  { id: '2',  title: 'Worship',               host: 'Praise FM',      startTime: '06:00', endTime: '07:00', description: 'O melhor da adoração nacional e internacional.', image: IMAGES.WORSHIP_BR     },
   { id: '3',  title: 'Manhã com Cristo',      host: 'Lucas Martins',  startTime: '07:00', endTime: '12:00', description: 'Sua manhã com muito louvor e edificação.',       image: IMAGES.LUCAS_MARTINS  },
   { id: '4',  title: 'Worship',               host: 'Praise FM',      startTime: '12:00', endTime: '13:00', description: 'Momento de adoração ao meio-dia.',               image: IMAGES.WORSHIP_BR     },
   { id: '5',  title: 'Tarde Gospel',          host: 'Rafael Costa',   startTime: '13:00', endTime: '16:00', description: 'A trilha sonora perfeita para a sua tarde.',     image: IMAGES.RAFAEL_COSTA   },
