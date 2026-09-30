@@ -1,4 +1,3 @@
-```tsx
 import React, { useState, useEffect, useMemo } from 'react'
 import { Play, Pause, ChevronRight } from 'lucide-react'
 import { SCHEDULES } from '../constants'
@@ -315,4 +314,3 @@ const Hero: React.FC<HeroProps> = ({
 }
 
 export default Hero
-```
