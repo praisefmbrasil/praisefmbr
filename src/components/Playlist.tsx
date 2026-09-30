@@ -1,151 +1,377 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
 import {
-  Flame,
-  Headphones,
-  Mic2,
+  Play,
   Music,
-  Music2,
-  Radio,
-  Sparkles,
-  Clock,
-  Disc3,
+  Heart,
+  Info,
+  ExternalLink,
+  Pause,
+  Loader2,
+  X,
+  Calendar,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
-const GENRES = [
-  { icon: Flame,      label: 'Worship',       sub: 'Adoração profunda' },
-  { icon: Mic2,       label: 'Gospel',        sub: 'Nacionais e internacionais' },
-  { icon: Headphones, label: 'Hip Hop',       sub: 'Flow cristão' },
-  { icon: Music2,     label: 'Rock Cristão',  sub: 'Alta energia' },
-  { icon: Disc3,      label: 'Clássicos',     sub: 'Hinos eternos' },
-  { icon: Sparkles,   label: 'Nova Geração',  sub: 'Novos talentos' },
+const MASTER_ARTISTS = [
+  'Isadora Pompeo',
+  'Gabriela Rocha',
+  'Julliany Souza',
+  'Fernandinho',
+  'Valesca Mayssa',
+  'Maria Marçal',
+  'Aline Barros',
+  'Isaías Saad',
+  'Samuel Messias',
+  'Gabriel Guedes',
+  'Vitor Santana',
+  'Theo Rubia',
+  'Anderson Freire',
+  'Thalles Roberto',
+  'fhop music',
 ]
 
-const CHIPS = ['Todos os gêneros', 'Worship', 'Gospel', 'Hip Hop Cristão', 'Rock Cristão', 'Clássicos']
+const ARCHIVE_DATA = [
+  { date: '24 Out', artists: ['Isadora Pompeo', 'Gabriela Rocha', 'Fernandinho'] },
+  { date: '23 Out', artists: ['Julliany Souza', 'Valesca Mayssa', 'Maria Marçal'] },
+  { date: '22 Out', artists: ['Aline Barros', 'Isaías Saad', 'Samuel Messias'] },
+  { date: '21 Out', artists: ['Gabriel Guedes', 'Theo Rubia', 'fhop music'] },
+]
 
-const Playlist: React.FC = () => {
-  const [activeChip, setActiveChip] = useState('Todos os gêneros')
+type Track = {
+  trackId: number
+  trackName: string
+  artistName: string
+  artworkUrl100: string
+  previewUrl?: string
+}
+
+const getRotationSeed = () => {
+  const oneDayInMs = 24 * 60 * 60 * 1000
+  return Math.floor(Date.now() / oneDayInMs)
+}
+
+const shuffleWithSeed = (array: any[], seed: number) => {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = (seed * (i + 1)) % shuffled.length
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
+
+const PlaylistCard: React.FC<{
+  track: Track
+  isPlaying: boolean
+  onTogglePlay: () => void
+}> = ({ track, isPlaying, onTogglePlay }) => {
+  const navigate = useNavigate()
+
+  const handleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    // Favoritos ainda não implementados no AuthContext atual.
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10 space-y-6">
-
-      {/* Hero */}
-      <div className="relative overflow-hidden bg-[#0a0a0a] rounded-[24px] px-10 py-14">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(0deg,#fff 0,#fff 1px,transparent 1px,transparent 56px),' +
-              'repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 1px,transparent 56px)',
+    <div className="group relative bg-white dark:bg-[#111] border border-gray-100 dark:border-white/5 transition-all duration-300 hover:shadow-xl">
+      <div className="relative aspect-square overflow-hidden">
+        <img
+          src={track.artworkUrl100.replace('100x100', '600x600')}
+          alt={track.trackName}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            ;(e.target as HTMLImageElement).src = `https://picsum.photos/seed/${encodeURIComponent(
+              track.artistName
+            )}/600/600`
           }}
         />
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 text-orange-500 text-[11px] font-black uppercase tracking-[0.28em] mb-5">
-            <Radio className="w-4 h-4" />
-            Praise FM Brasil
-          </div>
 
-          <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight leading-[0.92] mb-5">
-            Toda a <span className="text-orange-500">música</span>
-            <br />em um lugar
-          </h1>
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onTogglePlay()
+            }}
+            className="w-14 h-14 bg-[#ff6600] rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all shadow-2xl"
+          >
+            {isPlaying ? (
+              <Pause className="w-6 h-6 fill-current" />
+            ) : (
+              <Play className="w-6 h-6 fill-current ml-1" />
+            )}
+          </button>
+        </div>
 
-          <p className="text-gray-400 text-base max-w-md leading-relaxed mb-8">
-            Em breve, explore tudo que toca na Praise FM — gospel, worship, hip hop cristão, rock e muito mais.
-          </p>
+        <button
+          onClick={handleFavorite}
+          className="absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all bg-black/20 text-white hover:bg-[#ff6600] opacity-0 group-hover:opacity-100"
+        >
+          <Heart className="w-4 h-4" />
+        </button>
+      </div>
 
-          <div className="inline-flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-full px-4 py-2 text-orange-400 text-xs font-bold uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-            Tocando agora na rádio
+      <div className="p-4">
+        <h3 className="font-medium text-lg text-gray-900 dark:text-white leading-tight truncate uppercase tracking-tighter">
+          {track.trackName}
+        </h3>
+        <p className="text-gray-500 dark:text-gray-400 text-[10px] font-normal uppercase tracking-[0.2em] mt-1">
+          {track.artistName}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+const Playlist: React.FC = () => {
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activePreview, setActivePreview] = useState<number | null>(null)
+  const [showArchive, setShowArchive] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const currentArtists = useMemo(() => {
+    const seed = getRotationSeed()
+    return shuffleWithSeed(MASTER_ARTISTS, seed).slice(0, 12)
+  }, [])
+
+  useEffect(() => {
+    const fetchTracks = async () => {
+      setLoading(true)
+      try {
+        const results: Track[] = []
+
+        for (const artist of currentArtists) {
+          const res = await fetch(
+            `https://itunes.apple.com/search?term=${encodeURIComponent(
+              artist
+            )}&media=music&entity=song&limit=1`
+          )
+
+          if (res.ok) {
+            const text = await res.text()
+            if (text && text.trim().length > 0) {
+              try {
+                const json = JSON.parse(text)
+                if (json.results && json.results.length > 0) {
+                  results.push(json.results[0])
+                }
+              } catch {
+                console.debug('Playlist iTunes parse error for:', artist)
+              }
+            }
+          }
+        }
+
+        setTracks(results)
+      } catch {
+        console.debug('Erro ao carregar playlist Praise FM Brasil - Rede instável')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTracks()
+  }, [currentArtists])
+
+  const togglePreview = (track: Track) => {
+    if (!track.previewUrl || !audioRef.current) return
+
+    if (activePreview === track.trackId) {
+      audioRef.current.pause()
+      setActivePreview(null)
+    } else {
+      audioRef.current.src = track.previewUrl
+      audioRef.current.play().catch(() => setActivePreview(null))
+      setActivePreview(track.trackId)
+    }
+  }
+
+  const aList = tracks.slice(0, 4)
+  const bList = tracks.slice(4, 8)
+  const cList = tracks.slice(8, 12)
+
+  return (
+    <div className="bg-[#f2f2f2] dark:bg-[#000] min-h-screen transition-colors duration-300">
+      <audio ref={audioRef} onEnded={() => setActivePreview(null)} />
+
+      {showArchive && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-[#111] w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="p-6 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-[#ff6600] text-white">
+              <div className="flex items-center space-x-3">
+                <Calendar className="w-5 h-5" />
+                <h2 className="text-xl font-black uppercase tracking-tighter">Arquivo da Seleção</h2>
+              </div>
+              <button
+                onClick={() => setShowArchive(false)}
+                className="p-2 hover:bg-black/20 rounded-full transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex-grow overflow-y-auto p-6 space-y-4">
+              {ARCHIVE_DATA.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="p-5 border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-white/5 hover:border-[#ff6600] transition-colors group cursor-default"
+                >
+                  <span className="text-[10px] font-black text-[#ff6600] uppercase tracking-[0.2em] mb-2 block">
+                    {item.date}
+                  </span>
+                  <h3 className="text-lg font-black dark:text-white uppercase tracking-tight mb-3">
+                    Artistas da A List
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {item.artists.map((artist, aIdx) => (
+                      <span
+                        key={aIdx}
+                        className="bg-white dark:bg-black px-3 py-1 text-xs font-regular border border-gray-200 dark:border-white/10 dark:text-gray-300"
+                      >
+                        {artist}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-6 border-t border-gray-100 dark:border-white/10 text-center">
+              <p className="text-xs text-gray-400 uppercase font-regular tracking-widest">
+                Exibindo as últimas 4 edições diárias
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Filtros */}
-      <div className="flex gap-2 flex-wrap pt-2">
-        {CHIPS.map((chip) => (
-          <button
-            key={chip}
-            onClick={() => setActiveChip(chip)}
-            className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide border transition-all ${
-              activeChip === chip
-                ? 'bg-orange-500 border-orange-500 text-white'
-                : 'border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-orange-500/50'
-            }`}
-          >
-            {chip}
-          </button>
-        ))}
-      </div>
-
-      {/* Tocadas recentemente */}
-      <div>
-        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-orange-500 mb-4">
-          Tocadas recentemente
-        </p>
-
-        <div className="border border-black/5 dark:border-white/5 rounded-2xl overflow-hidden">
-          <div className="flex items-center gap-4 px-5 py-4">
-            <span className="w-5 text-sm text-center text-gray-400">1</span>
-            <div className="w-11 h-11 rounded-xl bg-orange-500/15 flex items-center justify-center flex-shrink-0">
-              <Music className="w-5 h-5 text-orange-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-gray-800 dark:text-white truncate">
-                Aguardando próxima música
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">Praise FM Brasil</p>
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-orange-500 bg-orange-500/10 px-3 py-1.5 rounded-full">
-              Ao vivo
+      <div className="bg-white dark:bg-[#111] border-b border-gray-200 dark:border-white/5 py-12 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center space-x-2 text-[#ff6600] mb-4">
+            <Music className="w-4 h-4" />
+            <span className="text-[10px] font-medium uppercase tracking-[0.4em]">
+              Seleção Oficial Praise FM Brasil
             </span>
           </div>
+          <h1 className="text-5xl md:text-8xl font-medium uppercase tracking-tighter mb-6 dark:text-white leading-none">
+            Playlist
+          </h1>
+          <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl font-normal leading-tight uppercase">
+            Curadoria diária. O som que define a{' '}
+            <span className="text-black dark:text-white font-medium">Praise FM Brasil</span>,
+            com grandes nomes e canções da música cristã brasileira.
+          </p>
         </div>
       </div>
 
-      {/* Gêneros */}
-      <div>
-        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-orange-500 mb-4">
-          Explorar por gênero
-        </p>
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-40">
+            <Loader2 className="w-12 h-12 text-[#ff6600] animate-spin mb-4" />
+            <p className="text-[10px] font-medium uppercase tracking-[0.3em] text-gray-400">
+              Atualizando Playlist Diária...
+            </p>
+          </div>
+        ) : (
+          <>
+            {aList.length > 0 && (
+              <section className="mb-24">
+                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black dark:border-white pb-4">
+                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white">
+                    A List
+                  </h2>
+                  <span className="text-[#ff6600] text-sm font-medium uppercase tracking-widest">
+                    Alta Rotação
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {aList.map((track) => (
+                    <PlaylistCard
+                      key={track.trackId}
+                      track={track}
+                      isPlaying={activePreview === track.trackId}
+                      onTogglePlay={() => togglePreview(track)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {GENRES.map(({ icon: Icon, label, sub }) => (
-            <div
-              key={label}
-              className="flex flex-col gap-2 p-5 rounded-2xl border border-black/5 dark:border-white/5 hover:border-orange-500/40 hover:bg-gray-50 dark:hover:bg-white/5 transition-all cursor-pointer group"
-            >
-              <Icon className="w-6 h-6 text-orange-500" />
-              <span className="text-sm font-bold text-gray-900 dark:text-white">{label}</span>
-              <span className="text-xs text-gray-400">{sub}</span>
+            {bList.length > 0 && (
+              <section className="mb-24">
+                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/20 dark:border-white/20 pb-4">
+                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-60">
+                    B List
+                  </h2>
+                  <span className="text-gray-400 text-sm font-medium uppercase tracking-widest">
+                    Em Ascensão
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {bList.map((track) => (
+                    <PlaylistCard
+                      key={track.trackId}
+                      track={track}
+                      isPlaying={activePreview === track.trackId}
+                      onTogglePlay={() => togglePreview(track)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {cList.length > 0 && (
+              <section className="mb-24">
+                <div className="flex items-baseline space-x-4 mb-10 border-b-4 border-black/10 dark:border-white/10 pb-4">
+                  <h2 className="text-4xl font-medium uppercase tracking-tighter dark:text-white opacity-40">
+                    C List
+                  </h2>
+                  <span className="text-gray-300 text-sm font-medium uppercase tracking-widest">
+                    Novas & Próximas
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {cList.map((track) => (
+                    <PlaylistCard
+                      key={track.trackId}
+                      track={track}
+                      isPlaying={activePreview === track.trackId}
+                      onTogglePlay={() => togglePreview(track)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        <div className="bg-white dark:bg-[#111] p-12 mt-20 border border-gray-200 dark:border-white/5">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="flex items-center space-x-8">
+              <div className="w-16 h-16 bg-[#ff6600] rounded-full flex items-center justify-center text-white flex-shrink-0">
+                <Info className="w-8 h-8" />
+              </div>
+              <div>
+                <h4 className="text-2xl font-medium uppercase tracking-tighter dark:text-white">
+                  Rotação Diária
+                </h4>
+                <p className="text-gray-500 dark:text-gray-400 text-sm max-w-lg mt-2 uppercase font-normal tracking-tight leading-relaxed">
+                  A <span className="text-[#ff6600] font-medium">Playlist Praise FM Brasil</span>{' '}
+                  é atualizada a cada 24 horas. Selecionamos músicas de grandes nomes da música
+                  cristã brasileira para renovar a programação todos os dias.
+                </p>
+              </div>
             </div>
-          ))}
+
+            <button
+              onClick={() => setShowArchive(true)}
+              className="bg-black dark:bg-white text-white dark:text-black px-10 py-5 text-[10px] font-medium uppercase tracking-[0.3em] flex items-center space-x-3 hover:bg-[#ff6600] dark:hover:bg-[#ff6600] hover:text-white transition-all shadow-lg active:scale-95"
+            >
+              <span>Ver Listas Anteriores</span>
+              <ExternalLink className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* Em breve */}
-      <div className="bg-gray-50 dark:bg-white/[0.03] border border-black/5 dark:border-white/5 rounded-[20px] p-12 text-center">
-        <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-white/5 mx-auto mb-5 flex items-center justify-center">
-          <Clock className="w-7 h-7 text-gray-300 dark:text-gray-600" />
-        </div>
-
-        <h3 className="text-xl font-black text-gray-900 dark:text-white mb-3">
-          Playlist completa em breve
-        </h3>
-
-        <p className="text-gray-400 text-sm leading-relaxed max-w-sm mx-auto mb-7">
-          Estamos organizando todo o catálogo para você explorar, curtir e descobrir músicas novas direto da Praise FM Brasil.
-        </p>
-
-        <a
-          href="https://www.instagram.com/praisefmbrasil"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-8 py-3.5 rounded-2xl text-sm font-black uppercase tracking-wide transition-all"
-        >
-          Siga-nos no Instagram
-        </a>
-      </div>
-
     </div>
   )
 }
