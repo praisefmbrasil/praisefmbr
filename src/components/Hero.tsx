@@ -1,32 +1,45 @@
+```tsx
 import React, { useState, useEffect, useMemo } from 'react'
 import { Play, Pause, ChevronRight } from 'lucide-react'
 import { SCHEDULES } from '../constants'
 import { Program } from '../types'
-import { useNavigate } from 'react-router-dom'
 
 const getBrazilInfo = () => {
   const now = new Date()
+
   const brazilString = now.toLocaleString('en-US', {
     timeZone: 'America/Sao_Paulo',
   })
+
   const brazilDate = new Date(brazilString)
+
   const h = brazilDate.getHours()
   const m = brazilDate.getMinutes()
   const day = brazilDate.getDay()
-  return { day, totalMinutes: h * 60 + m }
+
+  return {
+    day,
+    totalMinutes: h * 60 + m,
+  }
 }
 
 const parseTime = (time24: string) => {
   const parts = time24.split(':')
+
   const h = parseInt(parts[0] || '0', 10)
   const m = parseInt(parts[1] || '0', 10)
+
   return { h, m }
 }
 
 interface HeroProps {
   onListenClick: () => void
   isPlaying: boolean
-  liveMetadata?: { artist: string; title: string; artwork?: string } | null
+  liveMetadata?: {
+    artist: string
+    title: string
+    artwork?: string
+  } | null
   onNavigateToProgram: (program: Program) => void
 }
 
@@ -37,41 +50,70 @@ const Hero: React.FC<HeroProps> = ({
   onNavigateToProgram,
 }) => {
   const [tick, setTick] = useState(0)
-  const navigate = useNavigate()
 
+  /*
+   * Atualiza o programa atual/progresso a cada 30 segundos.
+   */
   useEffect(() => {
-    const interval = setInterval(() => setTick((t) => t + 1), 30000)
+    const interval = setInterval(() => {
+      setTick((t) => t + 1)
+    }, 30000)
+
     return () => clearInterval(interval)
   }, [])
 
   const brazil = useMemo(() => getBrazilInfo(), [tick])
 
+  /*
+   * Programa atual + próximos 3 programas.
+   *
+   * Se estivermos perto da meia-noite, completa os cards
+   * usando os primeiros programas do dia seguinte.
+   */
   const { currentProgram, upNextPrograms } = useMemo(() => {
     const currentDay = brazil.day
     const nextDay = (currentDay + 1) % 7
 
-    const scheduleToday = Array.isArray(SCHEDULES[currentDay]) ? SCHEDULES[currentDay] : SCHEDULES[1]
-    const scheduleTomorrow = Array.isArray(SCHEDULES[nextDay]) ? SCHEDULES[nextDay] : SCHEDULES[1]
+    const scheduleToday = Array.isArray(SCHEDULES[currentDay])
+      ? SCHEDULES[currentDay]
+      : SCHEDULES[1]
+
+    const scheduleTomorrow = Array.isArray(SCHEDULES[nextDay])
+      ? SCHEDULES[nextDay]
+      : SCHEDULES[1]
 
     const currentIndex = scheduleToday.findIndex((p) => {
       const startTime = parseTime(p.startTime)
       const endTime = parseTime(p.endTime)
 
       const start = startTime.h * 60 + startTime.m
+
       let end = endTime.h * 60 + endTime.m
 
-      if (end === 0 || end <= start) end = 24 * 60
+      if (end === 0 || end <= start) {
+        end = 24 * 60
+      }
 
-      return brazil.totalMinutes >= start && brazil.totalMinutes < end
+      return (
+        brazil.totalMinutes >= start &&
+        brazil.totalMinutes < end
+      )
     })
 
-    const current = currentIndex !== -1 ? scheduleToday[currentIndex] : scheduleToday[0]
-    
-    // LÓGICA CORRIGIDA: Junta o resto do dia de hoje com o dia de amanhã caso falte programas para preencher os 3 cards
+    const current =
+      currentIndex !== -1
+        ? scheduleToday[currentIndex]
+        : scheduleToday[0]
+
     let next: Program[] = []
+
     if (currentIndex !== -1) {
       const restOfToday = scheduleToday.slice(currentIndex + 1)
-      next = [...restOfToday, ...scheduleTomorrow].slice(0, 3)
+
+      next = [
+        ...restOfToday,
+        ...scheduleTomorrow,
+      ].slice(0, 3)
     } else {
       next = scheduleToday.slice(1, 4)
     }
@@ -82,6 +124,9 @@ const Hero: React.FC<HeroProps> = ({
     }
   }, [brazil])
 
+  /*
+   * Progresso do programa atual.
+   */
   const progress = useMemo(() => {
     if (!currentProgram) return 0
 
@@ -89,157 +134,249 @@ const Hero: React.FC<HeroProps> = ({
     const endTime = parseTime(currentProgram.endTime)
 
     const start = startTime.h * 60 + startTime.m
+
     let end = endTime.h * 60 + endTime.m
 
-    if (end === 0 || end <= start) end = 24 * 60
+    if (end === 0 || end <= start) {
+      end = 24 * 60
+    }
 
     const elapsed = brazil.totalMinutes - start
     const duration = end - start
 
     if (duration <= 0) return 0
 
-    return Math.min(Math.max(elapsed / duration, 0), 1)
+    return Math.min(
+      Math.max(elapsed / duration, 0),
+      1
+    )
   }, [currentProgram, brazil.totalMinutes])
 
-  if (!currentProgram) return null
+  if (!currentProgram) {
+    return null
+  }
 
-  const circleSize = 192
-  const strokeWidth = 8
+  /*
+   * Mesmo padrão dimensional da Praise FM USA.
+   */
+  const circleSize = 190
+  const strokeWidth = 6
+
   const center = circleSize / 2
-  const radius = center - strokeWidth / 2
+  const radius = (circleSize - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
-  const offset = circumference - progress * circumference
+
+  const offset =
+    circumference - progress * circumference
 
   return (
-    <section className="bg-white dark:bg-[#000000] pt-10 pb-12 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4">
-        
-        {/* Bloco do Ao Vivo */}
-        <div className="flex flex-col md:flex-row items-center md:items-center gap-12 mb-10">
+    <section className="bg-white dark:bg-[#121212] text-gray-950 dark:text-white transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10">
+
+        {/* =====================================================
+            PROGRAMA NO AR
+        ====================================================== */}
+
+        <div className="flex flex-col md:grid md:grid-cols-[220px_1fr] gap-8 md:gap-10 items-center border-b border-gray-300 dark:border-white/10 pb-8 md:pb-10">
+
+          {/* CAPA + PROGRESSO */}
+
           <div
-            className="relative flex-shrink-0 group cursor-pointer"
-            onClick={() => onNavigateToProgram(currentProgram)}
+            className="relative w-[190px] h-[190px] mx-auto md:mx-0 flex-shrink-0 cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/30 rounded-full"
+            onClick={() =>
+              onNavigateToProgram(currentProgram)
+            }
           >
-            <div
-              className="relative"
-              style={{ width: circleSize, height: circleSize }}
+            <svg
+              className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none"
+              viewBox={`0 0 ${circleSize} ${circleSize}`}
             >
-              <div
-                className="rounded-full overflow-hidden absolute"
-                style={{
-                  top: strokeWidth + 6,
-                  left: strokeWidth + 6,
-                  width: circleSize - (strokeWidth + 6) * 2,
-                  height: circleSize - (strokeWidth + 6) * 2,
-                }}
-              >
-                <img
-                  src={currentProgram.image}
-                  alt={currentProgram.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              {/* Círculo de fundo */}
 
-              <svg
-                width={circleSize}
-                height={circleSize}
-                className="absolute inset-0 -rotate-90 pointer-events-none"
-              >
-                <circle
-                  cx={center}
-                  cy={center}
-                  r={radius}
-                  stroke="#dbdbdb"
-                  strokeWidth={strokeWidth}
-                  fill="transparent"
-                  className="dark:stroke-white/10"
-                />
-                <circle
-                  cx={center}
-                  cy={center}
-                  r={radius}
-                  stroke="#ff6600"
-                  strokeWidth={strokeWidth}
-                  fill="transparent"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={offset}
-                  strokeLinecap="butt"
-                />
-              </svg>
+              <circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke="currentColor"
+                strokeWidth={strokeWidth}
+                fill="none"
+                className="text-gray-300 dark:text-gray-700"
+                opacity={0.3}
+              />
 
-              <div className="absolute bottom-0 right-0 w-14 h-14 bg-black rounded-full flex items-center justify-center border-[3px] border-[#1a1a1a] shadow-[0_0_0_1px_rgba(255,255,255,0.15)]">
-                <span className="text-white text-3xl font-bold">4</span>
-              </div>
+              {/* Progresso laranja */}
+
+              <circle
+                cx={center}
+                cy={center}
+                r={radius}
+                stroke="#ff6600"
+                strokeWidth={strokeWidth}
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={offset}
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+
+            {/* Imagem */}
+
+            <div className="absolute inset-[14px] rounded-full overflow-hidden bg-gray-200 shadow-lg">
+              <img
+                src={currentProgram.image}
+                alt={currentProgram.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* RADIO 2 */}
+
+            <div className="absolute -right-3 bottom-1 w-16 h-16 rounded-full bg-black text-white flex items-center justify-center text-4xl font-black border-4 border-white dark:border-[#121212] shadow-lg pointer-events-none">
+              2
             </div>
           </div>
 
-          <div className="flex-grow text-center md:text-left">
-            <div className="text-[11px] font-normal text-gray-500 dark:text-gray-400 mb-2 flex items-center justify-center md:justify-start space-x-2">
-              <span className="text-[#ff6600] font-black uppercase tracking-[0.2em]">AO VIVO</span>
-              <span>·</span>
-              <span>
+          {/* ===================================================
+              INFORMAÇÕES DO PROGRAMA
+          ==================================================== */}
+
+          <div className="text-center md:text-left w-full">
+
+            {/* AO VIVO + HORÁRIO */}
+
+            <div className="flex items-center justify-center md:justify-start gap-2 text-sm mb-2">
+
+              <span className="font-black text-[#ff6600]">
+                AO VIVO
+              </span>
+
+              <span className="text-gray-500">
+                ·
+              </span>
+
+              <span className="text-gray-500">
                 {currentProgram.startTime} - {currentProgram.endTime}
               </span>
+
             </div>
 
-            <h2
-              className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-2 hover:text-[#ff6600] transition-colors cursor-pointer inline-flex items-center"
-              onClick={() => onNavigateToProgram(currentProgram)}
-            >
-              {currentProgram.title}
-              <ChevronRight className="w-8 h-8 ml-1 text-[#ff6600]" />
-            </h2>
+            {/* TÍTULO */}
 
-            <p className="text-lg text-gray-600 dark:text-gray-400 font-normal mb-6 max-w-xl">
-              {liveMetadata?.artist ? `${liveMetadata.artist} - ${liveMetadata.title}` : currentProgram.host}
+            <button
+              onClick={() =>
+                onNavigateToProgram(currentProgram)
+              }
+              className="group text-center md:text-left w-full md:w-auto"
+            >
+              <h1 className="text-3xl md:text-4xl font-black leading-tight text-gray-950 dark:text-white">
+
+                {currentProgram.title}
+
+                <ChevronRight
+                  className="inline-block w-7 h-7 md:w-8 md:h-8 ml-1 text-[#ff6600] transition-transform group-hover:translate-x-1"
+                />
+
+              </h1>
+            </button>
+
+            {/* MÚSICA ATUAL / HOST */}
+
+            <p className="mt-2 text-base md:text-lg text-gray-600 dark:text-gray-400">
+
+              {liveMetadata?.artist
+                ? `${liveMetadata.artist} - ${liveMetadata.title}`
+                : currentProgram.host || 'Praise FM Brasil'}
+
             </p>
+
+            {/* BOTÃO PLAYER */}
 
             <button
               onClick={onListenClick}
-              className="bg-[#ff6600] text-white px-10 py-3.5 flex items-center justify-center space-x-3 hover:bg-[#e65c00] transition-all active:scale-95 mx-auto md:mx-0 rounded-md shadow-md"
+              className="mt-6 bg-[#ff6600] hover:bg-[#e65c00] text-white px-10 md:px-12 py-3 md:py-4 font-black text-lg transition active:scale-95 inline-flex items-center justify-center gap-3 mx-auto md:mx-0 rounded-xl shadow-lg shadow-orange-500/20"
             >
+
               {isPlaying ? (
-                <Pause className="fill-current w-5 h-5" />
+                <Pause
+                  size={22}
+                  fill="currentColor"
+                />
               ) : (
-                <Play className="fill-current w-5 h-5" />
+                <Play
+                  size={22}
+                  fill="currentColor"
+                />
               )}
-              <span className="text-lg font-bold tracking-tight">
-                {isPlaying ? 'Pausar' : 'Ouvir Agora'}
-              </span>
+
+              {isPlaying
+                ? 'Pausar'
+                : 'Ouvir Agora'}
+
             </button>
+
           </div>
         </div>
 
-        {/* Grade Horizontal de Próximos Programas */}
+        {/* =====================================================
+            PRÓXIMOS 3 PROGRAMAS
+        ====================================================== */}
+
         {upNextPrograms.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-8 border-b border-gray-300 dark:border-white/10">
+
             {upNextPrograms.map((prog, index) => (
-              <button
+
+              <div
                 key={prog.id || index}
-                className="flex gap-4 text-left group items-center bg-gray-100 dark:bg-[#1A1A1A] hover:bg-gray-200 dark:hover:bg-[#252525] p-4 transition-colors w-full rounded-2xl border border-transparent dark:border-zinc-900"
-                onClick={() => onNavigateToProgram(prog)}
+                className="flex gap-4 text-left group items-center bg-gray-100 dark:bg-[#1A1A1A] p-4 rounded-2xl"
               >
-                <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-800">
+
+                {/* CAPA */}
+
+                <div
+                  className="relative w-16 h-16 flex-shrink-0 overflow-hidden rounded-xl cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-lg hover:shadow-orange-500/25"
+                  onClick={() =>
+                    onNavigateToProgram(prog)
+                  }
+                >
                   <img
                     src={prog.image}
                     alt={prog.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="min-w-0">
+
+                {/* DADOS */}
+
+                <button
+                  onClick={() =>
+                    onNavigateToProgram(prog)
+                  }
+                  className="min-w-0 text-left flex-1"
+                >
+
                   <p className="text-[11px] font-black text-[#ff6600] uppercase tracking-wide mb-0.5">
                     {prog.startTime} - {prog.endTime}
                   </p>
-                  <h3 className="text-sm font-bold leading-tight group-hover:text-[#ff6600] transition-colors truncate text-gray-900 dark:text-white">
+
+                  <h3 className="text-sm font-bold leading-tight group-hover:text-[#ff6600] transition-colors truncate text-gray-950 dark:text-white">
                     {prog.title}
                   </h3>
+
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-                    {prog.host || "Praise FM Brasil"}
+                    {prog.host || 'Praise FM Brasil'}
                   </p>
-                </div>
-              </button>
+
+                </button>
+
+              </div>
+
             ))}
+
           </div>
+
         )}
 
       </div>
@@ -248,3 +385,4 @@ const Hero: React.FC<HeroProps> = ({
 }
 
 export default Hero
+```
