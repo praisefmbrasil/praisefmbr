@@ -188,37 +188,35 @@ const Hero: React.FC<HeroProps> = ({
             }
           >
             <svg
-              className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none"
-              viewBox={`0 0 ${circleSize} ${circleSize}`}
-            >
-              {/* Círculo de fundo */}
+  className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none"
+  viewBox={'0 0 ' + circleSize + ' ' + circleSize}
+>
+  {/* Círculo de fundo */}
 
-              <circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="currentColor"
-                strokeWidth={strokeWidth}
-                fill="none"
-                className="text-gray-300 dark:text-gray-700"
-                opacity={0.3}
-              />
+  <circle
+    cx={center}
+    cy={center}
+    r={radius}
+    stroke="currentColor"
+    strokeWidth={strokeWidth}
+    fill="none"
+    className="text-gray-300 dark:text-gray-700"
+    opacity={0.3}
+  />
 
-              {/* Progresso laranja */}
-
-              <circle
-                cx={center}
-                cy={center}
-                r={radius}
-                stroke="#ff6600"
-                strokeWidth={strokeWidth}
-                fill="none"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={offset}
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
+  <circle
+    cx={center}
+    cy={center}
+    r={radius}
+    stroke="#ff6600"
+    strokeWidth={strokeWidth}
+    fill="none"
+    strokeLinecap="round"
+    strokeDasharray={circumference}
+    strokeDashoffset={offset}
+    className="transition-all duration-1000 ease-out"
+  />
+</svg>
 
             {/* Imagem */}
 
