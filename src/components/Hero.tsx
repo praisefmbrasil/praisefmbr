@@ -241,7 +241,7 @@ const Hero: React.FC<HeroProps> = ({
             {/* MÚSICA TOCANDO / HOST */}
             <p className="mt-2 text-base md:text-lg text-gray-600 dark:text-gray-400">
               {liveMetadata?.artist
-                ? `${liveMetadata.artist} - ${liveMetadata.title}`
+                ? liveMetadata.artist + ' - ' + liveMetadata.title
                 : currentProgram.host || 'Praise FM Brasil'}
             </p>
 
@@ -270,7 +270,6 @@ const Hero: React.FC<HeroProps> = ({
         {/* PRÓXIMOS 3 PROGRAMAS */}
         {upNextPrograms.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-8 border-b border-gray-300 dark:border-white/10">
-
             {upNextPrograms.map((prog, index) => (
               <div
                 key={prog.id || index}
@@ -307,7 +306,6 @@ const Hero: React.FC<HeroProps> = ({
                 </button>
               </div>
             ))}
-
           </div>
         )}
 
