@@ -9,7 +9,6 @@ import {
   Radio,
   Moon,
   Sun,
-  LogIn,
   Menu,
   X,
 } from 'lucide-react'
@@ -66,7 +65,8 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <nav className="sticky top-0 z-50 h-16 bg-white dark:bg-black border-b border-gray-200 dark:border-white/10">
+      {/* HEADER PRINCIPAL */}
+      <nav className="sticky top-0 z-50 h-16 bg-white dark:bg-black border-b border-gray-200 dark:border-white/10 transition-colors">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-full">
           <div className="flex items-center h-full">
 
@@ -75,17 +75,25 @@ const Navbar: React.FC<NavbarProps> = ({
               to="/"
               onClick={closeMenu}
               className="flex items-center shrink-0"
+              aria-label="Praise FM Brasil"
             >
-              <span className="text-[22px] font-black tracking-tight text-black dark:text-white whitespace-nowrap">
-                PRAISE FM{' '}
-                <span className="text-[#ff6600]">
-                  BRA
-                </span>
-              </span>
+              {/* LOGO - LIGHT MODE */}
+              <img
+                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1769206553/LOGO_HEADER_uygoqx.webp"
+                alt="Praise FM Brasil"
+                className="h-8 w-auto object-contain dark:hidden"
+              />
+
+              {/* LOGO - DARK MODE */}
+              <img
+                src="https://res.cloudinary.com/dlcliu2cv/image/upload/v1782196185/white-logo_loqfwz.png"
+                alt="Praise FM Brasil"
+                className="hidden h-8 w-auto object-contain dark:block"
+              />
             </Link>
 
             {/* MENU DESKTOP */}
-            <div className="hidden lg:flex items-center justify-center flex-1 h-full px-6">
+            <div className="hidden lg:flex items-center justify-center flex-1 h-full px-5">
               {navItems.map((item) => {
                 const Icon = item.icon
                 const active = activeTab === item.id
@@ -103,7 +111,17 @@ const Navbar: React.FC<NavbarProps> = ({
                       )
                     }
                   >
-                    <Icon className="w-[15px] h-[15px]" />
+                    <Icon
+                      className={
+                        'w-[15px] h-[15px] ' +
+                        (
+                          active
+                            ? 'text-black dark:text-white'
+                            : 'text-gray-400'
+                        )
+                      }
+                      strokeWidth={1.5}
+                    />
 
                     <span className="whitespace-nowrap">
                       {item.label}
@@ -120,41 +138,32 @@ const Navbar: React.FC<NavbarProps> = ({
             {/* AÇÕES */}
             <div className="ml-auto flex items-center gap-2">
 
-              {/* TEMA */}
+              {/* ALTERAR TEMA */}
               <button
                 type="button"
                 onClick={onToggleTheme}
-                className="w-10 h-10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-600 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
                 aria-label="Alternar tema"
               >
                 {theme === 'light' ? (
-                  <Moon className="w-5 h-5" />
+                  <Moon className="w-4 h-4" />
                 ) : (
-                  <Sun className="w-5 h-5 text-[#ff6600]" />
+                  <Sun className="w-4 h-4 text-[#ff6600]" />
                 )}
               </button>
 
-              {/* LOGIN DESKTOP */}
-              <Link
-                to="/login"
-                className="hidden lg:flex items-center gap-2 bg-[#ff6600] hover:bg-[#e65c00] text-white px-5 py-2 rounded-full text-xs font-bold transition-colors"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>ENTRAR</span>
-              </Link>
-
-              {/* HAMBÚRGUER MOBILE */}
+              {/* MENU HAMBÚRGUER */}
               <button
                 type="button"
                 onClick={() => setOpen((value) => !value)}
-                className="lg:hidden w-10 h-10 flex items-center justify-center text-black dark:text-white"
+                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full text-black dark:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
                 aria-label={open ? 'Fechar menu' : 'Abrir menu'}
                 aria-expanded={open}
               >
                 {open ? (
-                  <X className="w-6 h-6" />
+                  <X className="w-5 h-5" />
                 ) : (
-                  <Menu className="w-6 h-6" />
+                  <Menu className="w-5 h-5" />
                 )}
               </button>
 
@@ -165,10 +174,10 @@ const Navbar: React.FC<NavbarProps> = ({
 
       {/* MENU MOBILE */}
       {open && (
-        <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-white dark:bg-black overflow-y-auto">
+        <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-white dark:bg-black overflow-y-auto transition-colors">
           <div className="max-w-7xl mx-auto px-4 py-5">
+            <nav className="flex flex-col">
 
-            <div className="flex flex-col">
               {navItems.map((item) => {
                 const Icon = item.icon
                 const active = activeTab === item.id
@@ -187,7 +196,10 @@ const Navbar: React.FC<NavbarProps> = ({
                       )
                     }
                   >
-                    <Icon className="w-5 h-5 shrink-0" />
+                    <Icon
+                      className="w-5 h-5 shrink-0"
+                      strokeWidth={1.5}
+                    />
 
                     <span>
                       {item.label}
@@ -200,17 +212,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 )
               })}
 
-              {/* LOGIN MOBILE */}
-              <Link
-                to="/login"
-                onClick={closeMenu}
-                className="flex items-center gap-4 px-4 py-4 mt-3 text-sm font-bold text-[#ff6600]"
-              >
-                <LogIn className="w-5 h-5 shrink-0" />
-                <span>ENTRAR</span>
-              </Link>
-            </div>
-
+            </nav>
           </div>
         </div>
       )}
