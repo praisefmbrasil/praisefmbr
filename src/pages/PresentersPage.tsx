@@ -30,11 +30,13 @@ const PRESENTERS_DATA = [
     tag: 'Tarde · 13h–16h',
   },
   {
-    name: 'Ana Paula',
-    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1782434155/ana-paula_mm9ggw.webp',
-    bio: 'Ana Paula descobre e apresenta os novos talentos que estão moldando o futuro da música cristã no Brasil.',
-    programTitle: 'Nova Geração',
-    tag: 'Tarde · 16h–17h',
+  {
+    name: 'DJ Ana Paula',
+    image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1790896730/club-mix_jixj8z.webp',
+    bio: 'DJ Ana Paula comanda o Club Mix com EDM gospel, remixes e música eletrônica cristã do Brasil e do mundo.',
+    programTitle: 'Club Mix',
+    tag: 'Club · 16h–17h',
+},
   },
   {
     name: 'Dj Patrick',
