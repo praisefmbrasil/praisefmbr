@@ -1,4 +1,3 @@
-```tsx
 import React, { useEffect, useState } from 'react'
 
 interface ForecastItem {
@@ -175,4 +174,4 @@ export default function WeatherBar() {
     </div>
   )
 }
-```
+
