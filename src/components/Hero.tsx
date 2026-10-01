@@ -237,10 +237,9 @@ const Hero: React.FC<HeroProps> = ({
               </h1>
             </button>
 
-           {/* APRESENTADOR */}
-<p className="mt-2 text-base md:text-lg text-gray-600 dark:text-gray-400">
-  {currentProgram.host || 'Praise FM Brasil'}
-</p>
+            {/* APRESENTADOR */}
+            <p className="mt-2 text-base md:text-lg text-gray-600 dark:text-gray-400">
+              {currentProgram.host || 'Praise FM Brasil'}
             </p>
 
             {/* BOTÃO PLAYER */}
