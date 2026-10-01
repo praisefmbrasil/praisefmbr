@@ -13,6 +13,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 
 import WeatherBar from './components/WeatherBar';
+import SEO from './components/SEO';
 
 import Footer from './components/Footer';
 
@@ -982,7 +983,11 @@ const AppContent: React.FC = () => {
 
     <div className="min-h-screen flex flex-col pb-[120px] dark:bg-[#000] transition-colors duration-300">
 
-
+      <SEO
+        title="Praise FM Brasil - Rádio Gospel e Música Cristã 24 Horas"
+        description="Ouça a Praise FM Brasil ao vivo — música gospel, louvor, adoração, lançamentos e programação cristã 24 horas por dia."
+        url="https://praisefmbr.vercel.app/"
+      />
 
       <Navbar
 
