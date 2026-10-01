@@ -30,13 +30,11 @@ const PRESENTERS_DATA = [
     tag: 'Tarde · 13h–16h',
   },
   {
-  {
     name: 'DJ Ana Paula',
     image: 'https://res.cloudinary.com/dlcliu2cv/image/upload/v1790896730/club-mix_jixj8z.webp',
     bio: 'DJ Ana Paula comanda o Club Mix com EDM gospel, remixes e música eletrônica cristã do Brasil e do mundo.',
     programTitle: 'Club Mix',
     tag: 'Club · 16h–17h',
-},
   },
   {
     name: 'Dj Patrick',
