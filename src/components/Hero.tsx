@@ -237,11 +237,10 @@ const Hero: React.FC<HeroProps> = ({
               </h1>
             </button>
 
-            {/* MÚSICA TOCANDO / HOST */}
-            <p className="mt-2 text-base md:text-lg text-gray-600 dark:text-gray-400">
-              {liveMetadata?.artist
-                ? liveMetadata.artist + ' - ' + liveMetadata.title
-                : currentProgram.host || 'Praise FM Brasil'}
+           {/* APRESENTADOR */}
+<p className="mt-2 text-base md:text-lg text-gray-600 dark:text-gray-400">
+  {currentProgram.host || 'Praise FM Brasil'}
+</p>
             </p>
 
             {/* BOTÃO PLAYER */}
