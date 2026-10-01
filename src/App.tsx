@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 
-import { HashRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 
 
@@ -1415,7 +1415,7 @@ export default function App() {
 
 
 
-      <HashRouter>
+      <BrowserRouter>
 
 
 
@@ -1427,7 +1427,7 @@ export default function App() {
 
 
 
-      </HashRouter>
+      </BrowserRouter>
 
 
 
