@@ -44,8 +44,7 @@ export default function WeatherBar() {
 
   useEffect(() => {
     // Celsius
-    const url =
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&units=metric&appid=${API_KEY}`
+    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${LAT}&lon=${LON}&units=metric&appid=${API_KEY}`
 
     fetch(url)
       .then((res) => {
