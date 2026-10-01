@@ -1,3 +1,4 @@
+```tsx
 import React, { useEffect, useState } from 'react'
 
 interface ForecastItem {
@@ -40,7 +41,9 @@ export default function WeatherBar() {
   }
 
   useEffect(() => {
-    const baseUrl = 'https://' + 'api.openweathermap.org/data/2.5/forecast'
+    const baseUrl =
+      'https://' + 'api.openweathermap.org/data/2.5/forecast'
+
     const url =
       baseUrl +
       '?lat=' + encodeURIComponent(LAT) +
@@ -53,6 +56,7 @@ export default function WeatherBar() {
         if (!res.ok) {
           throw new Error('Erro ao carregar previsão do tempo')
         }
+
         return res.json()
       })
       .then((data) => {
@@ -61,11 +65,20 @@ export default function WeatherBar() {
           const tomorrowData = data.list[8] || data.list[1]
           const nextDayData = data.list[16] || data.list[2]
 
-          const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+          const daysOfWeek = [
+            'Dom',
+            'Seg',
+            'Ter',
+            'Qua',
+            'Qui',
+            'Sex',
+            'Sáb'
+          ]
 
           const brazilDateString = new Date().toLocaleString('en-US', {
             timeZone: 'America/Sao_Paulo'
           })
+
           const brazilDate = new Date(brazilDateString)
           const todayIndex = brazilDate.getDay()
 
@@ -91,7 +104,9 @@ export default function WeatherBar() {
           ])
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Erro WeatherBar:', error)
+
         setForecast([
           { day: 'Hoje', temp: '--°C', condition: 'Indisponível' },
           { day: 'Amanhã', temp: '--°C', condition: 'Indisponível' },
@@ -104,8 +119,10 @@ export default function WeatherBar() {
     <div className="py-6 border-b border-gray-300 dark:border-white/10">
       <div className="max-w-7xl mx-auto px-4">
         <div className="bg-gray-100 dark:bg-[#1A1A1A] p-4 transition-colors rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+
           <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
             <div className="flex items-center gap-3">
+
               <div className="w-10 h-10 rounded-xl bg-white dark:bg-[#121212] shadow-sm flex items-center justify-center text-orange-500 flex-shrink-0">
                 <svg
                   className="w-5 h-5"
@@ -127,10 +144,12 @@ export default function WeatherBar() {
                 <p className="text-[11px] font-black text-orange-500 uppercase tracking-wide">
                   Rio de Janeiro, RJ
                 </p>
+
                 <h3 className="text-sm font-bold leading-tight text-gray-900 dark:text-white">
                   Previsão do Tempo
                 </h3>
               </div>
+
             </div>
           </div>
 
@@ -143,17 +162,21 @@ export default function WeatherBar() {
                 <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">
                   {item.day}
                 </span>
+
                 <span className="text-sm font-black text-gray-950 dark:text-white my-0.5">
                   {item.temp}
                 </span>
+
                 <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-full">
                   {item.condition}
                 </span>
               </div>
             ))}
           </div>
+
         </div>
       </div>
     </div>
   )
 }
+```
